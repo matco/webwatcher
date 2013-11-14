@@ -20,7 +20,7 @@ def warn(website, error):
 #website checker
 def check(website):
 	try:
-		response = urlfetch.fetch(website["url"], validate_certificate=False)
+		response = urlfetch.fetch(website["url"], deadline=config["timeout"], validate_certificate=False)
 		try:
 			if response.status_code != 200:
 				return warn(website, 'Response status is {0}'.format(response.status))
