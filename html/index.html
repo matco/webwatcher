@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>Webwatcher</title>
+		<link href="index.css" rel="stylesheet" type="text/css" title="defaut" />
+		<script type="text/javascript" src="https://raw.github.com/matco/webchat/master/extension.js"></script>
+		<script type="text/javascript" src="https://raw.github.com/matco/webchat/master/browser_extension.js"></script>
+		<script type="text/javascript" src="index.js"></script>
+	</head>
+	<body>
+		<h2>Websites</h2>
+		<table>
+			<thead>
+				<th style="width: 120px;">Name</th>
+				<th style="width: 250px;">URL</th>
+				<th style="width: 150px;">Last check</th>
+				<th style="width: 100px;">Actions</th>
+			</thead>
+			<tbody id="websites"></tbody>
+		</table>
+		<h2>Add a website</h2>
+		<form id="website" method="post" action="#">
+			<p>
+				<label>
+					<span>Name</span>
+					<input name="name" required="required" />
+				</label>
+			</p>
+			<p>
+				<label>
+					<span>URL</span>
+					<input name="url" required="required" />
+				</label>
+			</p>
+			<p>
+				<label>
+					<span>Texts</span>
+					<input name="texts" />
+				</label>
+			</p>
+			<button>Add website</button>
+		</form>
+	</body>
+</html>
