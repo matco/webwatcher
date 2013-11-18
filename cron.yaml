@@ -1,4 +1,4 @@
 cron:
 - description: check websites
-  url: /
+  url: /check
   schedule: every 1 minutes
