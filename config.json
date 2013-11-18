@@ -1,0 +1,30 @@
+{
+	"websites" : [
+		{
+			"name" : "Wikipedia",
+			"url" : "http://www.wikipedia.org",
+			"texts" : [
+				"Français",
+				"Find Wikipedia in a language"
+			]
+		},
+		{
+			"name" : "Example",
+			"url" : "http://www.example.org",
+			"texts" : [
+				"Example Domain",
+				"This domain is established to be used for illustrative examples in documents."
+			]
+		},
+		{
+			"name" : "Invalid",
+			"url" : "http://www.invalid-website.org",
+			"texts" : [
+				"Invalid website"
+			]
+		}
+	],
+	"sender_email" : "john.doe@example.com",
+	"emails" : ["john.doe@example.com"],
+	"timeout" : 10
+}
