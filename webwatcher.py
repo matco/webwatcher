@@ -66,8 +66,8 @@ def warn(website, error):
 		d.put()
 
 		#send e-mails
-		for subscriber in Subscribers.all():
-			mail.send_mail(config["sender_email"], subscribe.email, 'Problem with ' + website.name, error)
+		for subscriber in Subscriber.all():
+			mail.send_mail(config["sender_email"], subscriber.email, 'Problem with ' + website.name, error)
 
 	#return message to be displayed
 	message = 'Problem with website ' + website.name + ' : ' + error
