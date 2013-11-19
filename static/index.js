@@ -51,7 +51,9 @@ function restify(url) {
 						notify(JSON.parse(event.target.responseText).message);
 					}
 					else {
-						callback();
+						if(callback) {
+							callback();
+						}
 					}
 				}
 			);
@@ -68,7 +70,9 @@ function restify(url) {
 						notify(JSON.parse(event.responseText).message);
 					}
 					else {
-						callback();
+						if(callback) {
+							callback();
+						}
 					}
 				}
 			);
@@ -142,7 +146,7 @@ window.addEventListener(
 		}
 
 		function draw_website(website) {
-			var website_ui = document.createFullElement('tr', {'data-key' : website.name, 'class' : website.status === null ? 'na' : website.status ? 'ok' : 'nok'});
+			var website_ui = document.createFullElement('tr', {'data-key' : website.name, 'class' : website.online === null ? 'na' : website.online ? 'ok' : 'nok'});
 			website_ui.appendChild(document.createFullElement('td', {}, website.name));
 			website_ui.appendChild(document.createFullElement('td', {}, website.url));
 			website_ui.appendChild(document.createFullElement('td', {}, website.update ? new Date(website.update).toFullDisplay() : 'NA'));
@@ -172,7 +176,7 @@ window.addEventListener(
 			function(event) {
 				Event.stop(event);
 				var form = this;
-				var website = {name : this['name'].value, url : this['url'].value, texts : this['texts'].value, status : null};
+				var website = {name : this['name'].value, url : this['url'].value, texts : this['texts'].value, online : null};
 				Websites.add(website, function() {
 					websites_ui.appendChild(draw_website(website));
 					form.reset();
@@ -187,9 +191,9 @@ window.addEventListener(
 			Subscribers.add({email : 'john.doe@example.com'});
 
 			//add websites
-			Subscribers.add({name : 'Example', url : 'http://www.example.org', texts : 'Example Domain'});
+			Websites.add({name : 'Example', url : 'http://www.example.org', texts : 'Example Domain'});
 			//TODO a multiple text like 'This domain is established to be used for illustrative examples in documents.'
-			Subscribers.add({name : 'Invalid', url : 'http://www.invalid-website.org', texts : 'Invalid website'});
+			Websites.add({name : 'Invalid', url : 'http://www.invalid-website.org', texts : 'Invalid website'});
 		}
 	}
 )

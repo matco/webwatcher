@@ -43,7 +43,7 @@ class JSONCustomEncoder(json.JSONEncoder):
 		if object.__class__.__name__ == "Subscriber":
 			return {"email" : object.email}
 		if object.__class__.__name__ == "Website":
-			return {"name" : object.name, "url" : object.url, "status" : object.online, "update" : object.update}
+			return {"name" : object.name, "url" : object.url, "online" : object.online, "update" : object.update}
 		if object.__class__.__name__ == "datetime":
 			return object.isoformat()
 		return json.JSONEncoder.default(self, object)
