@@ -172,7 +172,7 @@ window.addEventListener(
 			function(event) {
 				Event.stop(event);
 				var form = this;
-				var website = {name : this['name'].value, url : this['url'].value, texts : this['texts'].value};
+				var website = {name : this['name'].value, url : this['url'].value, texts : this['texts'].value, status : null};
 				Websites.add(website, function() {
 					websites_ui.appendChild(draw_website(website));
 					form.reset();
@@ -184,26 +184,12 @@ window.addEventListener(
 		var debug = false;
 		if(debug) {
 			//add subscriber
-			document.getElementById('subscriber')['email'].value = 'matthieu.corageoud@rodanotech.ch';
-			document.getElementById('subscriber').submit();
+			Subscribers.add({email : 'john.doe@example.com'});
 
-			//add website
-			setTimeout(function() {
-				document.getElementById('website')['name'].value = 'Example';
-				document.getElementById('website')['url'].value = 'http://www.example.org';
-				document.getElementById('website')['texts'].value = 'Example Domain';
-				//document.getElementById('website')['texts'].value = 'This domain is established to be used for illustrative examples in documents.';
-				document.getElementById('website').submit();
-			}, 1000);
-
-			//add website
-			setTimeout(function() {
-				document.getElementById('website')['name'].value = 'Invalid';
-				document.getElementById('website')['url'].value = 'http://www.invalid-website.org';
-				document.getElementById('website')['texts'].value = '"Invalid website';
-				//document.getElementById('website')['texts'].value = 'This domain is established to be used for illustrative examples in documents.';
-				document.getElementById('website').submit();
-			}, 2000);
+			//add websites
+			Subscribers.add({name : 'Example', url : 'http://www.example.org', texts : 'Example Domain'});
+			//TODO a multiple text like 'This domain is established to be used for illustrative examples in documents.'
+			Subscribers.add({name : 'Invalid', url : 'http://www.invalid-website.org', texts : 'Invalid website'});
 		}
 	}
 )
