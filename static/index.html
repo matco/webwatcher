@@ -9,6 +9,26 @@
 		<script type="text/javascript" src="index.js"></script>
 	</head>
 	<body>
+		<h2>Subscribers</h2>
+		<table>
+			<thead>
+				<th style="width: 300px;">E-mail</th>
+				<th style="width: 100px;">Actions</th>
+			</thead>
+			<tbody id="subscribers"></tbody>
+		</table>
+		<h2>Add a subscriber</h2>
+		<form id="subscriber" method="post" action="#">
+			<p>
+				<label>
+					<span>E-mail</span>
+					<input name="email" type="email" required="required" placeholder="E-mail" />
+				</label>
+			</p>
+			<p>
+				<button>Add subscriber</button>
+			</p>
+		</form>
 		<h2>Websites</h2>
 		<table>
 			<thead>
@@ -24,22 +44,24 @@
 			<p>
 				<label>
 					<span>Name</span>
-					<input name="name" required="required" />
+					<input name="name" required="required" placeholder="Example" />
 				</label>
 			</p>
 			<p>
 				<label>
 					<span>URL</span>
-					<input name="url" required="required" />
+					<input name="url" type="url" required="required" placeholder="http://www.example.org" />
 				</label>
 			</p>
 			<p>
 				<label>
 					<span>Texts</span>
-					<input name="texts" />
+					<input name="texts" placeholder="Example Domain" />
 				</label>
 			</p>
-			<button>Add website</button>
+			<p>
+				<button>Add website</button>
+			</p>
 		</form>
 	</body>
 </html>

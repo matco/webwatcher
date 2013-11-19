@@ -13,7 +13,19 @@ file = open(CONFIG_FILE, 'r')
 config = json.load(file)
 file.close()
 
-class Website(db.Model):
+class NamedModel(db.Model):
+	def __init__(self, *args, **kwargs):
+		#add key name only when object is fresh
+		if not "key" in kwargs and not "key_name" in kwargs:
+			kwargs['key_name'] = kwargs[self.key_property]
+		super(NamedModel, self).__init__(*args, **kwargs)
+
+class Subscriber(NamedModel):
+	key_property = "email"
+	email = db.StringProperty(required=True)
+
+class Website(NamedModel):
+	key_property = "name"
 	name = db.StringProperty(required=True)
 	url = db.StringProperty(required=True)
 	texts = db.StringProperty(required=True)
@@ -26,9 +38,10 @@ class Downtime(db.Model):
 	start = db.DateTimeProperty(required=True, auto_now_add=True)
 	stop = db.DateTimeProperty()
 
-class WebsiteEncoder(json.JSONEncoder):
+class JSONCustomEncoder(json.JSONEncoder):
 	def default(self, object):
-		print object.__class__.__name__
+		if object.__class__.__name__ == "Subscriber":
+			return {"email" : object.email}
 		if object.__class__.__name__ == "Website":
 			return {"name" : object.name, "url" : object.url, "status" : object.online, "update" : object.update}
 		if object.__class__.__name__ == "datetime":
@@ -53,8 +66,8 @@ def warn(website, error):
 		d.put()
 
 		#send e-mails
-		for email in config["emails"]:
-			mail.send_mail(config["sender_email"], email, 'Problem with ' + website.name, error)
+		for subscriber in Subscribers.all():
+			mail.send_mail(config["sender_email"], subscribe.email, 'Problem with ' + website.name, error)
 
 	#return message to be displayed
 	message = 'Problem with website ' + website.name + ' : ' + error
@@ -101,42 +114,51 @@ class Check(webapp2.RequestHandler):
 		for website in Website.all():
 			self.response.write(check(website) + '\n')
 
-class Status(webapp2.RequestHandler):
+class REST(webapp2.RequestHandler):
 
 	def get(self):
 		self.response.headers['Content-Type'] = "application/json"
-		self.response.write(json.dumps(Website.all().fetch(None), cls=WebsiteEncoder))
+		objects = self.db_model.all().fetch(limit=None, read_policy=db.STRONG_CONSISTENCY)
+		self.response.write(json.dumps(objects, cls=JSONCustomEncoder))
 
 	def post(self):
-		parameters = json.loads(self.request.POST.get('website').decode("utf8"))
+		parameters = json.loads(self.request.POST.get("object").decode("utf8"))
+		key = parameters[self.db_model.key_property]
 
-		website_query = Website.gql("WHERE name = :1", parameters["name"])
-		if website_query.count() > 0:
-			response = json.dumps({"message" : "There is already a website with name {0}".format(parameters["name"])})
+		existing_object = self.db_model.get_by_key_name(key)
+		if existing_object is not None:
+			response = json.dumps({"message" : "There is already a {0} with key {1}".format(self.db_model_name, key)})
 			self.error(400)
 			self.response.write(response)
 		else:
-			website = Website(name=parameters["name"], url=parameters["url"], texts=parameters["texts"])
-			website.put();
-			response = json.dumps({"message" : "Website {0} added successfully".format(parameters["name"])})
+			object = self.db_model(**parameters)
+			object.put();
+			response = json.dumps({"message" : "{0} {1} added successfully".format(self.db_model_name, key)})
 			self.response.write(response)
 
-	def delete(self, website_name):
-		print self.request.path
-		website_query = Website.gql("WHERE name = :1", website_name)
-		if website_query.count() == 0:
-			response = json.dumps({"message" : "There is not website with name {0}".format(website_name)})
+	def delete(self, key):
+		object = self.db_model.get_by_key_name(key)
+		if object is None:
+			response = json.dumps({"message" : "There is no {0} with key {1}".format(self.db_model_name, key)})
 			self.error(400)
 			self.response.write(response)
 		else:
-			website = website_query.get()
-			website.delete()
-			response = json.dumps({"message" : "Website {0} deleted successfully".format(website_name)})
+			object.delete()
+			response = json.dumps({"message" : "{0} {1} deleted successfully".format(self.db_model_name, key)})
 			self.response.write(response)
 
+class WebsiteResource(REST):
+	db_model = Website
+	db_model_name = "Website"
+
+class SubscriberResource(REST):
+	db_model = Subscriber
+	db_model_name = "Subscriber"
 
 application = webapp2.WSGIApplication([
 	('/api/check', Check),
-	('/api/status', Status),
-	('/api/status/(\w+)', Status),
+	('/api/website', WebsiteResource),
+	('/api/website/(.+)', WebsiteResource),
+	('/api/subscriber', SubscriberResource),
+	('/api/subscriber/(.+)', SubscriberResource),
 ], debug=True)

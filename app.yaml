@@ -1,11 +1,14 @@
 application: gae-app-id
-version: 2
 runtime: python27
+version: 2
 api_version: 1
 threadsafe: true
 
 handlers:
-- url: /html
-  static_dir: html
 - url: /api/.*
   script: webwatcher.application
+- url: /
+  static_files: static/index.html
+  upload: static/index.html
+- url: /*
+  static_dir: static

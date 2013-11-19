@@ -1,0 +1,39 @@
+body {
+	font-family: Verdana;
+	font-size: 12px;
+}
+label > span {
+	float: left;
+	width: 100px;
+}
+input::placeholder {
+	color: #aaa;
+}
+input::-webkit-input-placeholder {
+	color: #aaa;
+}
+input::-moz-placeholder {
+	color: #aaa;
+}
+tbody .na {
+	background-color: #D9EDF7;
+}
+tbody .ok {
+	background-color: #DFF0D8;
+}
+tbody .nok {
+	background-color: #F2DEDE;
+}
+
+#subscriber input[name="email"] {
+	width: 280px;
+}
+#website input[name="name"] {
+	width: 150px;
+}
+#website input[name="url"] {
+	width: 220px;
+}
+#website input[name^="texts"] {
+	width: 220px;
+}
