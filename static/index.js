@@ -168,8 +168,49 @@ window.addEventListener(
 			});
 		}
 
-		update_subscribers();
-		update_websites();
+		function load_ui() {
+			document.getElementById('authentication').style.display = 'none';
+			document.getElementById('content').style.display = 'block';
+			update_subscribers();
+			update_websites();
+		}
+
+		var xhr = new XMLHttpRequest();
+		xhr.addEventListener(
+			'load',
+			function(event) {
+				if(event.target.status !== 401) {
+					load_ui()
+				}
+			}
+		);
+		xhr.open('GET', '/api/authenticate', true);
+		xhr.send(null);
+
+		document.getElementById('authentication').addEventListener(
+			'submit',
+			function(event) {
+				Event.stop(event);
+				var authentication_error = document.getElementById('authentication_error');
+				authentication_error.textContent = '';
+				var xhr = new XMLHttpRequest();
+				xhr.addEventListener(
+					'load',
+					function(event) {
+						if(event.target.status === 401) {
+							authentication_error.textContent = JSON.parse(event.target.responseText).message;
+						}
+						else {
+							load_ui();
+						}
+					}
+				);
+				var form_data = new FormData();
+				form_data.append('credentials', JSON.stringify({password : this['password'].value}));
+				xhr.open('POST', '/api/authenticate', true);
+				xhr.send(form_data);
+			}
+		);
 
 		document.getElementById('website').addEventListener(
 			'submit',

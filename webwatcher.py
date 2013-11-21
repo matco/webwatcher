@@ -1,7 +1,8 @@
+import datetime
 import json
 import urllib2
 import webapp2
-import datetime
+from webapp2_extras import sessions
 from google.appengine.api import urlfetch
 from google.appengine.api import mail
 from google.appengine.ext import db
@@ -106,6 +107,39 @@ def check(website):
 		return warn(website, "Unable to reach website : {0}".format(e))
 
 #appengine needs webpages
+class Authenticate(webapp2.RequestHandler):
+
+	def __init__(self, request, response):
+		self.initialize(request, response)
+		#set json header for all responses
+		self.response.headers['Content-Type'] = "application/json"
+
+	def dispatch(self):
+		self.session_store = sessions.get_store(request=self.request)
+		self.session = self.session_store.get_session()
+		try:
+			webapp2.RequestHandler.dispatch(self)
+		finally:
+			self.session_store.save_sessions(self.response)
+
+	def get(self):
+		if 'authenticated' in self.session:
+			self.response.write(json.dumps({"message" : "You are already authenticated"}))
+		else:
+			self.error(401)
+			self.response.write(json.dumps({"message" : "You are not authenticated yet"}))
+
+	def post(self):
+		credentials = json.loads(self.request.POST.get("credentials").decode("utf8"))
+		print "aaaa" + credentials["password"]
+		print config
+		if credentials["password"] == config["password"]:
+			self.session["authenticated"] = True
+			self.response.write(json.dumps({"message" : "Authentication success"}))
+		else:
+			self.error(401)
+			self.response.write(json.dumps({"message" : "Wrong password"}))
+
 class Check(webapp2.RequestHandler):
 
 	def get(self):
@@ -116,8 +150,24 @@ class Check(webapp2.RequestHandler):
 
 class REST(webapp2.RequestHandler):
 
-	def get(self):
+	def __init__(self, request, response):
+		self.initialize(request, response)
+		#set json header for all responses
 		self.response.headers['Content-Type'] = "application/json"
+
+	def dispatch(self):
+		self.session_store = sessions.get_store(request=self.request)
+		self.session = self.session_store.get_session()
+		try:
+			if 'authenticated' in self.session:
+				webapp2.RequestHandler.dispatch(self)
+			else:
+				self.error(401)
+				self.response.write(json.dumps({"message" : "You must be authorized to perform this action"}))
+		finally:
+			self.session_store.save_sessions(self.response)
+
+	def get(self):
 		objects = self.db_model.all().fetch(limit=None, read_policy=db.STRONG_CONSISTENCY)
 		self.response.write(json.dumps(objects, cls=JSONCustomEncoder))
 
@@ -155,10 +205,14 @@ class SubscriberResource(REST):
 	db_model = Subscriber
 	db_model_name = "Subscriber"
 
+webapp_config = {}
+webapp_config["webapp2_extras.sessions"] = {"secret_key" : "webwatcher?!"}
+
 application = webapp2.WSGIApplication([
+	('/api/authenticate', Authenticate),
 	('/api/check', Check),
 	('/api/website', WebsiteResource),
 	('/api/website/(.+)', WebsiteResource),
 	('/api/subscriber', SubscriberResource),
 	('/api/subscriber/(.+)', SubscriberResource),
-], debug=True)
+], debug=True, config=webapp_config)

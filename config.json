@@ -1,4 +1,5 @@
 {
+	"password" : "webwatcher",
 	"sender_email" : "john.doe@example.com",
 	"timeout" : 10
 }

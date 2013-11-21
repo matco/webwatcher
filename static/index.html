@@ -9,59 +9,73 @@
 		<script type="text/javascript" src="index.js"></script>
 	</head>
 	<body>
-		<h2>Subscribers</h2>
-		<table>
-			<thead>
-				<th style="width: 300px;">E-mail</th>
-				<th style="width: 100px;">Actions</th>
-			</thead>
-			<tbody id="subscribers"></tbody>
-		</table>
-		<h2>Add a subscriber</h2>
-		<form id="subscriber" method="post" action="#">
+		<form id="authentication" method="post" action="#" style="display: none;">
+			<p id="authentication_error"></p>
 			<p>
 				<label>
-					<span>E-mail</span>
-					<input name="email" type="email" required="required" placeholder="E-mail" />
+					<span>Password</span>
+					<input name="password" type="password" required="required" />
 				</label>
 			</p>
 			<p>
-				<button>Add subscriber</button>
+				<button>Login</button>
 			</p>
 		</form>
-		<h2>Websites</h2>
-		<table>
-			<thead>
-				<th style="width: 120px;">Name</th>
-				<th style="width: 250px;">URL</th>
-				<th style="width: 150px;">Last check</th>
-				<th style="width: 100px;">Actions</th>
-			</thead>
-			<tbody id="websites"></tbody>
-		</table>
-		<h2>Add a website</h2>
-		<form id="website" method="post" action="#">
-			<p>
-				<label>
-					<span>Name</span>
-					<input name="name" required="required" placeholder="Example" />
-				</label>
-			</p>
-			<p>
-				<label>
-					<span>URL</span>
-					<input name="url" type="url" required="required" placeholder="http://www.example.org" />
-				</label>
-			</p>
-			<p>
-				<label>
-					<span>Texts</span>
-					<input name="texts" placeholder="Example Domain" />
-				</label>
-			</p>
-			<p>
-				<button>Add website</button>
-			</p>
-		</form>
+		<div id="content" style="display: none;">
+			<h2>Subscribers</h2>
+			<table>
+				<thead>
+					<th style="width: 300px;">E-mail</th>
+					<th style="width: 100px;">Actions</th>
+				</thead>
+				<tbody id="subscribers"></tbody>
+			</table>
+			<h2>Add a subscriber</h2>
+			<form id="subscriber" method="post" action="#">
+				<p>
+					<label>
+						<span>E-mail</span>
+						<input name="email" type="email" required="required" placeholder="E-mail" />
+					</label>
+				</p>
+				<p>
+					<button>Add subscriber</button>
+				</p>
+			</form>
+			<h2>Websites</h2>
+			<table>
+				<thead>
+					<th style="width: 120px;">Name</th>
+					<th style="width: 250px;">URL</th>
+					<th style="width: 150px;">Last check</th>
+					<th style="width: 100px;">Actions</th>
+				</thead>
+				<tbody id="websites"></tbody>
+			</table>
+			<h2>Add a website</h2>
+			<form id="website" method="post" action="#">
+				<p>
+					<label>
+						<span>Name</span>
+						<input name="name" required="required" placeholder="Example" />
+					</label>
+				</p>
+				<p>
+					<label>
+						<span>URL</span>
+						<input name="url" type="url" required="required" placeholder="http://www.example.org" />
+					</label>
+				</p>
+				<p>
+					<label>
+						<span>Texts</span>
+						<input name="texts" placeholder="Example Domain" />
+					</label>
+				</p>
+				<p>
+					<button>Add website</button>
+				</p>
+			</form>
+		</div>
 	</body>
 </html>
