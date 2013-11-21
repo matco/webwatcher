@@ -179,8 +179,11 @@ window.addEventListener(
 		xhr.addEventListener(
 			'load',
 			function(event) {
-				if(event.target.status !== 401) {
+				if(event.target.status === 200) {
 					load_ui()
+				}
+				else {
+					document.getElementById('authentication').style.display = 'block';
 				}
 			}
 		);
@@ -209,6 +212,22 @@ window.addEventListener(
 				form_data.append('credentials', JSON.stringify({password : this['password'].value}));
 				xhr.open('POST', '/api/authenticate', true);
 				xhr.send(form_data);
+			}
+		);
+
+		document.getElementById('logout').addEventListener(
+			'click',
+			function() {
+				var xhr = new XMLHttpRequest();
+				xhr.addEventListener(
+					'load',
+					function(event) {
+						document.getElementById('content').style.display = 'none';
+						document.getElementById('authentication').style.display = 'block';
+					}
+				);
+				xhr.open('DELETE', '/api/authenticate', true);
+				xhr.send(null);
 			}
 		);
 

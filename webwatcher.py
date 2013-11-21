@@ -123,7 +123,7 @@ class Authenticate(webapp2.RequestHandler):
 			self.session_store.save_sessions(self.response)
 
 	def get(self):
-		if 'authenticated' in self.session:
+		if "authenticated" in self.session:
 			self.response.write(json.dumps({"message" : "You are already authenticated"}))
 		else:
 			self.error(401)
@@ -131,14 +131,16 @@ class Authenticate(webapp2.RequestHandler):
 
 	def post(self):
 		credentials = json.loads(self.request.POST.get("credentials").decode("utf8"))
-		print "aaaa" + credentials["password"]
-		print config
 		if credentials["password"] == config["password"]:
 			self.session["authenticated"] = True
 			self.response.write(json.dumps({"message" : "Authentication success"}))
 		else:
 			self.error(401)
 			self.response.write(json.dumps({"message" : "Wrong password"}))
+
+	def delete(self):
+		del self.session["authenticated"]
+		self.response.write(json.dumps({"message" : "Logout successfull"}))
 
 class Check(webapp2.RequestHandler):
 
