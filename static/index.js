@@ -85,6 +85,38 @@ function restify(url) {
 window.addEventListener(
 	'load',
 	function() {
+		//manage configuration
+		var configuration = document.getElementById('configuration');
+
+		function update_configuration() {
+			var xhr = new XMLHttpRequest();
+			xhr.addEventListener(
+				'load',
+				function(event) {
+					var settings = JSON.parse(event.target.responseText);
+					configuration['sender_email'].value = settings.sender_email || '';
+					configuration['website_timeout'].value = settings.website_timeout || '';
+				}
+			);
+			xhr.open('GET', '/api/configuration', true);
+			xhr.send(null);
+		}
+
+		configuration.addEventListener(
+			'submit',
+			function(event) {
+				Event.stop(event);
+				var form_data = new FormData();
+				form_data.append('configuration', JSON.stringify({
+					sender_email : this['sender_email'].value,
+					website_timeout : this['website_timeout'].value
+				}));
+				var xhr = new XMLHttpRequest();
+				xhr.open('POST', '/api/configuration', true);
+				xhr.send(form_data);
+			}
+		);
+
 		//manage subscribers list
 		var Subscribers = restify('/api/subscriber');
 
@@ -169,8 +201,10 @@ window.addEventListener(
 		}
 
 		function load_ui() {
+			document.getElementById('initialization').style.display = 'none';
 			document.getElementById('authentication').style.display = 'none';
 			document.getElementById('content').style.display = 'block';
+			update_configuration();
 			update_subscribers();
 			update_websites();
 		}
@@ -179,16 +213,47 @@ window.addEventListener(
 		xhr.addEventListener(
 			'load',
 			function(event) {
-				if(event.target.status === 200) {
-					load_ui()
+				if(event.target.status === 403) {
+					document.getElementById('initialization').style.display = 'block';
+				}
+				else if(event.target.status === 401) {
+					document.getElementById('authentication').style.display = 'block';
 				}
 				else {
-					document.getElementById('authentication').style.display = 'block';
+					load_ui();
 				}
 			}
 		);
-		xhr.open('GET', '/api/authenticate', true);
+		xhr.open('GET', '/api/status', true);
 		xhr.send(null);
+
+		document.getElementById('initialization').addEventListener(
+			'submit',
+			function(event) {
+				Event.stop(event);
+				var initialization_error = document.getElementById('initialization_error');
+				initialization_error.textContent = '';
+				if(this['password_1'].value !== this['password_2'].value) {
+					initialization_error.textContent = 'Passwords don\t match';
+				}
+				var xhr = new XMLHttpRequest();
+				xhr.addEventListener(
+					'load',
+					function(event) {
+						if(event.target.status === 401) {
+							authentication_error.textContent = JSON.parse(event.target.responseText).message;
+						}
+						else {
+							load_ui();
+						}
+					}
+				);
+				var form_data = new FormData();
+				form_data.append('value', this['password_1'].value);
+				xhr.open('POST', '/api/configuration/password', true);
+				xhr.send(form_data);
+			}
+		);
 
 		document.getElementById('authentication').addEventListener(
 			'submit',

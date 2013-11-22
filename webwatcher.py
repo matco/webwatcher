@@ -8,18 +8,17 @@ from google.appengine.api import mail
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 
-#read configuration file
-CONFIG_FILE = 'config.json';
-file = open(CONFIG_FILE, 'r')
-config = json.load(file)
-file.close()
-
 class NamedModel(db.Model):
 	def __init__(self, *args, **kwargs):
 		#add key name only when object is fresh
 		if not "key" in kwargs and not "key_name" in kwargs:
 			kwargs['key_name'] = kwargs[self.key_property]
 		super(NamedModel, self).__init__(*args, **kwargs)
+
+class Setting(NamedModel):
+	key_property = "id"
+	id = db.StringProperty(required=True)
+	value = db.StringProperty(required=True)
 
 class Subscriber(NamedModel):
 	key_property = "email"
@@ -41,6 +40,8 @@ class Downtime(db.Model):
 
 class JSONCustomEncoder(json.JSONEncoder):
 	def default(self, object):
+		if object.__class__.__name__ == "Setting":
+			return {"id" : object.id, "value" : object.value}
 		if object.__class__.__name__ == "Subscriber":
 			return {"email" : object.email}
 		if object.__class__.__name__ == "Website":
@@ -68,7 +69,7 @@ def warn(website, error):
 
 		#send e-mails
 		for subscriber in Subscriber.all():
-			mail.send_mail(config["sender_email"], subscriber.email, 'Problem with ' + website.name, error)
+			mail.send_mail(Setting.get_by_key_name("sender_email").value, subscriber.email, 'Problem with ' + website.name, error)
 
 	#return message to be displayed
 	message = 'Problem with website ' + website.name + ' : ' + error
@@ -77,7 +78,7 @@ def warn(website, error):
 #website checker
 def check(website):
 	try:
-		response = urlfetch.fetch(website.url, deadline=config["timeout"], validate_certificate=False)
+		response = urlfetch.fetch(website.url, deadline=Setting.get_by_key_name("website_timeout").value, validate_certificate=False)
 		try:
 			if response.status_code != 200:
 				return warn(website, 'Response status is {0}'.format(response.status))
@@ -107,31 +108,38 @@ def check(website):
 		return warn(website, "Unable to reach website : {0}".format(e))
 
 #appengine needs webpages
-class Authenticate(webapp2.RequestHandler):
-
+class CustomRequestHandler(webapp2.RequestHandler):
 	def __init__(self, request, response):
 		self.initialize(request, response)
 		#set json header for all responses
 		self.response.headers['Content-Type'] = "application/json"
 
-	def dispatch(self):
-		self.session_store = sessions.get_store(request=self.request)
-		self.session = self.session_store.get_session()
+	def dispatch(self, *args, **kwargs):
+		session_store = sessions.get_store(request=self.request)
+		self.session = session_store.get_session()
 		try:
-			webapp2.RequestHandler.dispatch(self)
+			webapp2.RequestHandler.dispatch(self, *args, **kwargs)
 		finally:
-			self.session_store.save_sessions(self.response)
+			session_store.save_sessions(self.response)
+
+class Status(CustomRequestHandler):
 
 	def get(self):
-		if "authenticated" in self.session:
-			self.response.write(json.dumps({"message" : "You are already authenticated"}))
-		else:
+		setting = Setting.get_by_key_name("password")
+		if setting is None:
+			self.error(403)
+			self.response.write(json.dumps({"message" : "Application must be configured"}))
+		elif "authenticated" not in self.session:
 			self.error(401)
 			self.response.write(json.dumps({"message" : "You are not authenticated yet"}))
+		else:
+			self.response.write(json.dumps({"message" : "You are already authenticated"}))
+
+class Authenticate(CustomRequestHandler):
 
 	def post(self):
 		credentials = json.loads(self.request.POST.get("credentials").decode("utf8"))
-		if credentials["password"] == config["password"]:
+		if credentials["password"] == Setting.get_by_key_name("password").value:
 			self.session["authenticated"] = True
 			self.response.write(json.dumps({"message" : "Authentication success"}))
 		else:
@@ -142,6 +150,76 @@ class Authenticate(webapp2.RequestHandler):
 		del self.session["authenticated"]
 		self.response.write(json.dumps({"message" : "Logout successfull"}))
 
+class Configuration(CustomRequestHandler):
+
+	def get(self, id=None):
+		if self.session["authenticated"]:
+			if id is None:
+				objects = Setting.all().fetch(limit=None, read_policy=db.STRONG_CONSISTENCY)
+				configuration = {}
+				for object in objects:
+					if object.id != "password":
+						configuration[object.id] = object.value;
+				self.response.write(json.dumps(configuration))
+			else:
+				setting = Setting.get_by_key_name(id)
+				if setting is None:
+					self.error(404)
+					self.response.write(json.dumps({"message" : "No setting with id {0}".format(id)}))
+				else:
+					self.response.write(json.dumps({"id" : id, "value" : setting.value}))
+		else:
+			self.error(401)
+			self.response.write(json.dumps({"message" : "You must be authenticated to perform this action"}))
+
+	def post(self, id=None):
+		if id is None:
+			if "authenticated" in self.session:
+				configuration = json.loads(self.request.POST.get("configuration").decode("utf8"))
+				for id, value in configuration.iteritems():
+					setting = Setting.get_by_key_name(id)
+				if setting is None:
+					setting = Setting(id=id, value=value)
+				else:
+					print "current setting " + setting.id + " - " + setting.value
+					setting.value = value;
+				setting.put()
+				self.response.write(json.dumps({"message" : "Configuration updated successfully"}))
+				if id == "password":
+					self.session["authenticated"] = True
+			else:
+				self.error(401)
+				self.response.write(json.dumps({"message" : "You must be authenticated to perform this action"}))
+		else:
+			setting = Setting.get_by_key_name(id)
+			value = self.request.POST.get("value").decode("utf8")
+			#special handling for password setting
+			if "authenticated" in self.session or id == "password" and setting is None:
+				if setting is None:
+					setting = Setting(id=id, value=value)
+				else:
+					setting.value = value;
+				setting.put()
+				self.response.write(json.dumps({"message" : "Setting {0} set to {0}".format(id, value)}))
+				if id == "password":
+					self.session["authenticated"] = True
+			else:
+				self.error(401)
+				self.response.write(json.dumps({"message" : "You must be authenticated to perform this action"}))
+
+	def delete(self, id):
+		if self.session["authenticated"]:
+			setting = Setting.get_by_key_name(id)
+			if setting is None:
+				self.error(404)
+				self.response.write(json.dumps({"message" : "No setting with id {0}".format(id)}))
+			else:
+				setting.delete()
+				self.response.write(json.dumps({"message" : "Setting id {0} deleted successfully".format(id)}))
+		else:
+			self.error(401)
+			self.response.write(json.dumps({"message" : "You must be authenticated to perform this action"}))
+
 class Check(webapp2.RequestHandler):
 
 	def get(self):
@@ -150,24 +228,19 @@ class Check(webapp2.RequestHandler):
 		for website in Website.all():
 			self.response.write(check(website) + '\n')
 
-class REST(webapp2.RequestHandler):
+class REST(CustomRequestHandler):
 
-	def __init__(self, request, response):
-		self.initialize(request, response)
-		#set json header for all responses
-		self.response.headers['Content-Type'] = "application/json"
-
-	def dispatch(self):
-		self.session_store = sessions.get_store(request=self.request)
-		self.session = self.session_store.get_session()
+	def dispatch(self, *args, **kwargs):
+		session_store = sessions.get_store(request=self.request)
+		self.session = session_store.get_session()
 		try:
 			if 'authenticated' in self.session:
-				webapp2.RequestHandler.dispatch(self)
+				webapp2.RequestHandler.dispatch(self, *args, **kwargs)
 			else:
 				self.error(401)
-				self.response.write(json.dumps({"message" : "You must be authorized to perform this action"}))
+				self.response.write(json.dumps({"message" : "You must be authenticated to perform this action"}))
 		finally:
-			self.session_store.save_sessions(self.response)
+			session_store.save_sessions(self.response)
 
 	def get(self):
 		objects = self.db_model.all().fetch(limit=None, read_policy=db.STRONG_CONSISTENCY)
@@ -179,8 +252,8 @@ class REST(webapp2.RequestHandler):
 
 		existing_object = self.db_model.get_by_key_name(key)
 		if existing_object is not None:
-			response = json.dumps({"message" : "There is already a {0} with key {1}".format(self.db_model_name, key)})
 			self.error(400)
+			response = json.dumps({"message" : "There is already a {0} with key {1}".format(self.db_model_name, key)})
 			self.response.write(response)
 		else:
 			object = self.db_model(**parameters)
@@ -211,8 +284,11 @@ webapp_config = {}
 webapp_config["webapp2_extras.sessions"] = {"secret_key" : "webwatcher?!"}
 
 application = webapp2.WSGIApplication([
+	('/api/status', Status),
 	('/api/authenticate', Authenticate),
 	('/api/check', Check),
+	('/api/configuration', Configuration),
+	('/api/configuration/(.*)', Configuration),
 	('/api/website', WebsiteResource),
 	('/api/website/(.+)', WebsiteResource),
 	('/api/subscriber', SubscriberResource),

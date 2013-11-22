@@ -9,7 +9,27 @@
 		<script type="text/javascript" src="index.js"></script>
 	</head>
 	<body>
+		<form id="initialization" method="post" action="#" style="display: none;">
+			<h2>Initialization</h2>
+			<p id="initialization_error"></p>
+			<p>
+				<label>
+					<span>Password</span>
+					<input name="password_1" type="password" required="required" />
+				</label>
+			</p>
+			<p>
+				<label>
+					<span>Retype password</span>
+					<input name="password_2" type="password" required="required" />
+				</label>
+			</p>
+			<p>
+				<button>Validate</button>
+			</p>
+		</form>
 		<form id="authentication" method="post" action="#" style="display: none;">
+			<h2>Authentication</h2>
 			<p id="authentication_error"></p>
 			<p>
 				<label>
@@ -25,6 +45,24 @@
 			<header>
 				<button id="logout">Logout</button>
 			</header>
+			<h2>Configuration</h2>
+			<form id="configuration" method="post" action="#">
+				<p>
+					<label>
+						<span>Sender e-mail</span>
+						<input name="sender_email" type="email" required="required" />
+					</label>
+				</p>
+				<p>
+					<label>
+						<span>Timeout</span>
+						<input name="website_timeout" type="number" required="required" />
+					</label>
+				</p>
+				<p>
+					<button>Save</button>
+				</p>
+			</form>
 			<h2>Subscribers</h2>
 			<table>
 				<thead>

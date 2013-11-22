@@ -15,6 +15,14 @@ input::-webkit-input-placeholder {
 input::-moz-placeholder {
 	color: #aaa;
 }
+input[type="email"] {
+	width: 280px;
+}
+input[type="number"] {
+	width: 30px;
+	text-align: right;
+}
+
 tbody .na {
 	background-color: #D9EDF7;
 }
@@ -25,9 +33,6 @@ tbody .nok {
 	background-color: #F2DEDE;
 }
 
-#subscriber input[name="email"] {
-	width: 280px;
-}
 #website input[name="name"] {
 	width: 150px;
 }
