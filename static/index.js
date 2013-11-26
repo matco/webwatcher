@@ -82,9 +82,41 @@ function restify(url) {
 	};
 }
 
+var UI = {};
+(function() {
+	//show tab associated content and hide other contents
+	function select_tab() {
+		if(!this.classList.contains('disabled')) {
+			this.parentNode.children.forEach(function(tab) {
+				if(tab === this) {
+					tab.classList.add('selected');
+					document.getElementById(tab.dataset.tab).style.display = 'block';
+				}
+				else {
+					tab.classList.remove('selected');
+					document.getElementById(tab.dataset.tab).style.display = 'none';
+				}
+			}, this);
+		}
+	}
+
+	UI.Tabify = function(container) {
+		container.children.forEach(function(tab) {
+			document.getElementById(tab.dataset.tab).style.display = tab.classList.contains('selected') ? 'block' : 'none';
+			tab.addEventListener('click', select_tab);
+		});
+	};
+})();
+
+
 window.addEventListener(
 	'load',
 	function() {
+		UI.Tabify(document.querySelector('header > ul'));
+		UI.Tabify(document.querySelector('#config > aside > ul'));
+		document.querySelector('header > ul > li[data-tab="status"]').click();
+		document.querySelector('#config > aside > ul > li[data-tab="section_1"]').click();
+
 		//manage configuration
 		var configuration = document.getElementById('configuration');
 
@@ -131,7 +163,7 @@ window.addEventListener(
 		}
 
 		function draw_subscriber(subscriber) {
-			var subscriber_ui = document.createFullElement('tr', {'data-key' : subscriber.email, 'class' : 'na'});
+			var subscriber_ui = document.createFullElement('tr', {'data-key' : subscriber.email});
 			subscriber_ui.appendChild(document.createFullElement('td', {}, subscriber.email));
 			var subscribe_actions = document.createFullElement('td');
 			subscribe_actions.appendChild(document.createFullElement(
@@ -178,10 +210,9 @@ window.addEventListener(
 		}
 
 		function draw_website(website) {
-			var website_ui = document.createFullElement('tr', {'data-key' : website.name, 'class' : website.online === null ? 'na' : website.online ? 'ok' : 'nok'});
+			var website_ui = document.createFullElement('tr', {'data-key' : website.name});
 			website_ui.appendChild(document.createFullElement('td', {}, website.name));
 			website_ui.appendChild(document.createFullElement('td', {}, website.url));
-			website_ui.appendChild(document.createFullElement('td', {}, website.update ? new Date(website.update).toFullDisplay() : 'NA'));
 			var website_actions = document.createFullElement('td');
 			website_actions.appendChild(document.createFullElement(
 				'a',
@@ -207,6 +238,8 @@ window.addEventListener(
 			update_configuration();
 			update_subscribers();
 			update_websites();
+			update_states();
+			setInterval(update_states, 10000);
 		}
 
 		var xhr = new XMLHttpRequest();
@@ -244,6 +277,7 @@ window.addEventListener(
 							authentication_error.textContent = JSON.parse(event.target.responseText).message;
 						}
 						else {
+							document.querySelector('header > ul > li[data-tab="config"]').click();
 							load_ui();
 						}
 					}
@@ -308,6 +342,35 @@ window.addEventListener(
 				});
 			}
 		);
+
+		//status
+		var states = document.getElementById('states');
+
+		function draw_state(state) {
+			var state_ui = document.createFullElement('tr', {'class' : state.online === null ? 'na' : state.online ? 'ok' : 'nok'});
+			state_ui.appendChild(document.createFullElement('td', {}, state.name));
+			state_ui.appendChild(document.createFullElement('td', {}, state.update ? new Date(state.update).toFullDisplay() : 'NA'));
+			state_ui.appendChild(document.createFullElement('td', {}, state.downtime));
+			state_ui.appendChild(document.createFullElement('td', {}, state.uptime));
+			var online;
+			if(state.uptime || state.downtime) {
+				online = state.uptime / (state.downtime + state.uptime) * 100;
+				online = Math.round(online * 10) / 10;
+				online += '%';
+			}
+			else {
+				online = 'NA';
+			}
+			state_ui.appendChild(document.createFullElement('td', {}, online));
+			return state_ui;
+		}
+
+		function update_states() {
+			states.clear();
+			Websites.list(function(websites) {
+				websites.map(draw_state).forEach(Node.prototype.appendChild, states);
+			});
+		}
 
 		//debug
 		var debug = false;

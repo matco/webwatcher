@@ -2,6 +2,7 @@ import datetime
 import json
 import urllib2
 import webapp2
+import logging
 from webapp2_extras import sessions
 from google.appengine.api import urlfetch
 from google.appengine.api import mail
@@ -22,7 +23,7 @@ class Setting(NamedModel):
 
 class Subscriber(NamedModel):
 	key_property = "email"
-	email = db.StringProperty(required=True)
+	email = db.EmailProperty(required=True)
 
 class Website(NamedModel):
 	key_property = "name"
@@ -31,6 +32,8 @@ class Website(NamedModel):
 	texts = db.StringProperty(required=True)
 	online = db.BooleanProperty()
 	update = db.DateTimeProperty()
+	uptime = db.IntegerProperty(default=0)
+	downtime = db.IntegerProperty(default=0)
 
 class Downtime(db.Model):
 	website = db.StringProperty(required=True)
@@ -45,67 +48,69 @@ class JSONCustomEncoder(json.JSONEncoder):
 		if object.__class__.__name__ == "Subscriber":
 			return {"email" : object.email}
 		if object.__class__.__name__ == "Website":
-			return {"name" : object.name, "url" : object.url, "online" : object.online, "update" : object.update}
+			return {"name" : object.name, "url" : object.url, "online" : object.online, "update" : object.update, "uptime" : object.uptime, "downtime" : object.downtime}
+		if object.__class__.__name__ == "Downtime":
+			return {"rationale" : object.rationale, "start" : object.start, "stop" : object.stop}
 		if object.__class__.__name__ == "datetime":
 			return object.isoformat()
 		return json.JSONEncoder.default(self, object)
 
 #warn about the problem
 def warn(website, error):
-	now = datetime.datetime.now()
-	#update website status
-	website_query = Website.gql("WHERE name = :1", website.name)
-	w = website_query.get()
-	w.update = now
-	w.online = False
-	w.put()
-	#check if website was already down at previous check
-	downtime_query = Downtime.gql("WHERE website = :1 AND stop = NULL", website.name)
-	if downtime_query.count() == 0:
-		#store downtime
-		now = datetime.datetime.now()
-		d = Downtime(website=website.name, rationale=error)
-		d.put()
-
-		#send e-mails
-		for subscriber in Subscriber.all():
-			mail.send_mail(Setting.get_by_key_name("sender_email").value, subscriber.email, 'Problem with ' + website.name, error)
-
-	#return message to be displayed
-	message = 'Problem with website ' + website.name + ' : ' + error
-	return message
+	#send e-mails
+	for subscriber in Subscriber.all():
+		mail.send_mail(Setting.get_by_key_name("sender_email").value, subscriber.email, 'Problem with ' + website.name, error)
 
 #website checker
 def check(website):
 	try:
-		response = urlfetch.fetch(website.url, deadline=Setting.get_by_key_name("website_timeout").value, validate_certificate=False)
+		error = None
+		response = urlfetch.fetch(website.url, deadline=int(Setting.get_by_key_name("website_timeout").value), validate_certificate=False)
 		try:
-			if response.status_code != 200:
-				return warn(website, 'Response status is {0}'.format(response.status))
-			html = response.content.decode("utf8")
-			for text in website.texts:
-				if not text in html:
-					return warn(website, 'Text "' + text + '" is not present')
-			#manage website status
-			now = datetime.datetime.now()
-			website_query = Website.gql("WHERE name = :1", website.name)
-			w = website_query.get()
-			#if update was previously offline
-			if not w.online:
-				downtime_query = Downtime.gql("WHERE website = :1 AND stop = NULL", website.name)
-				d = downtime_query.get()
-				d.stop = now
-				db.put(d)
-			#update website status
-			w.update = now
-			w.online = True
-			w.put()
-			#return message to be displayed
-			return "{0} is fine".format(website.name);
+			if response.status_code == 200:
+				html = response.content.decode("utf8")
+				for text in website.texts:
+					if not text in html:
+						error = "Text '{0}' is not present".format(text)
+			else:
+				error = "Response status is {0}".format(response.status)
 		except Exception as e:
-			return warn(website, "Unable to read website response : {0}".format(e))
+			error = "Unable to read website response : {0}".format(e)
 	except Exception as e:
-		return warn(website, "Unable to reach website : {0}".format(e))
+		error = "Unable to reach website : {0}".format(e)
+	#update website last update
+	now = datetime.datetime.now()
+	previous_update = website.update or now
+	website.update = now
+	#website is online
+	if error is None:
+		#if website was aready online at previous check, increase uptime
+		if website.online:
+			website.uptime += int((now - previous_update).total_seconds())
+		#if website was previously offline, update last downtime and increase downtime (pessimistic vision, website has returned online between 2 check)
+		else:
+			downtime = Downtime.gql("WHERE website = :1 AND stop = NULL", website.name).get()
+			downtime.stop = now
+			db.put(downtime)
+			website.downtime += int((now - previous_update).total_seconds())
+		website.online = True
+		website.put()
+		#return message to be displayed
+		return "{0} is fine".format(website.name);
+	#website is offline
+	else:
+		#if website was online at previous check, warn subscribers and create a new downtime
+		if website.online:
+			#warn subscribers only the first time website is detected as offline
+			warn(website, error)
+			downtime = Downtime(website=website.name, rationale=error)
+			downtime.put()
+		#increase downtime anyway (pessimistic vision)
+		website.downtime += int((now - previous_update).total_seconds())
+		website.online = False
+		website.put()
+		#return message to be displayed
+		return "Problem with website {0} : {1}".format(website.name, error)
 
 #appengine needs webpages
 class CustomRequestHandler(webapp2.RequestHandler):
@@ -181,7 +186,6 @@ class Configuration(CustomRequestHandler):
 				if setting is None:
 					setting = Setting(id=id, value=value)
 				else:
-					print "current setting " + setting.id + " - " + setting.value
 					setting.value = value;
 				setting.put()
 				self.response.write(json.dumps({"message" : "Configuration updated successfully"}))
@@ -223,10 +227,24 @@ class Configuration(CustomRequestHandler):
 class Check(webapp2.RequestHandler):
 
 	def get(self):
-		self.response.headers['Content-Type'] = "text/plain"
-		self.response.write('Checking websites\n')
+		self.response.headers['Content-Type'] = "application/json"
+		response = {}
 		for website in Website.all():
-			self.response.write(check(website) + '\n')
+			response[website.name] = check(website)
+		self.response.write(json.dumps(response))
+
+class Details(CustomRequestHandler):
+
+	def get(self):
+		self.response.headers['Content-Type'] = "application/json"
+		response = {}
+		for website in Website.all():
+			response["name"] = website.name
+			response["update"] = website.update
+			response["downtime"] = website.downtime
+			response["uptime"] = website.uptime
+			response["downtimes"] = Downtime.gql("WHERE website = :1 AND stop = NULL", website.name).all()
+		self.response.write(json.dumps(response))
 
 class REST(CustomRequestHandler):
 
@@ -284,9 +302,9 @@ webapp_config = {}
 webapp_config["webapp2_extras.sessions"] = {"secret_key" : "webwatcher?!"}
 
 application = webapp2.WSGIApplication([
+	('/api/check', Check),
 	('/api/status', Status),
 	('/api/authenticate', Authenticate),
-	('/api/check', Check),
 	('/api/configuration', Configuration),
 	('/api/configuration/(.*)', Configuration),
 	('/api/website', WebsiteResource),

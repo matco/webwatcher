@@ -1,10 +1,97 @@
+html {
+	height: 100%;
+	width: 100%;
+	padding: 0;
+	margin: 0;
+}
 body {
+	height: 100%;
+	width: 100%;
+	padding: 0;
+	margin: 0;
 	font-family: Verdana;
 	font-size: 12px;
+	background-color: #F5F5F5;
+	color: #333;
+}
+header {
+	position: fixed;
+	top: 0;
+	width: 100%;
+	height: 30px;
+	padding: 0;
+	margin: 0;
+	background-color: #111;
+	color: #ddd;
+	z-index: 1;
+}
+header > h1 {
+	float: left;
+	font-size: 15px;
+	margin: 5px 60px 0 5px;
+}
+header > ul {
+	float: left;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	height: 100%;
+}
+header > ul > li {
+	float: left;
+	cursor: pointer;
+	height: 100%;
+	padding: 6px 10px 0 10px;
+	vertical-align: middle;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+header > ul > li:hover:not(.selected) {
+	background-color: #333;
+}
+header > ul > li.selected {
+	background-color: #444;
+}
+header > button {
+	float: right;
+	margin: 5px 5px 0 0;
+}
+a {
+	text-decoration: none;
+	cursor: pointer;
+}
+button {
+	cursor: pointer;
+	border: 1px solid #888;
+	border-radius: 2px;
+}
+button:hover {
+	background-color: #333;
+	color: #ddd;
+}
+table {
+	border-collapse: collapse;
+}
+table td, table th {
+	border: 1px solid #ccc;
+}
+form {
+	margin: 0;
+	padding: 0;
 }
 label > span {
 	float: left;
-	width: 100px;
+	width: 120px;
+	margin-top: 4px;
+}
+input {
+	border: 1px solid #ccc;
+	border-radius: 2px;
+	padding: 2px;
+}
+input:focus {
+	border: 1px solid #aaa;
 }
 input::placeholder {
 	color: #aaa;
@@ -23,6 +110,79 @@ input[type="number"] {
 	text-align: right;
 }
 
+.window {
+	display: none;
+	position: fixed;
+	height: 150px;
+	width: 300px;
+	top: 20%;
+	left: calc(50% - 150px);
+	padding: 10px;
+	background-color: white;
+	border: 1px solid #aaa;
+	border-radius: 5px;
+}
+.window > h2 {
+	margin: 0 0 15px 0;
+}
+.window > menu {
+	position: absolute;
+	width: 100%;
+	left: 0;
+	bottom: 0;
+	margin: 0;
+	padding: 10px;
+	text-align: right;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+#content {
+	padding-top: 30px;
+}
+#config > aside {
+	position: fixed;
+	height: 100%;
+	width: 130px;
+	background-color: #ddd;
+	margin: 0;
+	padding: 0;
+}
+#config > aside > ul {
+	list-style-type: none;
+	width: 100%;
+	margin: 30px 0 0 0;
+	padding: 0 0 0 10px;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+#config > aside > ul > li {
+	cursor: pointer;
+	padding: 5px 10px;
+}
+#config > aside > ul > li.selected {
+	background-color: #F5F5F5;
+	border-radius: 5px 0 0 5px;
+}
+#config > div {
+	padding: 2px 10px 10px 140px;
+}
+#website input[name="name"] {
+	width: 150px;
+}
+#website input[name="url"] {
+	width: 220px;
+}
+#website input[name^="texts"] {
+	width: 220px;
+}
+
+#status {
+	padding: 10px;
+}
+
 tbody .na {
 	background-color: #D9EDF7;
 }
@@ -33,12 +193,3 @@ tbody .nok {
 	background-color: #F2DEDE;
 }
 
-#website input[name="name"] {
-	width: 150px;
-}
-#website input[name="url"] {
-	width: 220px;
-}
-#website input[name^="texts"] {
-	width: 220px;
-}

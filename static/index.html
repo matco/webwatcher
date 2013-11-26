@@ -9,7 +9,7 @@
 		<script type="text/javascript" src="index.js"></script>
 	</head>
 	<body>
-		<form id="initialization" method="post" action="#" style="display: none;">
+		<form id="initialization" method="post" action="#" class="window">
 			<h2>Initialization</h2>
 			<p id="initialization_error"></p>
 			<p>
@@ -24,11 +24,11 @@
 					<input name="password_2" type="password" required="required" />
 				</label>
 			</p>
-			<p>
+			<menu>
 				<button>Validate</button>
-			</p>
+			</menu>
 		</form>
-		<form id="authentication" method="post" action="#" style="display: none;">
+		<form id="authentication" method="post" action="#" class="window">
 			<h2>Authentication</h2>
 			<p id="authentication_error"></p>
 			<p>
@@ -37,86 +37,123 @@
 					<input name="password" type="password" required="required" />
 				</label>
 			</p>
-			<p>
+			<menu>
 				<button>Login</button>
-			</p>
+			</menu>
 		</form>
 		<div id="content" style="display: none;">
 			<header>
+				<h1>Webwatcher</h1>
+				<ul>
+					<li data-tab="config">Configuration</li>
+					<li data-tab="status">Status</li>
+				</ul>
 				<button id="logout">Logout</button>
 			</header>
-			<h2>Configuration</h2>
-			<form id="configuration" method="post" action="#">
-				<p>
-					<label>
-						<span>Sender e-mail</span>
-						<input name="sender_email" type="email" required="required" />
-					</label>
-				</p>
-				<p>
-					<label>
-						<span>Timeout</span>
-						<input name="website_timeout" type="number" required="required" />
-					</label>
-				</p>
-				<p>
-					<button>Save</button>
-				</p>
-			</form>
-			<h2>Subscribers</h2>
-			<table>
-				<thead>
-					<th style="width: 300px;">E-mail</th>
-					<th style="width: 100px;">Actions</th>
-				</thead>
-				<tbody id="subscribers"></tbody>
-			</table>
-			<h2>Add a subscriber</h2>
-			<form id="subscriber" method="post" action="#">
-				<p>
-					<label>
-						<span>E-mail</span>
-						<input name="email" type="email" required="required" placeholder="E-mail" />
-					</label>
-				</p>
-				<p>
-					<button>Add subscriber</button>
-				</p>
-			</form>
-			<h2>Websites</h2>
-			<table>
-				<thead>
-					<th style="width: 120px;">Name</th>
-					<th style="width: 250px;">URL</th>
-					<th style="width: 150px;">Last check</th>
-					<th style="width: 100px;">Actions</th>
-				</thead>
-				<tbody id="websites"></tbody>
-			</table>
-			<h2>Add a website</h2>
-			<form id="website" method="post" action="#">
-				<p>
-					<label>
-						<span>Name</span>
-						<input name="name" required="required" placeholder="Example" />
-					</label>
-				</p>
-				<p>
-					<label>
-						<span>URL</span>
-						<input name="url" type="url" required="required" placeholder="http://www.example.org" />
-					</label>
-				</p>
-				<p>
-					<label>
-						<span>Texts</span>
-						<input name="texts" placeholder="Example Domain" />
-					</label>
-				</p>
-				<p>
-					<button>Add website</button>
-				</p>
-			</form>
+
+			<div id="config">
+				<aside>
+					<ul>
+						<li data-tab="section_1">Main</li>
+						<li data-tab="section_2">Subscribers</li>
+						<li data-tab="section_3">Websites</li>
+					</ul>
+				</aside>
+				<div>
+					<div id="section_1">
+						<h2>Main</h2>
+						<form id="configuration" method="post" action="#">
+							<p>
+								<label>
+									<span>Sender e-mail</span>
+									<input name="sender_email" type="email" required="required" />
+								</label>
+							</p>
+							<p>
+								<label>
+									<span>Timeout</span>
+									<input name="website_timeout" type="number" required="required" />
+								</label>
+							</p>
+							<p>
+								<button>Save</button>
+							</p>
+						</form>
+					</div>
+					<div id="section_2">
+						<h2>Subscribers</h2>
+						<table>
+							<thead>
+								<th style="width: 300px;">E-mail</th>
+								<th style="width: 100px;">Actions</th>
+							</thead>
+							<tbody id="subscribers"></tbody>
+						</table>
+						<h2>Add a subscriber</h2>
+						<form id="subscriber" method="post" action="#">
+							<p>
+								<label>
+									<span>E-mail</span>
+									<input name="email" type="email" required="required" placeholder="E-mail" />
+								</label>
+							</p>
+							<p>
+								<button>Add subscriber</button>
+							</p>
+						</form>
+					</div>
+					<div id="section_3">
+						<h2>Websites</h2>
+						<table>
+							<thead>
+								<th style="width: 120px;">Name</th>
+								<th style="width: 250px;">URL</th>
+								<th style="width: 100px;">Actions</th>
+							</thead>
+							<tbody id="websites"></tbody>
+						</table>
+						<h2>Add a website</h2>
+						<form id="website" method="post" action="#">
+							<p>
+								<label>
+									<span>Name</span>
+									<input name="name" required="required" placeholder="Example" />
+								</label>
+							</p>
+							<p>
+								<label>
+									<span>URL</span>
+									<input name="url" type="url" required="required" placeholder="http://www.example.org" />
+								</label>
+							</p>
+							<p>
+								<label>
+									<span>Texts</span>
+									<input name="texts" placeholder="Example Domain" />
+								</label>
+							</p>
+							<p>
+								<button>Add website</button>
+							</p>
+						</form>
+					</div>
+				</div>
+			</div>
+
+			<div id="status">
+				<table>
+					<thead>
+						<tr>
+							<th style="width: 120px;">Name</th>
+							<th style="width: 150px;">Last check</th>
+							<th style="width: 150px;">Downtime</th>
+							<th style="width: 150px;">Uptime</th>
+							<th style="width: 150px;">Online</th>
+						</tr>
+					</thead>
+					<tbody id="states"></tbody>
+				</table>
+			</div>
 		</div>
 	</body>
 </html>
