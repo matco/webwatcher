@@ -24,7 +24,7 @@ function restify(url) {
 				'load',
 				function(event) {
 					if(event.target.status === 400) {
-						notify(JSON.parse(event.target.responseText).message);
+						UI.Notify(JSON.parse(event.target.responseText).message);
 					}
 					else {
 						if(callback) {
@@ -43,7 +43,7 @@ function restify(url) {
 				'load',
 				function(event) {
 					if(event.target.status === 400) {
-						notify(JSON.parse(event.responseText).message);
+						UI.Notify(JSON.parse(event.responseText).message);
 					}
 					else {
 						if(callback) {
@@ -114,7 +114,6 @@ var UI = {};
 		}, notification_close_time);
 	}
 })();
-
 
 window.addEventListener(
 	'load',
@@ -364,7 +363,7 @@ window.addEventListener(
 		var states = document.getElementById('states');
 
 		function draw_state(state) {
-			var state_ui = document.createFullElement('tr', {'class' : state.online === null ? 'na' : state.online ? 'ok' : 'nok'});
+			var state_ui = document.createFullElement('tr', {'data-key' : state.name, 'class' : state.online === null ? 'na' : state.online ? 'ok' : 'nok'});
 			state_ui.appendChild(document.createFullElement('td', {}, state.name));
 			state_ui.appendChild(document.createFullElement('td', {}, state.update ? new Date(state.update).toFullDisplay() : 'NA'));
 			state_ui.appendChild(document.createFullElement('td', {}, state.downtime));
@@ -379,6 +378,14 @@ window.addEventListener(
 				online = 'NA';
 			}
 			state_ui.appendChild(document.createFullElement('td', {}, online));
+			var state_actions = document.createFullElement('td');
+			state_actions.appendChild(document.createFullElement(
+				'a',
+				{href : '#', title : 'View details'},
+				'Details',
+				{click : detail_website_listener}
+			));
+			state_ui.appendChild(state_actions);
 			return state_ui;
 		}
 
@@ -387,6 +394,92 @@ window.addEventListener(
 			Websites.list(function(websites) {
 				websites.map(draw_state).forEach(Node.prototype.appendChild, states);
 			});
+		}
+
+		document.getElementById('status_check_now').addEventListener(
+			'click',
+			function(event) {
+				Event.stop(event);
+				var xhr = new XMLHttpRequest();
+				xhr.addEventListener(
+					'load',
+					function(xhr_event) {
+						if(xhr_event.target.status === 200) {
+							update_states();
+							UI.Notify('Websites have been checked successfully');
+						}
+					}
+				);
+				xhr.open('GET', '/api/check', true);
+				xhr.send(null);
+			}
+		);
+
+		//status details
+		document.getElementById('status_details_close').addEventListener(
+			'click',
+			function() {
+				document.getElementById('status_details').style.display = 'none';
+			}
+		);
+
+		function draw_downtime(downtime) {
+			var downtime_ui = document.createFullElement('tr');
+			var start = new Date(downtime.start);
+			var stop = downtime.stop ? new Date(downtime.stop) : undefined;
+			downtime_ui.appendChild(document.createFullElement('td', {}, start.toFullDisplay()));
+			downtime_ui.appendChild(document.createFullElement('td', {}, stop ? stop.toFullDisplay() : ''));
+			downtime_ui.appendChild(document.createFullElement('td', {style : 'text-align: right;'}, stop ? Math.round((stop.getTime() - start.getTime()) / 1000) : ''));
+			downtime_ui.appendChild(document.createFullElement('td', {title : downtime.rationale, style : 'width: 320px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;'}, downtime.rationale));
+			return downtime_ui;
+		}
+
+		function detail_website_listener(event) {
+			Event.stop(event);
+			xhr.addEventListener(
+				'load',
+				function(event) {
+					var details = JSON.parse(event.target.responseText);
+					//update link
+					var status_details_link = document.getElementById('status_details_link');
+					status_details_link.setAttribute('href', details.url);
+					status_details_link.textContent = details.name;
+					//update age
+					document.getElementById('status_details_age').textContent = new Date(details.update).getAgeLiteral();
+					//update check link
+					var status_details_check = document.getElementById('status_details_check');
+					status_details_check.clear();
+					status_details_check.appendChild(document.createFullElement(
+						'a',
+						{href : '#'},
+						'Check now',
+						{
+							click : function(event) {
+								Event.stop(event);
+								var xhr = new XMLHttpRequest();
+								xhr.addEventListener(
+									'load',
+									function(xhr_event) {
+										if(xhr_event.target.status === 200) {
+											document.getElementById('status_details_age').textContent = new Date().getAgeLiteral()
+											UI.Notify('Website has been checked successfully');
+										}
+									}
+								);
+								xhr.open('GET', '/api/check/' + details.name, true);
+								xhr.send(null);
+							}
+						}
+					));
+					//update downtime
+					var status_details_downtimes = document.getElementById('status_details_downtimes');
+					status_details_downtimes.clear();
+					details.downtimes.map(draw_downtime).forEach(Node.prototype.appendChild, status_details_downtimes);
+				}
+			);
+			xhr.open('GET', '/api/details/' + this.parentNode.parentNode.dataset.key, true);
+			xhr.send(null);
+			document.getElementById('status_details').style.display = 'block';
 		}
 
 		//debug

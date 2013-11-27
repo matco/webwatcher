@@ -142,6 +142,10 @@
 			</div>
 
 			<div id="status">
+				<h2>Websites status<a id="status_check_now" href="#" style="margin-left: 10px; font-weight: normal; font-size: 11px;">Check now</a></h2>
+				<!--<p>
+					Last check <time id="status_last_check"></time>.
+				</p>-->
 				<table>
 					<thead>
 						<tr>
@@ -150,10 +154,32 @@
 							<th style="width: 150px;">Downtime</th>
 							<th style="width: 150px;">Uptime</th>
 							<th style="width: 150px;">Online</th>
+							<th style="width: 150px;">Actions</th>
 						</tr>
 					</thead>
 					<tbody id="states"></tbody>
 				</table>
+				<div id="status_details" class="window">
+					<h2>Details for <a id="status_details_link" href="#"></a></h2>
+					<p>
+						Last checked <span id="status_details_age"></span>.
+						<span id="status_details_check"></span>
+					</p>
+					<table style="width: 800px; table-layout: fixed;">
+						<thead>
+							<tr>
+								<th style="width: 150px;">Start</th>
+								<th style="width: 150px;">Stop</th>
+								<th style="width: 80px;">Duration</th>
+								<th>Rationale</th>
+							</tr>
+						</thead>
+						<tbody id="status_details_downtimes"></tbody>
+					</table>
+					<menu>
+						<button id="status_details_close">Close</button>
+					</menu>
+				</div>
 			</div>
 		</div>
 	</body>

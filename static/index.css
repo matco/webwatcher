@@ -74,6 +74,7 @@ button:hover {
 	color: #ddd;
 }
 table {
+	background-color: #fff;
 	border-collapse: collapse;
 }
 table td, table th {
@@ -209,14 +210,20 @@ input[type="number"] {
 #status {
 	padding: 10px;
 }
-
-tbody .na {
+#status .na {
 	background-color: #D9EDF7;
 }
-tbody .ok {
+#status .ok {
 	background-color: #DFF0D8;
 }
-tbody .nok {
+#status .nok {
 	background-color: #F2DEDE;
+}
+
+#status_details {
+	width: 800px;
+	height: 380px;
+	left: calc(50% - 400px);
+	top: 15%;
 }
 

@@ -53,7 +53,7 @@ class JSONCustomEncoder(json.JSONEncoder):
 		if object.__class__.__name__ == "Downtime":
 			return {"rationale" : object.rationale, "start" : object.start, "stop" : object.stop}
 		if object.__class__.__name__ == "datetime":
-			return object.isoformat()
+			return object.isoformat() + "Z"
 		return json.JSONEncoder.default(self, object)
 
 #warn about the problem
@@ -89,7 +89,7 @@ def check(website):
 		if website.online:
 			website.uptime += int((now - previous_update).total_seconds())
 		#if website was previously offline, update last downtime and increase downtime (pessimistic vision, website has returned online between 2 check)
-		else:
+		elif website.online is False:
 			downtime = Downtime.gql("WHERE website = :1 AND stop = NULL", website.name).get()
 			downtime.stop = now
 			db.put(downtime)
@@ -234,25 +234,34 @@ class Configuration(CustomRequestHandler):
 
 class Check(webapp2.RequestHandler):
 
-	def get(self):
+	def get(self, name=None):
 		self.response.headers['Content-Type'] = "application/json"
 		response = {}
-		for website in Website.all():
+		if name is None:
+			websites = Website.all()
+		else:
+			websites = [Website.get_by_key_name(name)]
+		for website in websites:
 			response[website.name] = check(website)
 		self.response.write(json.dumps(response))
 
 class Details(CustomRequestHandler):
 
-	def get(self):
+	def get(self, name):
 		self.response.headers['Content-Type'] = "application/json"
 		response = {}
-		for website in Website.all():
+		website = Website.get_by_key_name(name)
+		if website is not None:
 			response["name"] = website.name
+			response["url"] = website.url
 			response["update"] = website.update
 			response["downtime"] = website.downtime
 			response["uptime"] = website.uptime
-			response["downtimes"] = Downtime.gql("WHERE website = :1 AND stop = NULL", website.name).all()
-		self.response.write(json.dumps(response))
+			response["downtimes"] = Downtime.gql("WHERE website = :1 ORDER BY stop DESC", website.name).fetch(10)
+			self.response.write(json.dumps(response, cls=JSONCustomEncoder))
+		else:
+			self.error(404)
+			self.response.write(json.dumps({"message" : "No website with name {0}".format(name)}))
 
 class REST(CustomRequestHandler):
 
@@ -310,11 +319,13 @@ webapp_config = {}
 webapp_config["webapp2_extras.sessions"] = {"secret_key" : "webwatcher?!"}
 
 application = webapp2.WSGIApplication([
-	('/api/check', Check),
 	('/api/status', Status),
 	('/api/authenticate', Authenticate),
 	('/api/configuration', Configuration),
 	('/api/configuration/(.*)', Configuration),
+	('/api/check', Check),
+	('/api/check/(.*)', Check),
+	('/api/details/(.*)', Details),
 	('/api/website', WebsiteResource),
 	('/api/website/(.+)', WebsiteResource),
 	('/api/subscriber', SubscriberResource),
