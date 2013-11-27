@@ -3,6 +3,7 @@ import json
 import urllib2
 import webapp2
 import logging
+import hashlib
 from webapp2_extras import sessions
 from google.appengine.api import urlfetch
 from google.appengine.api import mail
@@ -112,6 +113,9 @@ def check(website):
 		#return message to be displayed
 		return "Problem with website {0} : {1}".format(website.name, error)
 
+def hash_password(password):
+	return hashlib.sha256(password).hexdigest()
+
 #appengine needs webpages
 class CustomRequestHandler(webapp2.RequestHandler):
 	def __init__(self, request, response):
@@ -144,7 +148,7 @@ class Authenticate(CustomRequestHandler):
 
 	def post(self):
 		credentials = json.loads(self.request.POST.get("credentials").decode("utf8"))
-		if credentials["password"] == Setting.get_by_key_name("password").value:
+		if hash_password(credentials["password"]) == Setting.get_by_key_name("password").value:
 			self.session["authenticated"] = True
 			self.response.write(json.dumps({"message" : "Authentication success"}))
 		else:
@@ -197,7 +201,10 @@ class Configuration(CustomRequestHandler):
 		else:
 			setting = Setting.get_by_key_name(id)
 			value = self.request.POST.get("value").decode("utf8")
-			#special handling for password setting
+			#encrypt password
+			if id == "password":
+				value = hash_password(value)
+			#changing a setting required authentication exept for password the first time
 			if "authenticated" in self.session or id == "password" and setting is None:
 				if setting is None:
 					setting = Setting(id=id, value=value)
@@ -205,6 +212,7 @@ class Configuration(CustomRequestHandler):
 					setting.value = value;
 				setting.put()
 				self.response.write(json.dumps({"message" : "Setting {0} set to {0}".format(id, value)}))
+				#authenticate user
 				if id == "password":
 					self.session["authenticated"] = True
 			else:
