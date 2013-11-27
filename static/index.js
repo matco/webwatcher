@@ -1,29 +1,5 @@
 'use strict';
 
-//notifications
-function notify(message, options) {
-	if(Notification.permission !== 'granted' && Notification.permission !== 'denied') {
-		Notification.requestPermission(function(status) {
-			Notification.permission = status;
-			//re-notify
-			notify(message, options);
-		});
-	}
-	//use native notification
-	else if(Notification.permission === 'granted') {
-		var notification = new Notification(message, options);
-		notification.addEventListener('show', function() {
-			setTimeout(function() {
-				notification.close();
-			}, 5000);
-		});
-	}
-	//fallback on alert
-	else {
-		alert(message);
-	}
-}
-
 function restify(url) {
 
 	return {
@@ -106,6 +82,37 @@ var UI = {};
 			tab.addEventListener('click', select_tab);
 		});
 	};
+
+	var notification_close_time = 5000;
+	var notification_interval;
+	var notification_timeout;
+
+	UI.Notify = function(message) {
+		var notification = document.getElementById('notification');
+		//stop current animation if required
+		if(notification_interval) {
+			clearInterval(notification_interval);
+		}
+		if(notification_timeout) {
+			clearTimeout(notification_timeout);
+		}
+		//update notification
+		notification.textContent = message;
+		notification.style.opacity = 1;
+		notification.style.display = 'block';
+		//start animation
+		notification_timeout = setTimeout(function() {
+			notification_interval = setInterval(function() {
+				if(notification.style.opacity <= 0.01) {
+					notification.style.display = 'none';
+					clearInterval(notification_interval);
+				}
+				else {
+					notification.style.opacity -= 0.01;
+				}
+			}, 10);
+		}, notification_close_time);
+	}
 })();
 
 
@@ -138,12 +145,18 @@ window.addEventListener(
 			'submit',
 			function(event) {
 				Event.stop(event);
+				var xhr = new XMLHttpRequest();
+				xhr.addEventListener(
+					'load',
+					function(event) {
+						UI.Notify('Modifications save successfully');
+					}
+				);
 				var form_data = new FormData();
 				form_data.append('configuration', JSON.stringify({
 					sender_email : this['sender_email'].value,
 					website_timeout : this['website_timeout'].value
 				}));
-				var xhr = new XMLHttpRequest();
 				xhr.open('POST', '/api/configuration', true);
 				xhr.send(form_data);
 			}
@@ -159,6 +172,7 @@ window.addEventListener(
 			var subscriber_ui = this.parentNode.parentNode;
 			Subscribers.remove(subscriber_ui.dataset.key, function() {
 				subscriber_ui.parentNode.removeChild(subscriber_ui);
+				UI.Notify('Subscriber deleted successfully');
 			});
 		}
 
@@ -192,6 +206,7 @@ window.addEventListener(
 				Subscribers.add(subscriber, function() {
 					subscribers_ui.appendChild(draw_subscriber(subscriber));
 					form.reset();
+					UI.Notify('Subscriber added successfully');
 				});
 			}
 		);
@@ -206,6 +221,7 @@ window.addEventListener(
 			var website_ui = this.parentNode.parentNode;
 			Websites.remove(website_ui.dataset.key, function() {
 				website_ui.parentNode.removeChild(website_ui);
+				UI.Notify('Website deleted successfully');
 			});
 		}
 
@@ -230,6 +246,20 @@ window.addEventListener(
 				websites.map(draw_website).forEach(Node.prototype.appendChild, websites_ui);
 			});
 		}
+
+		document.getElementById('website').addEventListener(
+			'submit',
+			function(event) {
+				Event.stop(event);
+				var form = this;
+				var website = {name : this['name'].value, url : this['url'].value, texts : this['texts'].value, online : null};
+				Websites.add(website, function() {
+					websites_ui.appendChild(draw_website(website));
+					form.reset();
+					UI.Notify('Website added successfully');
+				});
+			}
+		);
 
 		function load_ui() {
 			document.getElementById('initialization').style.display = 'none';
@@ -327,19 +357,6 @@ window.addEventListener(
 				);
 				xhr.open('DELETE', '/api/authenticate', true);
 				xhr.send(null);
-			}
-		);
-
-		document.getElementById('website').addEventListener(
-			'submit',
-			function(event) {
-				Event.stop(event);
-				var form = this;
-				var website = {name : this['name'].value, url : this['url'].value, texts : this['texts'].value, online : null};
-				Websites.add(website, function() {
-					websites_ui.appendChild(draw_website(website));
-					form.reset();
-				});
 			}
 		);
 
