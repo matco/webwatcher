@@ -75,13 +75,13 @@ def check(website):
 		if avoid_cache is not None and avoid_cache.value == "True":
 			url += "&" if "?" in url else "?"
 			url += str(time.time())
-		response = urlfetch.fetch(url, deadline=int(Setting.get_by_key_name("website_timeout").value), validate_certificate=False)
+		response = urlfetch.fetch(url, headers={'Cache-Control' : 'max-age=60'}, deadline=int(Setting.get_by_key_name("website_timeout").value), validate_certificate=False)
 		try:
 			if response.status_code == 200:
 				html = response.content.decode("utf8")
-				for text in website.texts:
-					if not text in html:
-						error = "Text '{0}' is not present".format(text)
+				#for text in website.texts:
+				if not website.texts in html:
+					error = "Text '{0}' is not present".format(texts)
 			else:
 				error = "Response status is {0}".format(response.status_code)
 		except Exception as e:
