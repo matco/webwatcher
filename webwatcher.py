@@ -73,7 +73,7 @@ def check(website):
 		#add timestamp to url to avoid cache if asked
 		avoid_cache = Setting.get_by_key_name("avoid_cache")
 		if avoid_cache is not None and avoid_cache.value == "True":
-			url += "?" if url.contains("?") else "&"
+			url += "&" if "?" in url else "?"
 			url += str(time.time())
 		response = urlfetch.fetch(url, deadline=int(Setting.get_by_key_name("website_timeout").value), validate_certificate=False)
 		try:
