@@ -257,34 +257,6 @@ window.addEventListener(
 			}
 		);
 
-		function load_ui() {
-			document.getElementById('initialization').style.display = 'none';
-			document.getElementById('authentication').style.display = 'none';
-			document.getElementById('content').style.display = 'block';
-			update_configuration();
-			update_subscribers();
-			update_websites();
-			update_states();
-		}
-
-		var xhr = new XMLHttpRequest();
-		xhr.addEventListener(
-			'load',
-			function(event) {
-				if(event.target.status === 403) {
-					document.getElementById('initialization').style.display = 'block';
-				}
-				else if(event.target.status === 401) {
-					document.getElementById('authentication').style.display = 'block';
-				}
-				else {
-					load_ui();
-				}
-			}
-		);
-		xhr.open('GET', '/api/status', true);
-		xhr.send(null);
-
 		document.getElementById('initialization').addEventListener(
 			'submit',
 			function(event) {
@@ -302,8 +274,8 @@ window.addEventListener(
 							authentication_error.textContent = JSON.parse(event.target.responseText).message;
 						}
 						else {
-							document.querySelector('header > ul > li[data-tab="config"]').click();
-							load_ui();
+							login();
+							location.hash = '#config';
 						}
 					}
 				);
@@ -328,7 +300,11 @@ window.addEventListener(
 							authentication_error.textContent = JSON.parse(event.target.responseText).message;
 						}
 						else {
-							load_ui();
+							login();
+							if(authentication_callback) {
+								authentication_callback();
+								authentication_callback = undefined;
+							}
 						}
 					}
 				);
@@ -339,17 +315,27 @@ window.addEventListener(
 			}
 		);
 
+		document.getElementById('authentication_cancel').addEventListener(
+			'click',
+			function() {
+				authentication_callback = undefined;
+				document.getElementById('authentication').style.display = 'none';
+				location.hash = '#status';
+			}
+		);
+
+		document.getElementById('login').addEventListener(
+			'click',
+			function() {
+				document.getElementById('authentication').style.display = 'block';
+			}
+		);
+
 		document.getElementById('logout').addEventListener(
 			'click',
 			function() {
 				var xhr = new XMLHttpRequest();
-				xhr.addEventListener(
-					'load',
-					function(event) {
-						document.getElementById('content').style.display = 'none';
-						document.getElementById('authentication').style.display = 'block';
-					}
-				);
+				xhr.addEventListener('load', logout);
 				xhr.open('DELETE', '/api/authenticate', true);
 				xhr.send(null);
 			}
@@ -486,41 +472,100 @@ window.addEventListener(
 		window.addEventListener(
 			'hashchange',
 			function() {
-				//stop refreshing status page
-				if(refresh_status_page_inverval) {
-					clearInterval(refresh_status_page_inverval);
-				}
 				//retrieve pages
 				var config = document.getElementById('config');
 				var status = document.getElementById('status');
 				//retrieve links
 				var config_link = document.querySelector('a[href="#config"]');
 				var status_link = document.querySelector('a[href="#status"]');
-				//hide all pages
-				config.style.display = 'none';
-				status.style.display = 'none';
-				//unselect links
-				config_link.classList.remove('selected');
-				status_link.classList.remove('selected');
+
+				function unselect_all() {
+					//stop refreshing status page
+					if(refresh_status_page_inverval) {
+						clearInterval(refresh_status_page_inverval);
+					}
+					//hide all pages
+					config.style.display = 'none';
+					status.style.display = 'none';
+					//unselect links
+					config_link.classList.remove('selected');
+					status_link.classList.remove('selected');
+				}
+
 				//route
 				if(location.hash === '#config') {
-					config_link.classList.add('selected');
-					config.style.display = 'block';
+					var display_config = function() {
+						unselect_all();
+						//update page
+						update_configuration();
+						update_subscribers();
+						update_websites();
+						//display page
+						config_link.classList.add('selected');
+						config.style.display = 'block';
+					}
+					//check authentication
+					if(!authenticated) {
+						require_authentication(display_config);
+					}
+					else {
+						display_config()
+					}
 				}
 				else {
-					status_link.classList.add('selected');
-					status.style.display = 'block';
+					unselect_all();
+					//update page
+					update_states();
 					//refresh page automatically
 					refresh_status_page_inverval = setInterval(update_states, 10000);
+					//display page
+					status_link.classList.add('selected');
+					status.style.display = 'block';
 				}
 			}
-		)
+		);
 
-		location.hash = '#status';
-		//try to restore selected node
-		var event = document.createEvent('UIEvent');
-		event.initUIEvent('hashchange', true, true, this.window, 1);
-		window.dispatchEvent(event);
+		var authenticated = false;
+		var authentication_callback;
+
+		function require_authentication(callback) {
+			authentication_callback = callback;
+			document.getElementById('authentication').style.display = 'block';
+		}
+
+		function login() {
+			authenticated = true;
+			document.getElementById('authentication').style.display = 'none';
+			document.getElementById('login').style.display = 'none';
+			document.getElementById('logout').style.display = 'block';
+		}
+
+		function logout() {
+			authenticated = false;
+			document.getElementById('login').style.display = 'none';
+			document.getElementById('logout').style.display = 'block';
+			location.hash = '#status';
+		}
+
+		var xhr = new XMLHttpRequest();
+		xhr.addEventListener(
+			'load',
+			function(event) {
+				if(event.target.status === 403) {
+					document.getElementById('initialization').style.display = 'block';
+				}
+				else {
+					document.getElementById('content').style.display = 'block';
+					location.hash = '#status';
+					//try to restore selected node
+					var event = document.createEvent('UIEvent');
+					event.initUIEvent('hashchange', true, true, this.window, 1);
+					window.dispatchEvent(event);
+				}
+			}
+		);
+		xhr.open('GET', '/api/status', true);
+		xhr.send(null);
 
 		//debug
 		var debug = false;

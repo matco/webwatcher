@@ -277,7 +277,7 @@ class REST(CustomRequestHandler):
 		session_store = sessions.get_store(request=self.request)
 		self.session = session_store.get_session()
 		try:
-			if 'authenticated' in self.session:
+			if not self.require_authentication[self.request.method] or 'authenticated' in self.session:
 				webapp2.RequestHandler.dispatch(self, *args, **kwargs)
 			else:
 				self.error(401)
@@ -318,10 +318,12 @@ class REST(CustomRequestHandler):
 class WebsiteResource(REST):
 	db_model = Website
 	db_model_name = "Website"
+	require_authentication = {"GET" : False, "POST" : True, "DELETE" : True}
 
 class SubscriberResource(REST):
 	db_model = Subscriber
 	db_model_name = "Subscriber"
+	require_authentication = {"GET" : True, "POST" : True, "DELETE" : True}
 
 webapp_config = {}
 webapp_config["webapp2_extras.sessions"] = {"secret_key" : "webwatcher?!"}
