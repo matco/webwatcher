@@ -81,6 +81,9 @@ table {
 	background-color: #fff;
 	border-collapse: collapse;
 }
+table tr:nth-child(even) {
+	background-color: #efefef;
+}
 table td, table th {
 	border: 1px solid #ccc;
 }
