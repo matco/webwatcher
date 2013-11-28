@@ -118,11 +118,6 @@ var UI = {};
 window.addEventListener(
 	'load',
 	function() {
-		UI.Tabify(document.querySelector('header > ul'));
-		UI.Tabify(document.querySelector('#config > aside > ul'));
-		document.querySelector('header > ul > li[data-tab="status"]').click();
-		document.querySelector('#config > aside > ul > li[data-tab="section_1"]').click();
-
 		//manage configuration
 		var configuration = document.getElementById('configuration');
 
@@ -270,7 +265,6 @@ window.addEventListener(
 			update_subscribers();
 			update_websites();
 			update_states();
-			setInterval(update_states, 10000);
 		}
 
 		var xhr = new XMLHttpRequest();
@@ -362,8 +356,6 @@ window.addEventListener(
 		);
 
 		//status
-		var states = document.getElementById('states');
-
 		function draw_state(state) {
 			var state_ui = document.createFullElement('tr', {'data-key' : state.name, 'class' : state.online === null ? 'na' : state.online ? 'ok' : 'nok'});
 			state_ui.appendChild(document.createFullElement('td', {}, state.name));
@@ -392,6 +384,7 @@ window.addEventListener(
 		}
 
 		function update_states() {
+			var states = document.getElementById('states');
 			states.clear();
 			Websites.list(function(websites) {
 				websites.map(draw_state).forEach(Node.prototype.appendChild, states);
@@ -483,6 +476,51 @@ window.addEventListener(
 			xhr.send(null);
 			document.getElementById('status_details').style.display = 'block';
 		}
+
+		UI.Tabify(document.querySelector('#config > aside > ul'));
+		document.querySelector('#config > aside > ul > li[data-tab="section_1"]').click();
+
+		//manage navigation
+		var refresh_status_page_inverval;
+
+		window.addEventListener(
+			'hashchange',
+			function() {
+				//stop refreshing status page
+				if(refresh_status_page_inverval) {
+					clearInterval(refresh_status_page_inverval);
+				}
+				//retrieve pages
+				var config = document.getElementById('config');
+				var status = document.getElementById('status');
+				//retrieve links
+				var config_link = document.querySelector('a[href="#config"]');
+				var status_link = document.querySelector('a[href="#status"]');
+				//hide all pages
+				config.style.display = 'none';
+				status.style.display = 'none';
+				//unselect links
+				config_link.classList.remove('selected');
+				status_link.classList.remove('selected');
+				//route
+				if(location.hash === '#config') {
+					config_link.classList.add('selected');
+					config.style.display = 'block';
+				}
+				else {
+					status_link.classList.add('selected');
+					status.style.display = 'block';
+					//refresh page automatically
+					refresh_status_page_inverval = setInterval(update_states, 10000);
+				}
+			}
+		)
+
+		location.hash = '#status';
+		//try to restore selected node
+		var event = document.createEvent('UIEvent');
+		event.initUIEvent('hashchange', true, true, this.window, 1);
+		window.dispatchEvent(event);
 
 		//debug
 		var debug = false;
