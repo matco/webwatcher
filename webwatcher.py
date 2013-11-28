@@ -83,7 +83,7 @@ def check(website):
 					if not text in html:
 						error = "Text '{0}' is not present".format(text)
 			else:
-				error = "Response status is {0}".format(response.status)
+				error = "Response status is {0}".format(response.status_code)
 		except Exception as e:
 			error = "Unable to read website response : {0}".format(e)
 	except Exception as e:
@@ -110,7 +110,7 @@ def check(website):
 	#website is offline
 	else:
 		#if website was online at previous check, warn subscribers and create a new downtime
-		if website.online:
+		if website.online is None or website.online:
 			#warn subscribers only the first time website is detected as offline
 			warn(website, error)
 			downtime = Downtime(website=website.name, rationale=error)

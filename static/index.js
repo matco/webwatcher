@@ -275,6 +275,8 @@ window.addEventListener(
 						}
 						else {
 							login();
+							document.getElementById('initialization').style.display = 'none';
+							document.getElementById('content').style.display = 'block';
 							location.hash = '#config';
 						}
 					}
@@ -509,7 +511,7 @@ window.addEventListener(
 						require_authentication(display_config);
 					}
 					else {
-						display_config()
+						display_config();
 					}
 				}
 				else {
@@ -552,12 +554,13 @@ window.addEventListener(
 			'load',
 			function(event) {
 				if(event.target.status === 403) {
+					location.hash = '#';
 					document.getElementById('initialization').style.display = 'block';
 				}
 				else {
 					document.getElementById('content').style.display = 'block';
 					location.hash = '#status';
-					//try to restore selected node
+					//trigger manually hash change event
 					var event = document.createEvent('UIEvent');
 					event.initUIEvent('hashchange', true, true, this.window, 1);
 					window.dispatchEvent(event);
