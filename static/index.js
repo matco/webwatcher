@@ -134,6 +134,7 @@ window.addEventListener(
 					var settings = JSON.parse(event.target.responseText);
 					configuration['sender_email'].value = settings.sender_email || '';
 					configuration['website_timeout'].value = settings.website_timeout || '';
+					configuration['avoid_cache'].checked = settings.avoid_cache === 'True';
 				}
 			);
 			xhr.open('GET', '/api/configuration', true);
@@ -154,7 +155,8 @@ window.addEventListener(
 				var form_data = new FormData();
 				form_data.append('configuration', JSON.stringify({
 					sender_email : this['sender_email'].value,
-					website_timeout : this['website_timeout'].value
+					website_timeout : this['website_timeout'].value,
+					avoid_cache : this['avoid_cache'].checked
 				}));
 				xhr.open('POST', '/api/configuration', true);
 				xhr.send(form_data);

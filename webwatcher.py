@@ -1,4 +1,5 @@
 import datetime
+import time
 import json
 import urllib2
 import webapp2
@@ -59,14 +60,22 @@ class JSONCustomEncoder(json.JSONEncoder):
 #warn about the problem
 def warn(website, error):
 	#send e-mails
+	sender_email = Setting.get_by_key_name("sender_email").value
 	for subscriber in Subscriber.all():
-		mail.send_mail(Setting.get_by_key_name("sender_email").value, subscriber.email, 'Problem with ' + website.name, error)
+		mail.send_mail(sender_email, subscriber.email, 'Problem with ' + website.name, error)
 
 #website checker
 def check(website):
+	#TODO improve this by retrieving all settings
 	try:
 		error = None
-		response = urlfetch.fetch(website.url, deadline=int(Setting.get_by_key_name("website_timeout").value), validate_certificate=False)
+		url = website.url
+		#add timestamp to url to avoid cache if asked
+		avoid_cache = Setting.get_by_key_name("avoid_cache")
+		if avoid_cache is not None and avoid_cache.value == "True":
+			url += "?" if url.contains("?") else "&"
+			url += str(time.time())
+		response = urlfetch.fetch(url, deadline=int(Setting.get_by_key_name("website_timeout").value), validate_certificate=False)
 		try:
 			if response.status_code == 200:
 				html = response.content.decode("utf8")
@@ -186,15 +195,14 @@ class Configuration(CustomRequestHandler):
 			if "authenticated" in self.session:
 				configuration = json.loads(self.request.POST.get("configuration").decode("utf8"))
 				for id, value in configuration.iteritems():
+					value = str(value)
 					setting = Setting.get_by_key_name(id)
-				if setting is None:
-					setting = Setting(id=id, value=value)
-				else:
-					setting.value = value;
-				setting.put()
+					if setting is None:
+						setting = Setting(id=id, value=value)
+					else:
+						setting.value = value;
+					setting.put()
 				self.response.write(json.dumps({"message" : "Configuration updated successfully"}))
-				if id == "password":
-					self.session["authenticated"] = True
 			else:
 				self.error(401)
 				self.response.write(json.dumps({"message" : "You must be authenticated to perform this action"}))
