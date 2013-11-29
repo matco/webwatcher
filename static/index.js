@@ -372,7 +372,14 @@ window.addEventListener(
 					status_details_link.setAttribute('href', details.url);
 					status_details_link.textContent = details.name;
 					//update age
-					document.getElementById('status_details_age').textContent = new Date(details.update).getAgeLiteral();
+					var status_details_age_check;
+					if(details.update) {
+						status_details_age_check = 'Last checked ' + new Date(details.update).getAgeLiteral();
+					}
+					else {
+						status_details_age_check = 'Not cheked yet';
+					}
+					document.getElementById('status_details_age').textContent = status_details_age_check;
 					//update check link
 					var status_details_check = document.getElementById('status_details_check');
 					status_details_check.clear();
