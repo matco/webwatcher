@@ -58,63 +58,6 @@ function restify(url) {
 	};
 }
 
-var UI = {};
-(function() {
-	//show tab associated content and hide other contents
-	function select_tab() {
-		if(!this.classList.contains('disabled')) {
-			this.parentNode.children.forEach(function(tab) {
-				if(tab === this) {
-					tab.classList.add('selected');
-					document.getElementById(tab.dataset.tab).style.display = 'block';
-				}
-				else {
-					tab.classList.remove('selected');
-					document.getElementById(tab.dataset.tab).style.display = 'none';
-				}
-			}, this);
-		}
-	}
-
-	UI.Tabify = function(container) {
-		container.children.forEach(function(tab) {
-			document.getElementById(tab.dataset.tab).style.display = tab.classList.contains('selected') ? 'block' : 'none';
-			tab.addEventListener('click', select_tab);
-		});
-	};
-
-	var notification_close_time = 5000;
-	var notification_interval;
-	var notification_timeout;
-
-	UI.Notify = function(message) {
-		var notification = document.getElementById('notification');
-		//stop current animation if required
-		if(notification_interval) {
-			clearInterval(notification_interval);
-		}
-		if(notification_timeout) {
-			clearTimeout(notification_timeout);
-		}
-		//update notification
-		notification.textContent = message;
-		notification.style.opacity = 1;
-		notification.style.display = 'block';
-		//start animation
-		notification_timeout = setTimeout(function() {
-			notification_interval = setInterval(function() {
-				if(notification.style.opacity <= 0.01) {
-					notification.style.display = 'none';
-					clearInterval(notification_interval);
-				}
-				else {
-					notification.style.opacity -= 0.01;
-				}
-			}, 10);
-		}, notification_close_time);
-	}
-})();
-
 window.addEventListener(
 	'load',
 	function() {
@@ -275,9 +218,9 @@ window.addEventListener(
 						}
 						else {
 							login();
-							document.getElementById('initialization').style.display = 'none';
 							document.getElementById('content').style.display = 'block';
 							location.hash = '#config';
+							UI.CloseModal(document.getElementById('initialization'));
 						}
 					}
 				);
@@ -321,15 +264,15 @@ window.addEventListener(
 			'click',
 			function() {
 				authentication_callback = undefined;
-				document.getElementById('authentication').style.display = 'none';
 				location.hash = '#status';
+				UI.CloseModal(document.getElementById('authentication'));
 			}
 		);
 
 		document.getElementById('login').addEventListener(
 			'click',
 			function() {
-				document.getElementById('authentication').style.display = 'block';
+				UI.OpenModal(document.getElementById('authentication'), true);
 			}
 		);
 
@@ -402,7 +345,7 @@ window.addEventListener(
 		document.getElementById('status_details_close').addEventListener(
 			'click',
 			function() {
-				document.getElementById('status_details').style.display = 'none';
+				UI.CloseModal(document.getElementById('status_details'));
 			}
 		);
 
@@ -462,7 +405,7 @@ window.addEventListener(
 			);
 			xhr.open('GET', '/api/details/' + this.parentNode.parentNode.dataset.key, true);
 			xhr.send(null);
-			document.getElementById('status_details').style.display = 'block';
+			UI.OpenModal(document.getElementById('status_details'));
 		}
 
 		UI.Tabify(document.querySelector('#config > aside > ul'));
@@ -532,20 +475,20 @@ window.addEventListener(
 
 		function require_authentication(callback) {
 			authentication_callback = callback;
-			document.getElementById('authentication').style.display = 'block';
+			UI.OpenModal(document.getElementById('authentication'), true);
 		}
 
 		function login() {
 			authenticated = true;
-			document.getElementById('authentication').style.display = 'none';
+			UI.CloseModal(document.getElementById('authentication'));
 			document.getElementById('login').style.display = 'none';
 			document.getElementById('logout').style.display = 'block';
 		}
 
 		function logout() {
 			authenticated = false;
-			document.getElementById('login').style.display = 'none';
-			document.getElementById('logout').style.display = 'block';
+			document.getElementById('logout').style.display = 'none';
+			document.getElementById('login').style.display = 'block';
 			location.hash = '#status';
 		}
 
@@ -555,7 +498,7 @@ window.addEventListener(
 			function(event) {
 				if(event.target.status === 403) {
 					location.hash = '#';
-					document.getElementById('initialization').style.display = 'block';
+					UI.OpenModal(document.getElementById('initialization'));
 				}
 				else {
 					document.getElementById('content').style.display = 'block';

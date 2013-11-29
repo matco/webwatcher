@@ -4,13 +4,16 @@
 		<meta charset="UTF-8" />
 		<title>Webwatcher</title>
 		<link href="index.css" rel="stylesheet" type="text/css" title="defaut" />
-		<script type="text/javascript" src="https://raw.github.com/matco/webchat/master/extension.js"></script>
-		<script type="text/javascript" src="https://raw.github.com/matco/webchat/master/browser_extension.js"></script>
+		<script type="text/javascript" src="extension.js"></script>
+		<script type="text/javascript" src="browser_extension.js"></script>
+		<script type="text/javascript" src="ui.js"></script>
 		<script type="text/javascript" src="index.js"></script>
 	</head>
 	<body>
+		<div id="modal_overlay"></div>
+
 		<div id="notification"></div>
-		<form id="initialization" method="post" action="#" class="window">
+		<form id="initialization" method="post" action="#" class="modal">
 			<h2>Initialization</h2>
 			<p id="initialization_error" class="error"></p>
 			<p>
@@ -29,7 +32,7 @@
 				<button>Validate</button>
 			</menu>
 		</form>
-		<form id="authentication" method="post" action="#" class="window">
+		<form id="authentication" method="post" action="#" class="modal">
 			<h2>Authentication</h2>
 			<p id="authentication_error" class="error"></p>
 			<p>
@@ -168,7 +171,7 @@
 					</thead>
 					<tbody id="states"></tbody>
 				</table>
-				<div id="status_details" class="window">
+				<div id="status_details" class="modal">
 					<h2>Details for <a id="status_details_link" href="#"></a></h2>
 					<p>
 						Last checked <span id="status_details_age"></span>.
