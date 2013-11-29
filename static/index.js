@@ -207,7 +207,8 @@ window.addEventListener(
 				var initialization_error = document.getElementById('initialization_error');
 				initialization_error.textContent = '';
 				if(this['password_1'].value !== this['password_2'].value) {
-					initialization_error.textContent = 'Passwords don\t match';
+					initialization_error.textContent = 'Passwords don\'t match';
+					return;
 				}
 				var xhr = new XMLHttpRequest();
 				xhr.addEventListener(
