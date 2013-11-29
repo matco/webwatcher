@@ -506,7 +506,7 @@ window.addEventListener(
 			function(event) {
 				if(event.target.status === 403) {
 					location.hash = '#';
-					UI.OpenModal(document.getElementById('initialization'));
+					UI.OpenModal(document.getElementById('initialization'), true);
 				}
 				else {
 					document.getElementById('content').style.display = 'block';
