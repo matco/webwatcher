@@ -289,7 +289,7 @@ class REST(CustomRequestHandler):
 		objects = self.db_model.all().fetch(limit=None, read_policy=db.STRONG_CONSISTENCY)
 		self.response.write(json.dumps(objects, cls=JSONCustomEncoder))
 
-	def post(self):
+	def put(self):
 		parameters = json.loads(self.request.POST.get("object").decode("utf8"))
 		key = parameters[self.db_model.key_property]
 
@@ -318,12 +318,12 @@ class REST(CustomRequestHandler):
 class WebsiteResource(REST):
 	db_model = Website
 	db_model_name = "Website"
-	require_authentication = {"GET" : False, "POST" : True, "DELETE" : True}
+	require_authentication = {"GET" : False, "PUT" : True, "DELETE" : True}
 
 class SubscriberResource(REST):
 	db_model = Subscriber
 	db_model_name = "Subscriber"
-	require_authentication = {"GET" : True, "POST" : True, "DELETE" : True}
+	require_authentication = {"GET" : True, "PUT" : True, "DELETE" : True}
 
 webapp_config = {}
 webapp_config["webapp2_extras.sessions"] = {"secret_key" : "webwatcher?!"}

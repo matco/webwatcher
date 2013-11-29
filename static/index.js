@@ -33,7 +33,7 @@ function restify(url) {
 					}
 				}
 			);
-			xhr.open('POST', url, true);
+			xhr.open('PUT', url, true);
 			xhr.send(form_data);
 		},
 
