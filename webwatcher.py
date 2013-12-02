@@ -81,7 +81,7 @@ def check(website):
 				html = response.content.decode("utf8")
 				#for text in website.texts:
 				if not website.texts in html:
-					error = "Text '{0}' is not present".format(texts)
+					error = "Text '{0}' is not present".format(website.texts)
 			else:
 				error = "Response status is {0}".format(response.status_code)
 		except Exception as e:
