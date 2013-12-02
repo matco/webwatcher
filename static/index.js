@@ -292,8 +292,8 @@ window.addEventListener(
 			var state_ui = document.createFullElement('tr', {'data-key' : state.name, 'class' : state.online === null ? 'na' : state.online ? 'ok' : 'nok'});
 			state_ui.appendChild(document.createFullElement('td', {}, state.name));
 			state_ui.appendChild(document.createFullElement('td', {}, state.update ? new Date(state.update).toFullDisplay() : 'NA'));
-			state_ui.appendChild(document.createFullElement('td', {}, state.downtime));
-			state_ui.appendChild(document.createFullElement('td', {}, state.uptime));
+			state_ui.appendChild(document.createFullElement('td', {}, Date.getDurationLiteral(state.downtime)));
+			state_ui.appendChild(document.createFullElement('td', {}, Date.getDurationLiteral(state.uptime)));
 			var online;
 			if(state.uptime || state.downtime) {
 				online = state.uptime / (state.downtime + state.uptime) * 100;
@@ -357,7 +357,7 @@ window.addEventListener(
 			downtime_ui.appendChild(document.createFullElement('td', {}, start.toFullDisplay()));
 			downtime_ui.appendChild(document.createFullElement('td', {}, stop ? stop.toFullDisplay() : ''));
 			downtime_ui.appendChild(document.createFullElement('td', {style : 'text-align: right;'}, stop ? Math.round((stop.getTime() - start.getTime()) / 1000) : ''));
-			downtime_ui.appendChild(document.createFullElement('td', {title : downtime.rationale, style : 'width: 320px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;'}, downtime.rationale));
+			downtime_ui.appendChild(document.createFullElement('td', {title : downtime.rationale, style : 'width: 320px;'}, downtime.rationale));
 			return downtime_ui;
 		}
 

@@ -78,6 +78,7 @@ button:hover {
 	color: #ddd;
 }
 table {
+	table-layout: fixed;
 	background-color: #fff;
 	border-collapse: collapse;
 }
@@ -86,6 +87,9 @@ table tr:nth-child(even) {
 }
 table td, table th {
 	border: 1px solid #ccc;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 form {
 	margin: 0;

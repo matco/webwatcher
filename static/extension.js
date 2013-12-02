@@ -375,6 +375,37 @@ Date.parseToFullDisplay = function(date) {
 	var parts = date.match(/(\d+)/g);
 	return new Date(parts[2], parts[1] - 1, parts[0], parts[3], parts[4], parts[5]);
 };
+Date.getDurationLiteral = function(duration) {
+	var d, result = '';
+	//write seconds
+	d = duration % 60;
+	if(d) {
+		result = d + ' seconds';
+	}
+	duration = Math.floor(duration / 60);
+	if(duration < 1) {
+		return result;
+	}
+	//write minutes
+	d = duration % 60;
+	if(d) {
+		result = d + ' minutes' + (result ? ' ' + result : '');
+	}
+	duration = Math.floor(duration / 60);
+	if(duration < 1) {
+		return result;
+	}
+	//write hours
+	d = duration % 24;
+	if(d) {
+		result = d + ' hours' + (result ? ' ' + result : '');
+	}
+	duration = Math.floor(duration / 24);
+	if(duration < 1) {
+		return result;
+	}
+	return duration + ' days' + (result ? ' ' + result : '');
+};
 
 //prototypes
 Date.prototype.toDisplay = function() {
