@@ -50,7 +50,7 @@ class JSONCustomEncoder(json.JSONEncoder):
 		if object.__class__.__name__ == "Subscriber":
 			return {"email" : object.email}
 		if object.__class__.__name__ == "Website":
-			return {"name" : object.name, "url" : object.url, "online" : object.online, "update" : object.update, "uptime" : object.uptime, "downtime" : object.downtime}
+			return {"name" : object.name, "url" : object.url, "texts" : object.texts, "online" : object.online, "update" : object.update, "uptime" : object.uptime, "downtime" : object.downtime}
 		if object.__class__.__name__ == "Downtime":
 			return {"rationale" : object.rationale, "start" : object.start, "stop" : object.stop}
 		if object.__class__.__name__ == "datetime":

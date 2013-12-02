@@ -168,6 +168,7 @@ window.addEventListener(
 			var website_ui = document.createFullElement('tr', {'data-key' : website.name});
 			website_ui.appendChild(document.createFullElement('td', {}, website.name));
 			website_ui.appendChild(document.createFullElement('td', {}, website.url));
+			website_ui.appendChild(document.createFullElement('td', {}, website.texts));
 			var website_actions = document.createFullElement('td');
 			website_actions.appendChild(document.createFullElement(
 				'a',
