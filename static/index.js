@@ -317,9 +317,9 @@ window.addEventListener(
 		}
 
 		function update_states() {
-			var states = document.getElementById('states');
-			states.clear();
 			Websites.list(function(websites) {
+				var states = document.getElementById('states');
+				states.clear();
 				websites.map(draw_state).forEach(Node.prototype.appendChild, states);
 			});
 		}
