@@ -357,7 +357,14 @@ window.addEventListener(
 			var stop = downtime.stop ? new Date(downtime.stop) : undefined;
 			downtime_ui.appendChild(document.createFullElement('td', {}, start.toFullDisplay()));
 			downtime_ui.appendChild(document.createFullElement('td', {}, stop ? stop.toFullDisplay() : ''));
-			downtime_ui.appendChild(document.createFullElement('td', {style : 'text-align: right;'}, stop ? Math.round((stop.getTime() - start.getTime()) / 1000) : ''));
+			var duration;
+			if(stop) {
+				duration = Date.getDurationLiteral(Math.round((stop.getTime() - start.getTime()) / 1000));
+			}
+			else {
+				duration = '';
+			}
+			downtime_ui.appendChild(document.createFullElement('td', {style : 'text-align: right;'}, duration));
 			downtime_ui.appendChild(document.createFullElement('td', {title : downtime.rationale, style : 'width: 320px;'}, downtime.rationale));
 			return downtime_ui;
 		}

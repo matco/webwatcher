@@ -90,6 +90,7 @@ table td, table th {
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
+	padding: 2px;
 }
 form {
 	margin: 0;
@@ -244,9 +245,9 @@ input[type="number"] {
 }
 
 #status_details {
-	width: 800px;
+	width: 900px;
 	height: 380px;
-	left: calc(50% - 400px);
+	left: calc(50% - 450px);
 	top: 15%;
 }
 

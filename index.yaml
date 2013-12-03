@@ -13,5 +13,11 @@ indexes:
 - kind: Downtime
   properties:
   - name: website
+  - name: start
+    direction: desc
+
+- kind: Downtime
+  properties:
+  - name: website
   - name: stop
     direction: desc

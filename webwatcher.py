@@ -265,7 +265,7 @@ class Details(CustomRequestHandler):
 			response["update"] = website.update
 			response["downtime"] = website.downtime
 			response["uptime"] = website.uptime
-			response["downtimes"] = Downtime.gql("WHERE website = :1 ORDER BY stop DESC", website.name).fetch(10)
+			response["downtimes"] = Downtime.gql("WHERE website = :1 ORDER BY start DESC", website.name).fetch(10)
 			self.response.write(json.dumps(response, cls=JSONCustomEncoder))
 		else:
 			self.error(404)
