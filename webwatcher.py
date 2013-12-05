@@ -58,11 +58,11 @@ class JSONCustomEncoder(json.JSONEncoder):
 		return json.JSONEncoder.default(self, object)
 
 #warn about the problem
-def warn(website, error):
+def warn(subject, message):
 	#send e-mails
 	sender_email = Setting.get_by_key_name("sender_email").value
 	for subscriber in Subscriber.all():
-		mail.send_mail(sender_email, subscriber.email, 'Problem with ' + website.name, error)
+		mail.send_mail(sender_email, subscriber.email, subject, message)
 
 #website checker
 def check(website):
@@ -97,24 +97,30 @@ def check(website):
 		#if website was aready online at previous check, increase uptime
 		if website.online:
 			website.uptime += int((now - previous_update).total_seconds())
-		#if website was previously offline, update last downtime and increase downtime (pessimistic vision, website has returned online between 2 check)
+		#if website was previously offline
 		elif website.online is False:
+			#update last downtime
 			downtime = Downtime.gql("WHERE website = :1 AND stop = NULL", website.name).get()
 			downtime.stop = now
 			db.put(downtime)
+			#increase website downtime (pessimistic vision, website has returned online between 2 check)
 			website.downtime += int((now - previous_update).total_seconds())
+			#warn subscribers
+			message = website.name + " is back online"
+			warn(message, message)
 		website.online = True
 		website.put()
 		#return message to be displayed
 		return "{0} is fine".format(website.name);
 	#website is offline
 	else:
-		#if website was online at previous check, warn subscribers and create a new downtime
+		#if website was online at previous check
 		if website.online is None or website.online:
-			#warn subscribers only the first time website is detected as offline
-			warn(website, error)
+			#create a new downtime
 			downtime = Downtime(website=website.name, rationale=error)
 			downtime.put()
+			#warn subscribers only the first time website is detected as offline
+			warn(website.name + " is offline", error)
 		#increase downtime anyway (pessimistic vision)
 		website.downtime += int((now - previous_update).total_seconds())
 		website.online = False
