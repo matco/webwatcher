@@ -193,6 +193,7 @@ input[type="number"] {
 #content {
 	padding-top: 30px;
 }
+
 #config > aside {
 	position: fixed;
 	height: 100%;
@@ -243,11 +244,9 @@ input[type="number"] {
 #status .nok {
 	background-color: #F2DEDE;
 }
-
 #status_details {
 	width: 900px;
 	height: 380px;
 	left: calc(50% - 450px);
 	top: 15%;
 }
-
