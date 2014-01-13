@@ -5,6 +5,8 @@ import urllib2
 import webapp2
 import logging
 import hashlib
+import string
+import random
 from webapp2_extras import sessions
 from google.appengine.api import urlfetch
 from google.appengine.api import mail
@@ -330,8 +332,9 @@ class SubscriberResource(REST):
 	db_model_name = "Subscriber"
 	require_authentication = {"GET" : True, "PUT" : True, "DELETE" : True}
 
+secret_key = "".join(random.choice(string.ascii_letters + string.ascii_lowercase + string.punctuation) for x in range(20))
 webapp_config = {}
-webapp_config["webapp2_extras.sessions"] = {"secret_key" : "webwatcher?!"}
+webapp_config["webapp2_extras.sessions"] = {"secret_key" : secret_key}
 
 application = webapp2.WSGIApplication([
 	("/api/status", Status),
