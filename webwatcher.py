@@ -9,13 +9,12 @@ from webapp2_extras import sessions
 from google.appengine.api import urlfetch
 from google.appengine.api import mail
 from google.appengine.ext import db
-from google.appengine.ext.webapp import template
 
 class NamedModel(db.Model):
 	def __init__(self, *args, **kwargs):
 		#add key name only when object is fresh
 		if not "key" in kwargs and not "key_name" in kwargs:
-			kwargs['key_name'] = kwargs[self.key_property]
+			kwargs["key_name"] = kwargs[self.key_property]
 		super(NamedModel, self).__init__(*args, **kwargs)
 
 class Setting(NamedModel):
@@ -75,7 +74,7 @@ def check(website):
 		if avoid_cache is not None and avoid_cache.value == "True":
 			url += "&" if "?" in url else "?"
 			url += str(time.time())
-		response = urlfetch.fetch(url, headers={'Cache-Control' : 'max-age=60'}, deadline=int(Setting.get_by_key_name("website_timeout").value), validate_certificate=False)
+		response = urlfetch.fetch(url, headers={"Cache-Control" : "max-age=60"}, deadline=int(Setting.get_by_key_name("website_timeout").value), validate_certificate=False)
 		try:
 			if response.status_code == 200:
 				html = response.content.decode("utf8")
@@ -136,7 +135,7 @@ class CustomRequestHandler(webapp2.RequestHandler):
 	def __init__(self, request, response):
 		self.initialize(request, response)
 		#set json header for all responses
-		self.response.headers['Content-Type'] = "application/json"
+		self.response.headers["Content-Type"] = "application/json"
 
 	def dispatch(self, *args, **kwargs):
 		session_store = sessions.get_store(request=self.request)
@@ -249,7 +248,7 @@ class Configuration(CustomRequestHandler):
 class Check(webapp2.RequestHandler):
 
 	def get(self, name=None):
-		self.response.headers['Content-Type'] = "application/json"
+		self.response.headers["Content-Type"] = "application/json"
 		response = {}
 		if name is None:
 			websites = Website.all()
@@ -262,7 +261,7 @@ class Check(webapp2.RequestHandler):
 class Details(CustomRequestHandler):
 
 	def get(self, name):
-		self.response.headers['Content-Type'] = "application/json"
+		self.response.headers["Content-Type"] = "application/json"
 		response = {}
 		website = Website.get_by_key_name(name)
 		if website is not None:
@@ -283,7 +282,7 @@ class REST(CustomRequestHandler):
 		session_store = sessions.get_store(request=self.request)
 		self.session = session_store.get_session()
 		try:
-			if not self.require_authentication[self.request.method] or 'authenticated' in self.session:
+			if not self.require_authentication[self.request.method] or "authenticated" in self.session:
 				webapp2.RequestHandler.dispatch(self, *args, **kwargs)
 			else:
 				self.error(401)
@@ -335,15 +334,15 @@ webapp_config = {}
 webapp_config["webapp2_extras.sessions"] = {"secret_key" : "webwatcher?!"}
 
 application = webapp2.WSGIApplication([
-	('/api/status', Status),
-	('/api/authenticate', Authenticate),
-	('/api/configuration', Configuration),
-	('/api/configuration/(.*)', Configuration),
-	('/api/check', Check),
-	('/api/check/(.*)', Check),
-	('/api/details/(.*)', Details),
-	('/api/website', WebsiteResource),
-	('/api/website/(.+)', WebsiteResource),
-	('/api/subscriber', SubscriberResource),
-	('/api/subscriber/(.+)', SubscriberResource),
+	("/api/status", Status),
+	("/api/authenticate", Authenticate),
+	("/api/configuration", Configuration),
+	("/api/configuration/(.*)", Configuration),
+	("/api/check", Check),
+	("/api/check/(.*)", Check),
+	("/api/details/(.*)", Details),
+	("/api/website", WebsiteResource),
+	("/api/website/(.+)", WebsiteResource),
+	("/api/subscriber", SubscriberResource),
+	("/api/subscriber/(.+)", SubscriberResource),
 ], debug=True, config=webapp_config)
