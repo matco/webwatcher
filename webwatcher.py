@@ -76,7 +76,13 @@ def check(website):
 		url += "&" if "?" in url else "?"
 		url += str(time.time())
 	try:
-		response = urlfetch.fetch(url=url, headers={"Cache-Control" : "max-age=60"}, deadline=int(Setting.get_by_key_name("website_timeout").value), validate_certificate=False)
+		response = urlfetch.fetch(
+			url=url,
+			headers={"Cache-Control" : "max-age=60"},
+			deadline=int(Setting.get_by_key_name("website_timeout").value),
+			validate_certificate=False,
+			follow_redirects=True
+		)
 		try:
 			if response.status_code == 200:
 				html = response.content.decode("utf8")
@@ -87,8 +93,12 @@ def check(website):
 				error = "Response status is {0}".format(response.status_code)
 		except Exception as e:
 			error = "Unable to read website response: {0}".format(e)
+	except urlfetch.DownloadError as e:
+		error = "Unable to retrieve website data: {0}".format(e)
+	except urlfetch.DeadlineExceededError as e:
+		error = "Deadline exceeded while trying to reach website: {0}".format(e)
 	except Exception as e:
-		error = "Unable to reach website: {0}".format(e)
+		error = "Unable to reach website for unknown reason: {0}".format(e)
 	#update website last update
 	now = datetime.datetime.now()
 	previous_update = website.update or now
