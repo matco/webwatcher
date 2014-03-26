@@ -68,15 +68,15 @@ def warn(subject, message):
 #website checker
 def check(website):
 	#TODO improve this by retrieving all settings
+	error = None
+	url = website.url
+	#add timestamp to url to avoid cache if asked
+	avoid_cache = Setting.get_by_key_name("avoid_cache")
+	if avoid_cache is not None and avoid_cache.value == "True":
+		url += "&" if "?" in url else "?"
+		url += str(time.time())
 	try:
-		error = None
-		url = website.url
-		#add timestamp to url to avoid cache if asked
-		avoid_cache = Setting.get_by_key_name("avoid_cache")
-		if avoid_cache is not None and avoid_cache.value == "True":
-			url += "&" if "?" in url else "?"
-			url += str(time.time())
-		response = urlfetch.fetch(url, headers={"Cache-Control" : "max-age=60"}, deadline=int(Setting.get_by_key_name("website_timeout").value), validate_certificate=False)
+		response = urlfetch.fetch(url=url, headers={"Cache-Control" : "max-age=60"}, deadline=int(Setting.get_by_key_name("website_timeout").value), validate_certificate=False)
 		try:
 			if response.status_code == 200:
 				html = response.content.decode("utf8")
@@ -86,9 +86,9 @@ def check(website):
 			else:
 				error = "Response status is {0}".format(response.status_code)
 		except Exception as e:
-			error = "Unable to read website response : {0}".format(e)
+			error = "Unable to read website response: {0}".format(e)
 	except Exception as e:
-		error = "Unable to reach website : {0}".format(e)
+		error = "Unable to reach website: {0}".format(e)
 	#update website last update
 	now = datetime.datetime.now()
 	previous_update = website.update or now
