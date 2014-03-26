@@ -125,6 +125,9 @@ input[type="number"] {
 	width: 40px;
 	text-align: right;
 }
+input[type="checkbox"] {
+	margin-top: 5px;
+}
 
 #notification {
 	position: fixed;
