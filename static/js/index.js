@@ -23,13 +23,18 @@ function restify(url) {
 			xhr.addEventListener(
 				'load',
 				function(event) {
-					if(event.target.status === 400) {
-						UI.Notify(JSON.parse(event.target.responseText).message);
-					}
-					else {
+					if(event.target.status === 200) {
 						if(callback) {
 							callback();
 						}
+					}
+					else if(event.target.status === 400) {
+						UI.Notify(JSON.parse(event.target.responseText).message);
+					}
+					//unauthorized
+					else if(event.target.status === 401) {
+						UI.Notify(JSON.parse(event.target.responseText).message);
+						//TODO show login window
 					}
 				}
 			);
