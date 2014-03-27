@@ -9,6 +9,11 @@ Node.prototype.clear = function() {
 	//allow chain
 	return this;
 };
+Node.prototype.appendChilds = function(childs) {
+	childs.forEach(Node.prototype.appendChild, this);
+	//allow chain
+	return this;
+};
 /*Node.prototype.up = function(tag) {
 	if(this.parentNode.nodeName.toLowerCase() === tag.toLowerCase()) {
 		return this.parentNode;
@@ -79,6 +84,15 @@ HTMLElement.prototype.getPosition = function() {
 		return {left : parent_position.left + position.left, top : parent_position.top + position.top};
 	}
 	return position;
+};
+
+//HTMLFormElement
+HTMLFormElement.prototype.disable = function() {
+	this.elements.forEach(HTMLElement.prototype.setAttribute.callbackize('disabled', 'disabled'));
+};
+
+HTMLFormElement.prototype.enable = function() {
+	this.elements.forEach(HTMLElement.prototype.removeAttribute.callbackize('disabled'));
 };
 
 //HTMLSelectElement
