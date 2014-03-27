@@ -12,6 +12,7 @@ function Grid(parameters) {
 	this.actions = [];
 	this.statusText = 'Display items ${start} - ${stop} of ${total}';
 	this.rowPerPage = 10;
+	this.rowClass;
 	this.enableSearch = true;
 	this.allowMissingData = false;
 	//events
@@ -38,11 +39,11 @@ function Grid(parameters) {
 	//check columns
 	for(var i = 0; i < this.columns.length; i++) {
 		var column = this.columns[i];
-		if(!column.data && !column.render || !column.label || !column.type) {
-			throw new Error('Column ' + i + ' is incomplete (must have data or render, label and type)');
+		if(!column.data && !column.render || !column.label) {
+			throw new Error('Column ' + i + ' is incomplete (must have data or render, and label)');
 		}
-		if(!column.data && !column.unsortable) {
-			throw new Error('Column ' + column.label + ' must have data to be sortable or be set as unsortable');
+		if(!column.unsortable && (!column.data || !column.type)) {
+			throw new Error('Column ' + column.label + ' must have data or type to be sortable or be set as unsortable');
 		}
 	}
 
@@ -488,7 +489,7 @@ Grid.prototype.draw = function() {
 			for(i = 0; i < data.length; i++) {
 				rendered_data[i] = [];
 				var original_record = data[i];
-				//store original record
+				//store original record //TODO find an other way to store it as this prevent having a column linked to data name "record"
 				rendered_data[i].record = original_record;
 				for(j = 0; j < that.columns.length; j++) {
 					column = that.columns[j];
@@ -516,7 +517,13 @@ Grid.prototype.draw = function() {
 			}
 			//insert in table
 			for(var i = 0; i < rendered_data.length; i++) {
-				var line = document.createFullElement('tr', {'class' : i % 2 === 0 ? 'even' : 'odd'});
+				var line = document.createElement('tr');
+				if(that.rowClass) {
+					line.classList.add(that.rowClass.call(undefined, rendered_data[i].record))
+				}
+				else {
+					line.classList.add(i % 2 === 0 ? 'even' : 'odd');
+				}
 				for(var j = 0; j < that.columns.length; j++) {
 					var column = that.columns[j];
 					var value = column.render ? rendered_data[i][j].rendered : rendered_data[i][j].raw;
