@@ -112,6 +112,12 @@ if(!Function.isFunction) {
 }
 
 //prototypes
+Function.prototype.negatize = function() {
+	var original = this;
+	return function() {
+		return !!!original.apply(null, arguments);
+	};
+};
 Function.prototype.callbackize = function() {
 	var original = this;
 	var args = arguments;
