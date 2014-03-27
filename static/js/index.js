@@ -294,38 +294,51 @@ window.addEventListener(
 		);
 
 		//status
-		function draw_state(state) {
-			var state_ui = document.createFullElement('tr', {'data-key' : state.name, 'class' : state.online === null ? 'na' : state.online ? 'ok' : 'nok'});
-			state_ui.appendChild(document.createFullElement('td', {}, state.name));
-			state_ui.appendChild(document.createFullElement('td', {}, state.update ? new Date(state.update).toFullDisplay() : 'NA'));
-			state_ui.appendChild(document.createFullElement('td', {}, Date.getDurationLiteral(state.downtime)));
-			state_ui.appendChild(document.createFullElement('td', {}, Date.getDurationLiteral(state.uptime)));
-			var online;
-			if(state.uptime || state.downtime) {
-				online = state.uptime / (state.downtime + state.uptime) * 100;
-				online = Math.round(online * 10) / 10;
-				online += '%';
+		var states_columns = [
+			{label : 'Name', data: 'name', type : Grid.DataType.STRING, width : 120},
+			{label : 'Last check', data: 'update', type : Grid.DataType.DATE, width : 150, render : render_date},
+			{label : 'Downtime', data : 'downtime', type : Grid.DataType.NUMBER, width : 250, render : render_time},
+			{label : 'Uptime', data : 'uptime', type : Grid.DataType.NUMBER, width : 250, render : render_time},
+			{label : 'Availability', data : 'availability', type : Grid.DataType.NUMBER, width : 80, render : render_online},
+			{label : 'Actions', width : 100, unsortable : true, render : render_actions}
+		];
+
+		var states_grid = new Grid({
+			container : document.getElementById('states'),
+			columns : states_columns,
+			path : '/js/grid/',
+			rowPerPage : 10,
+			rowClass : function(record) {
+				return record.online === null ? 'na' : record.online ? 'ok' : 'nok';
 			}
-			else {
-				online = 'NA';
-			}
-			state_ui.appendChild(document.createFullElement('td', {}, online));
-			var state_actions = document.createFullElement('td');
-			state_actions.appendChild(document.createFullElement(
-				'a',
-				{href : '#', title : 'View details'},
-				'Details',
-				{click : detail_website_listener}
-			));
-			state_ui.appendChild(state_actions);
-			return state_ui;
+		});
+
+		function render_date(value) {
+			return value ? value.toFullDisplay() : 'NA';
+		}
+
+		function render_time(value) {
+			return Date.getDurationLiteral(value);
+		}
+
+		function render_online(value) {
+			return value ? value + '%' : 'NA';
+		}
+
+		function render_actions(value, record) {
+			return document.createFullElement('a', {href : '#', title : 'View details'}, 'Details', {click : function(event) {Event.stop(event); detail_website(record.name)}});
 		}
 
 		function update_states() {
 			Websites.list(function(websites) {
-				var states = document.getElementById('states');
-				states.clear();
-				websites.map(draw_state).forEach(Node.prototype.appendChild, states);
+				//calculate availability for each website
+				websites.forEach(function(website) {
+					if(website.uptime || website.downtime) {
+						var availability = website.uptime / (website.downtime + website.uptime) * 100;
+						website.availability = Math.round(availability * 10) / 10;
+					}
+				});
+				states_grid.render(new Grid.Datasource({data : websites}));
 			});
 		}
 
@@ -374,8 +387,7 @@ window.addEventListener(
 			return downtime_ui;
 		}
 
-		function detail_website_listener(event) {
-			Event.stop(event);
+		function detail_website(key) {
 			xhr.addEventListener(
 				'load',
 				function(event) {
@@ -424,7 +436,7 @@ window.addEventListener(
 					details.downtimes.map(draw_downtime).forEach(Node.prototype.appendChild, status_details_downtimes);
 				}
 			);
-			xhr.open('GET', '/api/details/' + this.parentNode.parentNode.dataset.key, true);
+			xhr.open('GET', '/api/details/' + key, true);
 			xhr.send(null);
 			UI.OpenModal(document.getElementById('status_details'));
 		}
