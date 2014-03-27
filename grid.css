@@ -52,14 +52,13 @@
 	font-size: 12px;
 	background-color: #ddd;
 	color: #555;
-	height: 26px;
+	height: 20px;
 	border: 1px solid #c0c0c0;
 	border-top: 0;
-	padding: 0 5px;
+	padding: 4px;
 	margin: 0;
 }
 .grid_footer_actions {
-	margin: 5px;
 	float: left;
 }
 .grid_footer_actions input {
@@ -68,6 +67,26 @@
 	border-radius: 3px;
 	background-color: #fff;
 	border: 1px solid #999;
+}
+.grid_footer_actions .button {
+	color: #484848;
+	font-size: 12px;
+	font-weight: bold;
+	font-family: Helvetica, Arial, sans-serif;
+	text-decoration: none;
+	background-color: #F7F7F7;
+	background-image: -moz-linear-gradient(top, #F7F7F7, #D1D1D1);
+	background-image: -webkit-linear-gradient(top, #F7F7F7, #D1D1D1);
+	border: 1px solid #7F7F7F;
+	border-radius: 2px;
+	box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+	padding: 1px 9px;
+	cursor: pointer;
+}
+.grid_footer_actions .button:hover {
+	background-color: #ddd;
+	background-image: -moz-linear-gradient(top, #ddd, #D1D1D1);
+	background-image: -webkit-linear-gradient(top, #ddd, #D1D1D1);
 }
 .grid_footer_actions img {
 	vertical-align: middle;
@@ -83,7 +102,6 @@
 	border-radius: 2px;
 	box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 	float: right;
-	margin: 3px;
 }
 .grid_footer_controls a {
 	float: left;
@@ -112,6 +130,6 @@
 	border: 0;
 }
 .grid_footer_info {
-	margin: 5px;
+	margin-top: 2px;
 	float: right;
 }
