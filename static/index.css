@@ -248,8 +248,8 @@ input[type="checkbox"] {
 	background-color: #F2DEDE;
 }
 #status_details {
-	width: 900px;
+	width: 1000px;
 	height: 380px;
-	left: calc(50% - 450px);
+	left: calc(50% - 500px);
 	top: 15%;
 }

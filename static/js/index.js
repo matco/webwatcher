@@ -66,6 +66,11 @@ function restify(url) {
 window.addEventListener(
 	'load',
 	function() {
+		//helpers
+		function render_date(value) {
+			return value ? value.toFullDisplay() : 'NA';
+		}
+
 		//manage configuration
 		var configuration = document.getElementById('configuration');
 
@@ -313,10 +318,6 @@ window.addEventListener(
 			}
 		});
 
-		function render_date(value) {
-			return value ? value.toFullDisplay() : 'NA';
-		}
-
 		function render_time(value, record) {
 			return value ? Date.getDurationLiteral(value) : record.online ? '0' : 'NA';
 		}
@@ -340,6 +341,7 @@ window.addEventListener(
 					}
 					website.availability = availability;
 				});
+				//update states grid
 				states_grid.render(new Grid.Datasource({data : websites}));
 			});
 		}
@@ -371,22 +373,22 @@ window.addEventListener(
 			}
 		);
 
-		function draw_downtime(downtime) {
-			var downtime_ui = document.createFullElement('tr');
-			var start = new Date(downtime.start);
-			var stop = downtime.stop ? new Date(downtime.stop) : undefined;
-			downtime_ui.appendChild(document.createFullElement('td', {}, start.toFullDisplay()));
-			downtime_ui.appendChild(document.createFullElement('td', {}, stop ? stop.toFullDisplay() : ''));
-			var duration;
-			if(stop) {
-				duration = Date.getDurationLiteral(Math.round((stop.getTime() - start.getTime()) / 1000));
-			}
-			else {
-				duration = '';
-			}
-			downtime_ui.appendChild(document.createFullElement('td', {style : 'text-align: right;'}, duration));
-			downtime_ui.appendChild(document.createFullElement('td', {title : downtime.rationale, style : 'width: 320px;'}, downtime.rationale));
-			return downtime_ui;
+		var details_columns = [
+			{label : 'Start', data: 'start', type : Grid.DataType.DATE, width : 150, render : render_date},
+			{label : 'Stop', data: 'stop', type : Grid.DataType.DATE, width : 150, render : render_date},
+			{label : 'Duration', data: 'duration', type : Grid.DataType.NUMBER, width : 100, render : render_duration},
+			{label : 'Rationale', data : 'rationale', type : Grid.DataType.STRING}
+		];
+
+		var details_grid = new Grid({
+			container : document.getElementById('website_details'),
+			columns : details_columns,
+			path : '/js/grid/',
+			rowPerPage : 10
+		});
+
+		function render_duration(value) {
+			return value ? Date.getDurationLiteral(value) : 'NA';
 		}
 
 		function detail_website(key) {
@@ -432,10 +434,17 @@ window.addEventListener(
 							}
 						}
 					));
-					//update downtime
-					var status_details_downtimes = document.getElementById('status_details_downtimes');
-					status_details_downtimes.clear();
-					details.downtimes.map(draw_downtime).forEach(Node.prototype.appendChild, status_details_downtimes);
+					//calculate duration for each downtime
+					details.downtimes.forEach(function(downtime) {
+						var duration;
+						if(downtime.start && downtime.stop) {
+							//TODO improve this as grid do the same job
+							duration = Math.round((new Date(downtime.stop).getTime() - new Date(downtime.start).getTime()) / 1000);
+						}
+						downtime.duration = duration;
+					});
+					//update downtimes grid
+					details_grid.render(new Grid.Datasource({data : details.downtimes}));
 				}
 			);
 			xhr.open('GET', '/api/details/' + key, true);
