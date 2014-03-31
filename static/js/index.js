@@ -317,8 +317,8 @@ window.addEventListener(
 			return value ? value.toFullDisplay() : 'NA';
 		}
 
-		function render_time(value) {
-			return value ? Date.getDurationLiteral(value) : 'NA';
+		function render_time(value, record) {
+			return value ? Date.getDurationLiteral(value) : record.online ? '0' : 'NA';
 		}
 
 		function render_online(value) {
