@@ -380,7 +380,7 @@ Grid.prototype.render = function(datasource) {
 					column = that.columns[i];
 					if(column.data) {
 						for(j = 0; j < datasource.data.length; j++) {
-							if(datasource.data[j][that.columns[i].data] === undefined) {
+							if(!datasource.data[j].hasOwnProperty(that.columns[i].data)) {
 								throw new Error('Column ' + i + ' used data ' + that.columns[i].data + ' but this data does not exist in record ' + j);
 							}
 						}
