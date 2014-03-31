@@ -94,9 +94,9 @@ def check(website):
 		except Exception as e:
 			error = "Unable to read website response: {0}".format(e)
 	except urlfetch.DownloadError as e:
-		error = "Unable to retrieve website data: {0}".format(e)
+		error = "Unable to retrieve website data: {0}".format(e.message)
 	except urlfetch.DeadlineExceededError as e:
-		error = "Deadline exceeded while trying to reach website: {0}".format(e)
+		error = "Deadline exceeded while trying to reach website: {0}".format(e.message)
 	except Exception as e:
 		error = "Unable to reach website for unknown reason: {0}".format(e)
 	#update website last update
