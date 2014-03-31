@@ -318,7 +318,7 @@ window.addEventListener(
 		}
 
 		function render_time(value) {
-			return Date.getDurationLiteral(value);
+			return value ? Date.getDurationLiteral(value) : 'NA';
 		}
 
 		function render_online(value) {
@@ -333,10 +333,12 @@ window.addEventListener(
 			Websites.list(function(websites) {
 				//calculate availability for each website
 				websites.forEach(function(website) {
+					var availability;
 					if(website.uptime || website.downtime) {
-						var availability = website.uptime / (website.downtime + website.uptime) * 100;
-						website.availability = Math.round(availability * 10) / 10;
+						availability = website.uptime / (website.downtime + website.uptime) * 100;
+						availability = Math.round(availability * 10) / 10;
 					}
+					website.availability = availability;
 				});
 				states_grid.render(new Grid.Datasource({data : websites}));
 			});
