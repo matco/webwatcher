@@ -327,7 +327,7 @@ window.addEventListener(
 		}
 
 		function render_actions(value, record) {
-			return document.createFullElement('a', {href : '#', title : 'View details'}, 'Details', {click : function(event) {Event.stop(event); detail_website(record.name)}});
+			return document.createFullElement('a', {href : '#', title : 'View website details'}, 'Details', {click : function(event) {Event.stop(event); detail_website(record.name)}});
 		}
 
 		function update_states() {
