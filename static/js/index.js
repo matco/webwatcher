@@ -391,6 +391,17 @@ window.addEventListener(
 			return value ? Date.getDurationLiteral(value) : 'NA';
 		}
 
+		function update_website_details_age(date) {
+			var age;
+			if(date) {
+				age = 'Last checked ' + date.getAgeLiteral();
+			}
+			else {
+				age = 'Not cheked yet';
+			}
+			document.getElementById('website_details_age').textContent = age;
+		}
+
 		function detail_website(key) {
 			xhr.addEventListener(
 				'load',
@@ -401,20 +412,13 @@ window.addEventListener(
 					status_details_link.setAttribute('href', details.url);
 					status_details_link.textContent = details.name;
 					//update age
-					var status_details_age_check;
-					if(details.update) {
-						status_details_age_check = 'Last checked ' + new Date(details.update).getAgeLiteral();
-					}
-					else {
-						status_details_age_check = 'Not cheked yet';
-					}
-					document.getElementById('status_details_age').textContent = status_details_age_check;
+					update_website_details_age(details.update ? new Date(details.update) : undefined);
 					//update check link
 					var status_details_check = document.getElementById('status_details_check');
 					status_details_check.clear();
 					status_details_check.appendChild(document.createFullElement(
-						'a',
-						{href : '#'},
+						'button',
+						{},
 						'Check now',
 						{
 							click : function(event) {
@@ -424,7 +428,7 @@ window.addEventListener(
 									'load',
 									function(xhr_event) {
 										if(xhr_event.target.status === 200) {
-											document.getElementById('status_details_age').textContent = new Date().getAgeLiteral()
+											update_website_details_age(new Date());
 											UI.Notify('Website has been checked successfully');
 										}
 									}
