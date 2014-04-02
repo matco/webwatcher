@@ -248,7 +248,7 @@ input[type="checkbox"] {
 #status .nok {
 	background-color: #F2DEDE;
 }
-#status_details {
+#website_details {
 	width: 1000px;
 	height: 380px;
 	left: calc(50% - 500px);

@@ -366,10 +366,10 @@ window.addEventListener(
 		);
 
 		//status details
-		document.getElementById('status_details_close').addEventListener(
+		document.getElementById('website_details_close').addEventListener(
 			'click',
 			function() {
-				UI.CloseModal(document.getElementById('status_details'));
+				UI.CloseModal(document.getElementById('website_details'));
 			}
 		);
 
@@ -381,7 +381,7 @@ window.addEventListener(
 		];
 
 		var details_grid = new Grid({
-			container : document.getElementById('website_details'),
+			container : document.getElementById('website_details_downtimes'),
 			columns : details_columns,
 			path : '/js/grid/',
 			rowPerPage : 10
@@ -408,15 +408,15 @@ window.addEventListener(
 				function(event) {
 					var details = JSON.parse(event.target.responseText);
 					//update link
-					var status_details_link = document.getElementById('status_details_link');
-					status_details_link.setAttribute('href', details.url);
-					status_details_link.textContent = details.name;
+					var website_details_link = document.getElementById('website_details_link');
+					website_details_link.setAttribute('href', details.url);
+					website_details_link.textContent = details.name;
 					//update age
 					update_website_details_age(details.update ? new Date(details.update) : undefined);
 					//update check link
-					var status_details_check = document.getElementById('status_details_check');
-					status_details_check.clear();
-					status_details_check.appendChild(document.createFullElement(
+					var website_details_check = document.getElementById('website_details_check');
+					website_details_check.clear();
+					website_details_check.appendChild(document.createFullElement(
 						'button',
 						{},
 						'Check now',
@@ -453,7 +453,7 @@ window.addEventListener(
 			);
 			xhr.open('GET', '/api/details/' + key, true);
 			xhr.send(null);
-			UI.OpenModal(document.getElementById('status_details'));
+			UI.OpenModal(document.getElementById('website_details'));
 		}
 
 		UI.Tabify(document.querySelector('#config > aside > ul'));
