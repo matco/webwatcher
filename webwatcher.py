@@ -352,10 +352,10 @@ application = webapp2.WSGIApplication([
 	("/api/configuration", Configuration),
 	("/api/configuration/(.*)", Configuration),
 	("/api/check", Check),
-	("/api/check/(.*)", Check),
-	("/api/details/(.*)", Details),
+	("/api/check/([A-Za-z0-9]*)", Check),
+	("/api/details/([A-Za-z0-9]*)", Details),
 	("/api/website", WebsiteResource),
-	("/api/website/(.+)", WebsiteResource),
+	("/api/website/([A-Za-z0-9]+)", WebsiteResource),
 	("/api/subscriber", SubscriberResource),
 	("/api/subscriber/(.+)", SubscriberResource),
 ], debug=True, config=webapp_config)
