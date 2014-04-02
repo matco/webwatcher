@@ -397,7 +397,7 @@ window.addEventListener(
 				age = 'Last checked ' + date.getAgeLiteral();
 			}
 			else {
-				age = 'Not cheked yet';
+				age = 'Not checked yet';
 			}
 			document.getElementById('website_details_age').textContent = age;
 		}
