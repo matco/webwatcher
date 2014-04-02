@@ -376,7 +376,7 @@ window.addEventListener(
 		var details_columns = [
 			{label : 'Start', data: 'start', type : Grid.DataType.DATE, width : 150, render : render_date},
 			{label : 'Stop', data: 'stop', type : Grid.DataType.DATE, width : 150, render : render_date},
-			{label : 'Duration', data: 'duration', type : Grid.DataType.NUMBER, width : 100, render : render_duration},
+			{label : 'Duration', data: 'duration', type : Grid.DataType.NUMBER, width : 200, render : render_duration},
 			{label : 'Rationale', data : 'rationale', type : Grid.DataType.STRING}
 		];
 
