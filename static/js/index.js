@@ -312,7 +312,7 @@ window.addEventListener(
 			container : document.getElementById('states'),
 			columns : states_columns,
 			path : '/js/grid/',
-			rowPerPage : 10,
+			rowPerPage : undefined,
 			rowClass : function(record) {
 				return record.online === null ? 'na' : record.online ? 'ok' : 'nok';
 			}
