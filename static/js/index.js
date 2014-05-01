@@ -97,7 +97,7 @@ window.addEventListener(
 				xhr.addEventListener(
 					'load',
 					function(event) {
-						UI.Notify('Modifications save successfully');
+						UI.Notify('Modifications saved successfully');
 					}
 				);
 				var form_data = new FormData();
