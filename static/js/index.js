@@ -211,6 +211,27 @@ window.addEventListener(
 			}
 		);
 
+		document.getElementById('recalculate').addEventListener(
+			'click',
+			function(event) {
+				Event.stop(event);
+				var that = this;
+				this.setAttribute('disabled', 'disabled');
+				this.classList.add('loading');
+				var xhr = new XMLHttpRequest();
+				xhr.addEventListener(
+					'load',
+					function(xhr_event) {
+						that.removeAttribute('disabled');
+						that.classList.remove('loading');
+						UI.Notify(JSON.parse(xhr_event.target.responseText).message);
+					}
+				);
+				xhr.open('GET', '/api/recalculate', true);
+				xhr.send(null);
+			}
+		);
+
 		document.getElementById('initialization').addEventListener(
 			'submit',
 			function(event) {

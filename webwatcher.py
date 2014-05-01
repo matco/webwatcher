@@ -274,6 +274,31 @@ class Check(webapp2.RequestHandler):
 		#self.response.write(json.dumps(response))
 		self.response.write(json.dumps(websites, cls=JSONCustomEncoder))
 
+class Recalculate(CustomRequestHandler):
+
+	def get(self, name=None):
+		self.response.headers["Content-Type"] = "application/json"
+		if self.session["authenticated"]:
+			websites = {}
+			#retrieve all downtimes
+			for downtime in Downtime.all():
+				if downtime.stop is not None:
+					if downtime.website not in websites:
+						websites[downtime.website] = 0
+					websites[downtime.website] += int((downtime.stop - downtime.start).total_seconds())
+			#update all websites
+			for website in Website.all():
+				if website.name in websites:
+					website.downtime = websites[website.name]
+				else:
+					website.downtime = 0
+				website.put()
+
+			self.response.write(json.dumps({"message" : "Websites updated successfully"}))
+		else:
+			self.error(401)
+			self.response.write(json.dumps({"message" : "You must be authenticated to perform this action"}))
+
 class Details(CustomRequestHandler):
 
 	def get(self, name):
@@ -356,6 +381,7 @@ application = webapp2.WSGIApplication([
 	("/api/authenticate", Authenticate),
 	("/api/configuration", Configuration),
 	("/api/configuration/(.*)", Configuration),
+	("/api/recalculate", Recalculate),
 	("/api/check", Check),
 	("/api/check/([A-Za-z0-9]*)", Check),
 	("/api/details/([A-Za-z0-9]*)", Details),
