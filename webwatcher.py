@@ -262,12 +262,15 @@ class Check(webapp2.RequestHandler):
 	def get(self, name=None):
 		self.response.headers["Content-Type"] = "application/json"
 		response = {}
+		#retrieve websites
 		if name is None:
 			websites = Website.all()
 		else:
 			websites = [Website.get_by_key_name(name)]
+		#check retrieved websites
 		for website in websites:
 			response[website.name] = check(website)
+		#self.response.write(json.dumps(response))
 		self.response.write(json.dumps(response))
 
 class Details(CustomRequestHandler):
