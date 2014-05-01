@@ -431,13 +431,21 @@ window.addEventListener(
 						{
 							click : function(event) {
 								Event.stop(event);
+								var that = this;
+								this.setAttribute('disabled', 'disabled');
+								this.classList.add('loading');
 								var xhr = new XMLHttpRequest();
 								xhr.addEventListener(
 									'load',
 									function(xhr_event) {
+										that.removeAttribute('disabled');
+										that.classList.remove('loading');
 										if(xhr_event.target.status === 200) {
 											update_website_details_age(new Date());
 											UI.Notify('Website has been checked successfully');
+										}
+										else {
+											UI.Notify('Unable to check website');
 										}
 									}
 								);
