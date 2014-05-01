@@ -265,14 +265,14 @@ class Check(webapp2.RequestHandler):
 		response = {}
 		#retrieve websites
 		if name is None:
-			websites = Website.all()
+			websites = Website.all().fetch(limit=None, read_policy=db.STRONG_CONSISTENCY)
 		else:
 			websites = [Website.get_by_key_name(name)]
 		#check retrieved websites
 		for website in websites:
 			response[website.name] = check(website)
 		#self.response.write(json.dumps(response))
-		self.response.write(json.dumps(response))
+		self.response.write(json.dumps(websites, cls=JSONCustomEncoder))
 
 class Details(CustomRequestHandler):
 

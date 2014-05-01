@@ -330,20 +330,22 @@ window.addEventListener(
 			return document.createFullElement('a', {href : '#', title : 'View website details'}, 'Details', {click : function(event) {Event.stop(event); detail_website(record.name)}});
 		}
 
-		function update_states() {
-			Websites.list(function(websites) {
-				//calculate availability for each website
-				websites.forEach(function(website) {
-					var availability;
-					if(website.uptime || website.downtime) {
-						availability = website.uptime / (website.downtime + website.uptime) * 100;
-						availability = Math.round(availability * 10) / 10;
-					}
-					website.availability = availability;
-				});
-				//update states grid
-				states_grid.render(new Grid.Datasource({data : websites}));
+		function update_websites() {
+			Websites.list(draw_websites);
+		}
+
+		function draw_websites(websites) {
+			//calculate availability for each website
+			websites.forEach(function(website) {
+				var availability;
+				if(website.uptime || website.downtime) {
+					availability = website.uptime / (website.downtime + website.uptime) * 100;
+					availability = Math.round(availability * 10) / 10;
+				}
+				website.availability = availability;
 			});
+			//update states grid
+			states_grid.render(new Grid.Datasource({data : websites}));
 		}
 
 		document.getElementById('status_check_now').addEventListener(
@@ -360,7 +362,7 @@ window.addEventListener(
 						that.removeAttribute('disabled');
 						that.classList.remove('loading');
 						if(xhr_event.target.status === 200) {
-							update_states();
+							draw_websites(JSON.parse(xhr_event.target.responseText));
 							UI.Notify('Websites have been checked successfully');
 						}
 						else {
@@ -524,9 +526,9 @@ window.addEventListener(
 				else {
 					unselect_all();
 					//update page
-					update_states();
+					update_websites();
 					//refresh page automatically
-					refresh_status_page_inverval = setInterval(update_states, 10000);
+					refresh_status_page_inverval = setInterval(update_websites, 10000);
 					//display page
 					status_link.classList.add('selected');
 					status.style.display = 'block';
