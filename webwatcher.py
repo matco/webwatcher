@@ -112,8 +112,9 @@ def check(website):
 		elif website.online is False:
 			#update last downtime
 			downtime = Downtime.gql("WHERE website = :1 AND stop = NULL", website.name).get()
+			#downtime = Downtime.all().filter("website=", website.name).filter("stop =", None).get()
 			downtime.stop = now
-			db.put(downtime)
+			downtime.put()
 			#increase website downtime (pessimistic vision, website has returned online between 2 check)
 			website.downtime += int((now - previous_update).total_seconds())
 			#warn subscribers
@@ -128,7 +129,7 @@ def check(website):
 		#if website was online at previous check
 		if website.online is None or website.online:
 			#create a new downtime
-			downtime = Downtime(website=website.name, rationale=error)
+			downtime = Downtime(parent=website, website=website.name, rationale=error)
 			downtime.put()
 			#warn subscribers only the first time website is detected as offline
 			warn(website.name + " is offline", error)
@@ -286,6 +287,7 @@ class Details(CustomRequestHandler):
 			response["downtime"] = website.downtime
 			response["uptime"] = website.uptime
 			response["downtimes"] = Downtime.gql("WHERE website = :1 ORDER BY start DESC", website.name).fetch(10)
+			#response["downtimes"] = Downtime.all().filter("website=", website.name).order("-start").fetch(50)
 			self.response.write(json.dumps(response, cls=JSONCustomEncoder))
 		else:
 			self.error(404)
