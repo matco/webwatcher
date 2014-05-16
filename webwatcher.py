@@ -367,6 +367,15 @@ class WebsiteResource(REST):
 	db_model_name = "Website"
 	require_authentication = {"GET" : False, "PUT" : True, "DELETE" : True}
 
+	def delete(self, key):
+		object = self.db_model.get_by_key_name(key)
+		#delete associated downtimes
+		if object is not None:
+			downtimes = Downtime.gql("WHERE website = :1 ORDER BY start DESC", object.name).fetch(limit=None, read_policy=db.STRONG_CONSISTENCY)
+			for downtime in downtimes:
+				downtime.delete()
+		super(WebsiteResource, self).delete(key)
+
 class SubscriberResource(REST):
 	db_model = Subscriber
 	db_model_name = "Subscriber"
