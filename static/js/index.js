@@ -351,7 +351,7 @@ window.addEventListener(
 			return document.createFullElement('a', {href : '#', title : 'View website details'}, 'Details', {click : function(event) {Event.stop(event); detail_website(record.name)}});
 		}
 
-		function update_websites() {
+		function update_states() {
 			Websites.list(draw_websites);
 		}
 
@@ -547,9 +547,9 @@ window.addEventListener(
 				else {
 					unselect_all();
 					//update page
-					update_websites();
+					update_states();
 					//refresh page automatically
-					refresh_status_page_inverval = setInterval(update_websites, 10000);
+					refresh_status_page_inverval = setInterval(update_states, 10000);
 					//display page
 					status_link.classList.add('selected');
 					status.style.display = 'block';
