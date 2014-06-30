@@ -150,6 +150,7 @@ def hash_password(password):
 
 #appengine needs webpages
 class CustomRequestHandler(webapp2.RequestHandler):
+
 	def __init__(self, request, response):
 		self.initialize(request, response)
 		#set json header for all responses
@@ -164,6 +165,7 @@ class CustomRequestHandler(webapp2.RequestHandler):
 			session_store.save_sessions(self.response)
 
 class AuthenticatedRequestHandler(CustomRequestHandler):
+
 	def dispatch(self, *args, **kwargs):
 		session_store = sessions.get_store(request=self.request)
 		self.session = session_store.get_session()
@@ -276,7 +278,6 @@ class Configuration(CustomRequestHandler):
 class Check(webapp2.RequestHandler):
 
 	def get(self, name=None):
-		self.response.headers["Content-Type"] = "application/json"
 		response = {}
 		#retrieve websites
 		if name is None:
@@ -289,35 +290,29 @@ class Check(webapp2.RequestHandler):
 		#self.response.write(json.dumps(response))
 		self.response.write(json.dumps(websites, cls=JSONCustomEncoder))
 
-class Recalculate(CustomRequestHandler):
+class Recalculate(AuthenticatedRequestHandler):
 
 	def get(self, name=None):
-		self.response.headers["Content-Type"] = "application/json"
-		if self.session["authenticated"]:
-			websites = {}
-			#retrieve all downtimes
-			for downtime in Downtime.all():
-				if downtime.stop is not None:
-					if downtime.website not in websites:
-						websites[downtime.website] = 0
-					websites[downtime.website] += int((downtime.stop - downtime.start).total_seconds())
-			#update all websites
-			for website in Website.all():
-				if website.name in websites:
-					website.downtime = websites[website.name]
-				else:
-					website.downtime = 0
-				website.put()
+		websites = {}
+		#retrieve all downtimes
+		for downtime in Downtime.all():
+			if downtime.stop is not None:
+				if downtime.website not in websites:
+					websites[downtime.website] = 0
+				websites[downtime.website] += int((downtime.stop - downtime.start).total_seconds())
+		#update all websites
+		for website in Website.all():
+			if website.name in websites:
+				website.downtime = websites[website.name]
+			else:
+				website.downtime = 0
+			website.put()
 
-			self.response.write(json.dumps({"message" : "Websites updated successfully"}))
-		else:
-			self.error(401)
-			self.response.write(json.dumps({"message" : "You must be authenticated to perform this action"}))
+		self.response.write(json.dumps({"message" : "Websites updated successfully"}))
 
 class Details(CustomRequestHandler):
 
 	def get(self, name):
-		self.response.headers["Content-Type"] = "application/json"
 		response = {}
 		website = Website.get_by_key_name(name)
 		if website is not None:
@@ -397,6 +392,7 @@ class SubscriberResource(REST):
 	require_authentication = {"GET" : True, "PUT" : True, "DELETE" : True}
 
 class WebsiteDisable(AuthenticatedRequestHandler):
+
 	def get(self, name):
 		website = Website.get_by_key_name(name)
 		if website is not None:
@@ -408,6 +404,7 @@ class WebsiteDisable(AuthenticatedRequestHandler):
 			self.response.write(json.dumps({"message" : "No website with name {0}".format(name)}))
 
 class WebsiteEnable(AuthenticatedRequestHandler):
+
 	def get(self, name):
 		website = Website.get_by_key_name(name)
 		if website is not None:
