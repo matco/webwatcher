@@ -549,7 +549,7 @@ window.addEventListener(
 					details_grid.render(new Grid.Datasource({data : details.downtimes}));
 				}
 			);
-			xhr.open('GET', '/api/details/' + key, true);
+			xhr.open('GET', '/api/website/' + key + '/details', true);
 			xhr.send(null);
 			UI.OpenModal(document.getElementById('website_details'));
 		}

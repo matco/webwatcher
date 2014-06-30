@@ -310,24 +310,6 @@ class Recalculate(AuthenticatedRequestHandler):
 
 		self.response.write(json.dumps({"message" : "Websites updated successfully"}))
 
-class Details(CustomRequestHandler):
-
-	def get(self, name):
-		response = {}
-		website = Website.get_by_key_name(name)
-		if website is not None:
-			response["name"] = website.name
-			response["url"] = website.url
-			response["update"] = website.update
-			response["downtime"] = website.downtime
-			response["uptime"] = website.uptime
-			response["downtimes"] = Downtime.gql("WHERE website = :1 ORDER BY start DESC", website.name).fetch(limit=None)
-			#response["downtimes"] = Downtime.all().filter("website=", website.name).order("-start").fetch(limit=None)
-			self.response.write(json.dumps(response, cls=JSONCustomEncoder))
-		else:
-			self.error(404)
-			self.response.write(json.dumps({"message" : "No website with name {0}".format(name)}))
-
 class REST(CustomRequestHandler):
 
 	def dispatch(self, *args, **kwargs):
@@ -415,6 +397,24 @@ class WebsiteEnable(AuthenticatedRequestHandler):
 			self.error(404)
 			self.response.write(json.dumps({"message" : "No website with name {0}".format(name)}))
 
+class WebsiteDetails(CustomRequestHandler):
+
+	def get(self, name):
+		response = {}
+		website = Website.get_by_key_name(name)
+		if website is not None:
+			response["name"] = website.name
+			response["url"] = website.url
+			response["update"] = website.update
+			response["downtime"] = website.downtime
+			response["uptime"] = website.uptime
+			response["downtimes"] = Downtime.gql("WHERE website = :1 ORDER BY start DESC", website.name).fetch(limit=None)
+			#response["downtimes"] = Downtime.all().filter("website=", website.name).order("-start").fetch(limit=None)
+			self.response.write(json.dumps(response, cls=JSONCustomEncoder))
+		else:
+			self.error(404)
+			self.response.write(json.dumps({"message" : "No website with name {0}".format(name)}))
+
 secret_key = "".join(random.choice(string.ascii_letters + string.ascii_lowercase + string.punctuation) for x in range(20))
 webapp_config = {}
 webapp_config["webapp2_extras.sessions"] = {"secret_key" : secret_key}
@@ -427,11 +427,11 @@ application = webapp2.WSGIApplication([
 	("/api/recalculate", Recalculate),
 	("/api/check", Check),
 	("/api/check/([A-Za-z0-9]*)", Check),
-	("/api/details/([A-Za-z0-9]*)", Details),
 	("/api/website", WebsiteResource),
 	("/api/website/([A-Za-z0-9]+)", WebsiteResource),
 	("/api/website/([A-Za-z0-9]+)/disable", WebsiteDisable),
 	("/api/website/([A-Za-z0-9]+)/enable", WebsiteEnable),
+	("/api/website/([A-Za-z0-9]*)/details", WebsiteDetails),
 	("/api/subscriber", SubscriberResource),
 	("/api/subscriber/(.+)", SubscriberResource),
 ], debug=True, config=webapp_config)
