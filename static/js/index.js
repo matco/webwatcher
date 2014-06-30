@@ -174,15 +174,74 @@ window.addEventListener(
 			});
 		}
 
+		function disable_website_listener(event) {
+			Event.stop(event);
+			var link = this;
+			var container = this.parentNode;
+			website_action(container.parentNode.dataset.key, 'disable', function() {
+				container.removeChild(link);
+				container.insertBefore(document.createFullElement(
+					'a',
+					{href : '#', title : 'Re-enable this website'},
+					'Enable',
+					{click : enable_website_listener}
+				), container.firstChild);
+			});
+		}
+
+		function enable_website_listener(event) {
+			Event.stop(event);
+			var link = this;
+			var container = this.parentNode;
+			website_action(container.parentNode.dataset.key, 'enable', function() {
+				container.removeChild(link);
+				container.insertBefore(document.createFullElement(
+					'a',
+					{href : '#', title : 'Disable this website temporary'},
+					'Disable',
+					{click : disable_website_listener}
+				), container.firstChild);
+			});
+		}
+
+		function website_action(website, action, callback) {
+			var xhr = new XMLHttpRequest();
+			xhr.addEventListener(
+				'load',
+				function(event) {
+					UI.Notify(JSON.parse(event.target.responseText).message);
+					callback();
+				}
+			);
+			xhr.open('GET', '/api/website/' + website + '/' + action, true);
+			xhr.send();
+		}
+
 		function draw_website(website) {
 			var website_ui = document.createFullElement('tr', {'data-key' : website.name});
 			website_ui.appendChild(document.createFullElement('td', {}, website.name));
 			website_ui.appendChild(document.createFullElement('td', {}, website.url));
 			website_ui.appendChild(document.createFullElement('td', {}, website.texts));
 			var website_actions = document.createFullElement('td');
+			if(website.disabled) {
+				website_actions.appendChild(document.createFullElement(
+					'a',
+					{href : '#', title : 'Re-enable this website'},
+					'Enable',
+					{click : enable_website_listener}
+				));
+			}
+			else {
+				website_actions.appendChild(document.createFullElement(
+					'a',
+					{href : '#', title : 'Disable this website temporary'},
+					'Disable',
+					{click : disable_website_listener}
+				));
+			}
 			website_actions.appendChild(document.createFullElement(
 				'a',
-				{href : '#', title : 'Unwatch this website and delete all logs'},
+				{href : '#', title : 'Unwatch this website and delete all logs', style : 'margin-left: 5px;'},
 				'Delete',
 				{click : delete_website_listener}
 			));

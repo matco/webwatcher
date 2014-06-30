@@ -37,6 +37,7 @@ class Website(NamedModel):
 	update = db.DateTimeProperty()
 	uptime = db.IntegerProperty(default=0)
 	downtime = db.IntegerProperty(default=0)
+	disabled = db.BooleanProperty()
 
 class Downtime(db.Model):
 	website = db.StringProperty(required=True)
@@ -51,7 +52,7 @@ class JSONCustomEncoder(json.JSONEncoder):
 		if object.__class__.__name__ == "Subscriber":
 			return {"email" : object.email}
 		if object.__class__.__name__ == "Website":
-			return {"name" : object.name, "url" : object.url, "texts" : object.texts, "online" : object.online, "update" : object.update, "uptime" : object.uptime, "downtime" : object.downtime}
+			return {"name" : object.name, "url" : object.url, "texts" : object.texts, "online" : object.online, "update" : object.update, "uptime" : object.uptime, "downtime" : object.downtime, "disabled" : object.disabled}
 		if object.__class__.__name__ == "Downtime":
 			return {"rationale" : object.rationale, "start" : object.start, "stop" : object.stop}
 		if object.__class__.__name__ == "datetime":
@@ -162,6 +163,16 @@ class CustomRequestHandler(webapp2.RequestHandler):
 		finally:
 			session_store.save_sessions(self.response)
 
+class AuthenticatedRequestHandler(CustomRequestHandler):
+	def dispatch(self, *args, **kwargs):
+		session_store = sessions.get_store(request=self.request)
+		self.session = session_store.get_session()
+		if "authenticated" in self.session and self.session["authenticated"]:
+			webapp2.RequestHandler.dispatch(self, *args, **kwargs)
+		else:
+			self.error(401)
+			self.response.write(json.dumps({"message" : "You must be authenticated to perform this action"}))
+
 class Status(CustomRequestHandler):
 
 	def get(self):
@@ -269,7 +280,7 @@ class Check(webapp2.RequestHandler):
 		response = {}
 		#retrieve websites
 		if name is None:
-			websites = Website.all().fetch(limit=None, read_policy=db.STRONG_CONSISTENCY)
+			websites = Website.gql("WHERE disabled = FALSE").fetch(limit=None, read_policy=db.STRONG_CONSISTENCY)
 		else:
 			websites = [Website.get_by_key_name(name)]
 		#check retrieved websites
@@ -385,6 +396,28 @@ class SubscriberResource(REST):
 	db_model_name = "Subscriber"
 	require_authentication = {"GET" : True, "PUT" : True, "DELETE" : True}
 
+class WebsiteDisable(AuthenticatedRequestHandler):
+	def get(self, name):
+		website = Website.get_by_key_name(name)
+		if website is not None:
+			website.disabled = True
+			website.put()
+			self.response.write(json.dumps({"message" : "Website {0} disabled successfully".format(website.name)}))
+		else:
+			self.error(404)
+			self.response.write(json.dumps({"message" : "No website with name {0}".format(name)}))
+
+class WebsiteEnable(AuthenticatedRequestHandler):
+	def get(self, name):
+		website = Website.get_by_key_name(name)
+		if website is not None:
+			website.disabled = False
+			website.put()
+			self.response.write(json.dumps({"message" : "Website {0} enabled successfully".format(website.name)}))
+		else:
+			self.error(404)
+			self.response.write(json.dumps({"message" : "No website with name {0}".format(name)}))
+
 secret_key = "".join(random.choice(string.ascii_letters + string.ascii_lowercase + string.punctuation) for x in range(20))
 webapp_config = {}
 webapp_config["webapp2_extras.sessions"] = {"secret_key" : secret_key}
@@ -400,6 +433,8 @@ application = webapp2.WSGIApplication([
 	("/api/details/([A-Za-z0-9]*)", Details),
 	("/api/website", WebsiteResource),
 	("/api/website/([A-Za-z0-9]+)", WebsiteResource),
+	("/api/website/([A-Za-z0-9]+)/disable", WebsiteDisable),
+	("/api/website/([A-Za-z0-9]+)/enable", WebsiteEnable),
 	("/api/subscriber", SubscriberResource),
 	("/api/subscriber/(.+)", SubscriberResource),
 ], debug=True, config=webapp_config)
