@@ -113,10 +113,14 @@ def check(website):
 			#update last downtime
 			downtime = Downtime.gql("WHERE website = :1 AND stop = NULL", website.name).get()
 			#downtime = Downtime.all().filter("website=", website.name).filter("stop =", None).get()
-			downtime.stop = now
-			downtime.put()
-			#increase website downtime (pessimistic vision, website has returned online between 2 check)
-			website.downtime += int((now - previous_update).total_seconds())
+			#TODO fix this as downtime should never be None
+			if downtime is not None:
+				downtime.stop = now
+				downtime.put()
+				#increase website downtime (pessimistic vision, website has returned online between 2 check)
+				website.downtime += int((now - previous_update).total_seconds())
+			else:
+				warn("Error while retrieving current downtime for " + website.name)
 			#warn subscribers
 			message = website.name + " is back online"
 			warn(message, message)
