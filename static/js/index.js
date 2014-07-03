@@ -442,6 +442,7 @@ window.addEventListener(
 						that.removeAttribute('disabled');
 						that.classList.remove('loading');
 						if(xhr_event.target.status === 200) {
+							//TODO improve this as only enabled websites are checked
 							draw_websites(JSON.parse(xhr_event.target.responseText));
 							UI.Notify('Websites have been checked successfully');
 						}
@@ -621,7 +622,9 @@ window.addEventListener(
 
 		function require_authentication(callback) {
 			authentication_callback = callback;
-			UI.OpenModal(document.getElementById('authentication'), true);
+			var authentication_form = document.getElementById('authentication');
+			UI.OpenModal(authentication_form, true);
+			authentication_form['password'].focus();
 		}
 
 		function login() {
