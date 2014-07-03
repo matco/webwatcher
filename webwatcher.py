@@ -281,7 +281,7 @@ class Check(webapp2.RequestHandler):
 		response = {}
 		#retrieve websites
 		if name is None:
-			websites = Website.gql("WHERE disabled = FALSE").fetch(limit=None, read_policy=db.STRONG_CONSISTENCY)
+			websites = Website.gql("WHERE disabled != TRUE").fetch(limit=None, read_policy=db.STRONG_CONSISTENCY)
 		else:
 			websites = [Website.get_by_key_name(name)]
 		#check retrieved websites
