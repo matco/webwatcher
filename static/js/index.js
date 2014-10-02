@@ -221,7 +221,7 @@ window.addEventListener(
 					{href : '#', title : 'Re-enable this website'},
 					'Enable',
 					{click : enable_website_listener}
-				), container.firstChild);
+				), container.lastChild);
 			});
 		}
 
@@ -236,7 +236,7 @@ window.addEventListener(
 					{href : '#', title : 'Disable this website temporary'},
 					'Disable',
 					{click : disable_website_listener}
-				), container.firstChild);
+				), container.lastChild);
 			});
 		}
 
