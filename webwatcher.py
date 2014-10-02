@@ -324,9 +324,13 @@ class REST(CustomRequestHandler):
 		finally:
 			session_store.save_sessions(self.response)
 
-	def get(self):
-		objects = self.db_model.all().fetch(limit=None, read_policy=db.STRONG_CONSISTENCY)
-		self.response.write(json.dumps(objects, cls=JSONCustomEncoder))
+	def get(self, key = None):
+		if key is not None:
+			object = self.db_model.get_by_key_name(key)
+			self.response.write(json.dumps(object, cls=JSONCustomEncoder))
+		else:
+			objects = self.db_model.all().fetch(limit=None, read_policy=db.STRONG_CONSISTENCY)
+			self.response.write(json.dumps(objects, cls=JSONCustomEncoder))
 
 	def put(self):
 		parameters = json.loads(self.request.POST.get("object").decode("utf8"))
@@ -343,6 +347,22 @@ class REST(CustomRequestHandler):
 			response = json.dumps({"message" : "{0} {1} added successfully".format(self.db_model_name, key)})
 			self.response.write(response)
 
+	def post(self, key):
+		object = self.db_model.get_by_key_name(key)
+		if object is None:
+			self.error(400)
+			response = json.dumps({"message" : "There is no {0} with key {1}".format(self.db_model_name, key)})
+			self.response.write(response)
+		else:
+			parameters = json.loads(self.request.POST.get("object").decode("utf8"))
+			print dir(object)
+			#warning "private" fields may be updated
+			for attribue, value in parameters.iteritems():
+				setattr(object, attribue, value)
+			object.put();
+			response = json.dumps({"message" : "{0} {1} updated successfully".format(self.db_model_name, key)})
+			self.response.write(response)
+
 	def delete(self, key):
 		object = self.db_model.get_by_key_name(key)
 		if object is None:
@@ -357,7 +377,7 @@ class REST(CustomRequestHandler):
 class WebsiteResource(REST):
 	db_model = Website
 	db_model_name = "Website"
-	require_authentication = {"GET" : False, "PUT" : True, "DELETE" : True}
+	require_authentication = {"GET" : False, "PUT" : True, "POST" : True, "DELETE" : True}
 
 	def delete(self, key):
 		object = self.db_model.get_by_key_name(key)
@@ -366,6 +386,7 @@ class WebsiteResource(REST):
 			downtimes = Downtime.gql("WHERE website = :1 ORDER BY start DESC", object.name).fetch(limit=None, read_policy=db.STRONG_CONSISTENCY)
 			for downtime in downtimes:
 				downtime.delete()
+		#delete website itself
 		super(WebsiteResource, self).delete(key)
 
 class SubscriberResource(REST):

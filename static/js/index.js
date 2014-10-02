@@ -2,6 +2,37 @@
 
 function restify(url) {
 
+	function send_object(object, callback) {
+		var form_data = new FormData();
+		form_data.append('object', JSON.stringify(object));
+		var xhr = new XMLHttpRequest();
+		xhr.addEventListener(
+			'load',
+			function(event) {
+				if(event.target.status === 200) {
+					if(callback) {
+						callback();
+					}
+				}
+				else if(event.target.status === 400) {
+					UI.Notify(JSON.parse(event.target.responseText).message);
+				}
+				//unauthorized
+				else if(event.target.status === 401) {
+					UI.Notify(JSON.parse(event.target.responseText).message);
+					//TODO show login window
+				}
+			}
+		);
+		if(object.key) {
+			xhr.open('POST', url + '/' + object.name, true);
+		}
+		else {
+			xhr.open('PUT', url, true);
+		}
+		xhr.send(form_data);
+	}
+
 	return {
 		list : function(callback) {
 			var xhr = new XMLHttpRequest();
@@ -16,31 +47,22 @@ function restify(url) {
 			xhr.send();
 		},
 
-		add : function(object, callback) {
-			var form_data = new FormData();
-			form_data.append('object', JSON.stringify(object));
+		get : function(key, callback) {
 			var xhr = new XMLHttpRequest();
 			xhr.addEventListener(
 				'load',
 				function(event) {
-					if(event.target.status === 200) {
-						if(callback) {
-							callback();
-						}
-					}
-					else if(event.target.status === 400) {
-						UI.Notify(JSON.parse(event.target.responseText).message);
-					}
-					//unauthorized
-					else if(event.target.status === 401) {
-						UI.Notify(JSON.parse(event.target.responseText).message);
-						//TODO show login window
-					}
+					var object = JSON.parse(event.target.responseText);
+					callback(object);
 				}
 			);
-			xhr.open('PUT', url, true);
-			xhr.send(form_data);
+			xhr.open('GET', url + '/' + key, true);
+			xhr.send();
 		},
+
+		save : send_object,
+
+		add : send_object,
 
 		remove : function(key, callback) {
 			var xhr = new XMLHttpRequest();
@@ -164,6 +186,20 @@ window.addEventListener(
 		var Websites = restify('/api/website');
 
 		var websites_ui = document.getElementById('websites');
+		var website_form = document.getElementById('website');
+
+		function edit_website_listener(event) {
+			Event.stop(event);
+			var website_ui = this.parentNode.parentNode;
+			var website_ui = this.parentNode.parentNode;
+			Websites.get(website_ui.dataset.key, function(website) {
+				website_form['name'].setAttribute('disabled', 'disabled');
+				website_form['name'].value = website.name;
+				website_form['url'].value = website.url;
+				website_form['texts'].value = website.texts;
+				website_form.style.display = 'block';
+			});
+		}
 
 		function delete_website_listener(event) {
 			Event.stop(event);
@@ -223,6 +259,12 @@ window.addEventListener(
 			website_ui.appendChild(document.createFullElement('td', {}, website.url));
 			website_ui.appendChild(document.createFullElement('td', {}, website.texts));
 			var website_actions = document.createFullElement('td');
+			website_actions.appendChild(document.createFullElement(
+				'a',
+				{href : '#', title : 'Edit this website', style : 'margin-right: 5px;'},
+				'Edit',
+				{click : edit_website_listener}
+			));
 			if(website.disabled) {
 				website_actions.appendChild(document.createFullElement(
 					'a',
@@ -256,17 +298,44 @@ window.addEventListener(
 			});
 		}
 
-		document.getElementById('website').addEventListener(
+		document.getElementById('website_add').addEventListener(
+			'click',
+			function() {
+				website_form.reset();
+				website_form['name'].removeAttribute('disabled');
+				website_form.style.display = 'block';
+			}
+		);
+
+		document.getElementById('website_cancel').addEventListener(
+			'click',
+			function() {
+				website_form.style.display = 'none';
+			}
+		);
+
+		website_form.addEventListener(
 			'submit',
 			function(event) {
 				Event.stop(event);
 				var form = this;
 				var website = {name : this['name'].value, url : this['url'].value, texts : this['texts'].value, online : null};
-				Websites.add(website, function() {
-					websites_ui.appendChild(draw_website(website));
-					form.reset();
-					UI.Notify('Website added successfully');
-				});
+				if(this['name'].hasAttribute('disabled')) {
+					website.key = website.name;
+					Websites.save(website, function() {
+						websites_ui.removeChild(websites_ui.querySelector('tr[data-key="' + website.name + '"]'));
+						websites_ui.appendChild(draw_website(website));
+						form.reset();
+						UI.Notify('Website saved successfully');
+					});
+				}
+				else {
+					Websites.add(website, function() {
+						websites_ui.appendChild(draw_website(website));
+						form.reset();
+						UI.Notify('Website added successfully');
+					});
+				}
 			}
 		);
 

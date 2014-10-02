@@ -128,12 +128,13 @@
 								<th style="width: 120px;">Name</th>
 								<th style="width: 280px;">URL</th>
 								<th>Texts</th>
-								<th style="width: 120px;">Actions</th>
+								<th style="width: 150px;">Actions</th>
 							</thead>
 							<tbody id="websites"></tbody>
 						</table>
-						<h2>Add a website</h2>
-						<form id="website" method="post" action="#">
+						<button id="website_add">Add website</button>
+						<form id="website" method="post" action="#" style="display: none;">
+							<h2>Website</h2>
 							<p>
 								<label>
 									<span>Name</span>
@@ -153,7 +154,8 @@
 								</label>
 							</p>
 							<p>
-								<button>Add website</button>
+								<button>Save</button>
+								<button id="website_cancel" type="reset">Cancel</button>
 							</p>
 						</form>
 					</div>
