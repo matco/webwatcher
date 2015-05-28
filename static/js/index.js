@@ -108,7 +108,7 @@ window.addEventListener(
 				}
 			);
 			xhr.open('GET', '/api/configuration', true);
-			xhr.send(null);
+			xhr.send();
 		}
 
 		configuration.addEventListener(
@@ -356,7 +356,7 @@ window.addEventListener(
 					}
 				);
 				xhr.open('GET', '/api/recalculate', true);
-				xhr.send(null);
+				xhr.send();
 			}
 		);
 
@@ -443,7 +443,7 @@ window.addEventListener(
 				var xhr = new XMLHttpRequest();
 				xhr.addEventListener('load', logout);
 				xhr.open('DELETE', '/api/authenticate', true);
-				xhr.send(null);
+				xhr.send();
 			}
 		);
 
@@ -521,7 +521,7 @@ window.addEventListener(
 					}
 				);
 				xhr.open('GET', '/api/check', true);
-				xhr.send(null);
+				xhr.send();
 			}
 		);
 
@@ -602,7 +602,7 @@ window.addEventListener(
 									}
 								);
 								xhr.open('GET', '/api/check/' + details.name, true);
-								xhr.send(null);
+								xhr.send();
 							}
 						}
 					));
@@ -620,7 +620,7 @@ window.addEventListener(
 				}
 			);
 			xhr.open('GET', '/api/website/' + key + '/details', true);
-			xhr.send(null);
+			xhr.send();
 			UI.OpenModal(document.getElementById('website_details'));
 		}
 
@@ -729,7 +729,7 @@ window.addEventListener(
 			}
 		);
 		xhr.open('GET', '/api/status', true);
-		xhr.send(null);
+		xhr.send();
 
 		//debug
 		var debug = false;
