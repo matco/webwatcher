@@ -622,7 +622,7 @@ var Authentication = (function() {
 							else {
 								login();
 								document.getElementById('content').style.display = 'block';
-								location.hash = '#config';
+								location.hash = '#section=config';
 								UI.CloseModal(document.getElementById('initialization'));
 							}
 						}
@@ -667,7 +667,7 @@ var Authentication = (function() {
 				'click',
 				function() {
 					authentication_callback = undefined;
-					location.hash = '#status';
+					location.hash = '#section=status';
 					UI.CloseModal(document.getElementById('authentication'));
 				}
 			);
@@ -709,7 +709,7 @@ window.addEventListener(
 				}
 				else {
 					document.getElementById('content').style.display = 'block';
-					location.hash = '#status';
+					location.hash = '#section=status';
 					//trigger manually hash change event
 					var event = document.createEvent('UIEvent');
 					event.initUIEvent('hashchange', true, true, this.window, 1);

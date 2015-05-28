@@ -10,8 +10,8 @@
 			var config = document.getElementById('config');
 			var status = document.getElementById('status');
 			//retrieve links
-			var config_link = document.querySelector('a[href="#config"]');
-			var status_link = document.querySelector('a[href="#status"]');
+			var menu_config = document.getElementById('menu_config');
+			var menu_status = document.getElementById('menu_status');
 
 			function unselect_all() {
 				//stop refreshing status page
@@ -22,19 +22,21 @@
 				config.style.display = 'none';
 				status.style.display = 'none';
 				//unselect links
-				config_link.classList.remove('selected');
-				status_link.classList.remove('selected');
+				menu_config.classList.remove('selected');
+				menu_status.classList.remove('selected');
 			}
 
-			//route
-			if(location.hash === '#config') {
+			//retrieve data encoded in hash
+			var data = Hash.Decode(location.hash);
+
+			if(data.section === 'config') {
 				//check authentication
 				Authentication.Check(function() {
 					unselect_all();
 					//update page
 					Configuration.Show();
 					//display page
-					config_link.classList.add('selected');
+					menu_config.classList.add('selected');
 					config.style.display = 'block';
 				});
 			}
@@ -45,7 +47,7 @@
 				//refresh page automatically
 				refresh_status_page_inverval = setInterval(Status.Show, 10000);
 				//display page
-				status_link.classList.add('selected');
+				menu_status.classList.add('selected');
 				status.style.display = 'block';
 			}
 		}
