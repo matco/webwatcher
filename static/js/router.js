@@ -26,6 +26,9 @@
 				menu_status.classList.remove('selected');
 			}
 
+			//close all modals
+			UI.CloseModals();
+
 			//retrieve data encoded in hash
 			var data = Hash.Decode(location.hash);
 
@@ -49,6 +52,10 @@
 				//display page
 				menu_status.classList.add('selected');
 				status.style.display = 'block';
+				//details
+				if(data.hasOwnProperty('details')) {
+					Status.Detail(data.details);
+				}
 			}
 		}
 	);

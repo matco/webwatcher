@@ -404,7 +404,7 @@ var Status = (function() {
 	}
 
 	function render_actions(value, record) {
-		return document.createFullElement('a', {href : '#', title : 'View website details'}, 'Details', {click : function(event) {Event.stop(event); detail_website(record.name)}});
+		return document.createFullElement('a', {href : '#section=status&details=' + record.name, title : 'View website details'}, 'Details');
 	}
 
 	function draw_websites(websites) {
@@ -446,72 +446,71 @@ var Status = (function() {
 		document.getElementById('website_details_age').textContent = age;
 	}
 
-	function detail_website(key) {
-		var xhr = new XMLHttpRequest();
-		xhr.addEventListener(
-			'load',
-			function(event) {
-				var details = JSON.parse(event.target.responseText);
-				//update link
-				var website_details_link = document.getElementById('website_details_link');
-				website_details_link.setAttribute('href', details.url);
-				website_details_link.textContent = details.name;
-				//update age
-				update_website_details_age(details.update ? new Date(details.update) : undefined);
-				//update check link
-				var website_details_check = document.getElementById('website_details_check');
-				website_details_check.clear();
-				website_details_check.appendChild(document.createFullElement(
-					'button',
-					{},
-					'Check now',
-					{
-						click : function(event) {
-							Event.stop(event);
-							var that = this;
-							this.setAttribute('disabled', 'disabled');
-							this.classList.add('loading');
-							var xhr = new XMLHttpRequest();
-							xhr.addEventListener(
-								'load',
-								function(xhr_event) {
-									that.removeAttribute('disabled');
-									that.classList.remove('loading');
-									if(xhr_event.target.status === 200) {
-										update_website_details_age(new Date());
-										UI.Notify('Website has been checked successfully');
-									}
-									else {
-										UI.Notify('Unable to check website');
-									}
-								}
-							);
-							xhr.open('GET', '/api/check/' + details.name, true);
-							xhr.send();
-						}
-					}
-				));
-				//calculate duration for each downtime
-				details.downtimes.forEach(function(downtime) {
-					var duration;
-					if(downtime.start && downtime.stop) {
-						//TODO improve this as grid do the same job
-						duration = Math.round((new Date(downtime.stop).getTime() - new Date(downtime.start).getTime()) / 1000);
-					}
-					downtime.duration = duration;
-				});
-				//update downtimes grid
-				details_grid.render(new Grid.Datasource({data : details.downtimes}));
-			}
-		);
-		xhr.open('GET', '/api/website/' + key + '/details', true);
-		xhr.send();
-		UI.OpenModal(document.getElementById('website_details'));
-	}
-
 	return {
 		Show : function update_states() {
 			Websites.list(draw_websites);
+		},
+		Detail : function(key) {
+			var xhr = new XMLHttpRequest();
+			xhr.addEventListener(
+				'load',
+				function(event) {
+					var details = JSON.parse(event.target.responseText);
+					//update link
+					var website_details_link = document.getElementById('website_details_link');
+					website_details_link.setAttribute('href', details.url);
+					website_details_link.textContent = details.name;
+					//update age
+					update_website_details_age(details.update ? new Date(details.update) : undefined);
+					//update check link
+					var website_details_check = document.getElementById('website_details_check');
+					website_details_check.clear();
+					website_details_check.appendChild(document.createFullElement(
+						'button',
+						{},
+						'Check now',
+						{
+							click : function(event) {
+								Event.stop(event);
+								var that = this;
+								this.setAttribute('disabled', 'disabled');
+								this.classList.add('loading');
+								var xhr = new XMLHttpRequest();
+								xhr.addEventListener(
+									'load',
+									function(xhr_event) {
+										that.removeAttribute('disabled');
+										that.classList.remove('loading');
+										if(xhr_event.target.status === 200) {
+											update_website_details_age(new Date());
+											UI.Notify('Website has been checked successfully');
+										}
+										else {
+											UI.Notify('Unable to check website');
+										}
+									}
+								);
+								xhr.open('GET', '/api/check/' + details.name, true);
+								xhr.send();
+							}
+						}
+					));
+					//calculate duration for each downtime
+					details.downtimes.forEach(function(downtime) {
+						var duration;
+						if(downtime.start && downtime.stop) {
+							//TODO improve this as grid do the same job
+							duration = Math.round((new Date(downtime.stop).getTime() - new Date(downtime.start).getTime()) / 1000);
+						}
+						downtime.duration = duration;
+					});
+					//update downtimes grid
+					details_grid.render(new Grid.Datasource({data : details.downtimes}));
+				}
+			);
+			xhr.open('GET', '/api/website/' + key + '/details', true);
+			xhr.send();
+			UI.OpenModal(document.getElementById('website_details'));
 		},
 		Init : function() {
 			//status
@@ -560,13 +559,6 @@ var Status = (function() {
 				path : '/js/grid/',
 				rowPerPage : 10
 			});
-
-			document.getElementById('website_details_close').addEventListener(
-				'click',
-				function() {
-					UI.CloseModal(document.getElementById('website_details'));
-				}
-			);
 		}
 	};
 })();
