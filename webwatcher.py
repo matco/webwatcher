@@ -12,6 +12,7 @@ from google.appengine.api import urlfetch
 from google.appengine.api import mail
 from google.appengine.ext import db
 
+#model
 class NamedModel(db.Model):
 	def __init__(self, *args, **kwargs):
 		#add key name only when object is fresh
@@ -45,20 +46,6 @@ class Downtime(db.Model):
 	start = db.DateTimeProperty(required=True, auto_now_add=True)
 	stop = db.DateTimeProperty()
 
-class JSONCustomEncoder(json.JSONEncoder):
-	def default(self, object):
-		if object.__class__.__name__ == "Setting":
-			return {"id" : object.id, "value" : object.value}
-		if object.__class__.__name__ == "Subscriber":
-			return {"email" : object.email}
-		if object.__class__.__name__ == "Website":
-			return {"name" : object.name, "url" : object.url, "texts" : object.texts, "online" : object.online, "update" : object.update, "uptime" : object.uptime, "downtime" : object.downtime, "disabled" : object.disabled}
-		if object.__class__.__name__ == "Downtime":
-			return {"rationale" : object.rationale, "start" : object.start, "stop" : object.stop}
-		if object.__class__.__name__ == "datetime":
-			return object.isoformat() + "Z"
-		return json.JSONEncoder.default(self, object)
-
 #warn about the problem
 def warn(subject, message):
 	#send e-mails
@@ -67,20 +54,18 @@ def warn(subject, message):
 		mail.send_mail(sender_email, subscriber.email, subject, message)
 
 #website checker
-def check(website):
-	#TODO improve this by retrieving all settings
+def check(website, avoid_cache, timeout):
 	error = None
 	url = website.url
 	#add timestamp to url to avoid cache if asked
-	avoid_cache = Setting.get_by_key_name("avoid_cache")
-	if avoid_cache is not None and avoid_cache.value == "True":
+	if avoid_cache:
 		url += "&" if "?" in url else "?"
 		url += str(time.time())
 	try:
 		response = urlfetch.fetch(
 			url=url,
 			headers={"Cache-Control" : "max-age=60"},
-			deadline=int(Setting.get_by_key_name("website_timeout").value),
+			deadline=timeout,
 			validate_certificate=False,
 			follow_redirects=True
 		)
@@ -104,6 +89,7 @@ def check(website):
 	now = datetime.datetime.now()
 	previous_update = website.update or now
 	website.update = now
+	time_since_last_check = int((now - previous_update).total_seconds())
 	#website is online
 	if error is None:
 		#if website was aready online at previous check, increase uptime
@@ -118,8 +104,8 @@ def check(website):
 			if downtime is not None:
 				downtime.stop = now
 				downtime.put()
-				#increase website downtime (pessimistic vision, website has returned online between 2 check)
-				website.downtime += int((now - previous_update).total_seconds())
+				#increase website downtime (pessimistic vision, website has returned online between 2 checks)
+				website.downtime += time_since_last_check
 			else:
 				warn("Error while retrieving current downtime for " + website.name)
 			#warn subscribers
@@ -139,7 +125,7 @@ def check(website):
 			#warn subscribers only the first time website is detected as offline
 			warn(website.name + " is offline", error)
 		#increase downtime anyway (pessimistic vision)
-		website.downtime += int((now - previous_update).total_seconds())
+		website.downtime += time_since_last_check
 		website.online = False
 		website.put()
 		#return message to be displayed
@@ -147,6 +133,21 @@ def check(website):
 
 def hash_password(password):
 	return hashlib.sha256(password).hexdigest()
+
+#api
+class JSONCustomEncoder(json.JSONEncoder):
+	def default(self, object):
+		if object.__class__.__name__ == "Setting":
+			return {"id" : object.id, "value" : object.value}
+		if object.__class__.__name__ == "Subscriber":
+			return {"email" : object.email}
+		if object.__class__.__name__ == "Website":
+			return {"name" : object.name, "url" : object.url, "texts" : object.texts, "online" : object.online, "update" : object.update, "uptime" : object.uptime, "downtime" : object.downtime, "disabled" : object.disabled}
+		if object.__class__.__name__ == "Downtime":
+			return {"rationale" : object.rationale, "start" : object.start, "stop" : object.stop}
+		if object.__class__.__name__ == "datetime":
+			return object.isoformat() + "Z"
+		return json.JSONEncoder.default(self, object)
 
 #appengine needs webpages
 class CustomRequestHandler(webapp2.RequestHandler):
@@ -284,9 +285,13 @@ class Check(webapp2.RequestHandler):
 			websites = Website.gql("WHERE disabled != TRUE").fetch(limit=None, read_policy=db.STRONG_CONSISTENCY)
 		else:
 			websites = [Website.get_by_key_name(name)]
+		#retrieve settings
+		avoid_cache = Setting.get_by_key_name("avoid_cache")
+		avoid_cache = avoid_cache is not None and avoid_cache.value == "True"
+		timeout = int(Setting.get_by_key_name("website_timeout").value)
 		#check retrieved websites
 		for website in websites:
-			response[website.name] = check(website)
+			response[website.name] = check(website, avoid_cache, timeout)
 		#self.response.write(json.dumps(response))
 		self.response.write(json.dumps(websites, cls=JSONCustomEncoder))
 
@@ -308,7 +313,7 @@ class Recalculate(AuthenticatedRequestHandler):
 				website.downtime = 0
 			website.put()
 
-		self.response.write(json.dumps({"message" : "Websites updated successfully"}))
+		self.response.write(json.dumps({"message" : "Website downtimes calculated successfully"}))
 
 class REST(CustomRequestHandler):
 
