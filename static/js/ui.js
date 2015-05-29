@@ -19,14 +19,27 @@ UI.StopLoading = function() {
 
 (function() {
 	var notification_close_time = 5000;
-	var notification_interval;
 	var notification_timeout;
+
+	window.addEventListener('load', function() {
+		function hide_after_animation() {
+			this.style.display = 'none';
+		}
+		var notification = document.getElementById('notification');
+		//TODO clean this when all browsers support good event
+		notification.addEventListener('animationend', hide_after_animation);
+		notification.addEventListener('webkitAnimationEnd', hide_after_animation);
+		notification.addEventListener('oanimationend', hide_after_animation);
+	});
+
+	//remember if notification permission has been requested to avoir asking to the user more than once
+	var notification_permission_requested = false;
 
 	UI.Notify = function(message, options) {
 		//ask for permission if user has not explicity denied nor granted notification (permission can be default or undefined)
-		if(Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+		if(!['granted', 'denied'].contains(Notification.permission) && !notification_permission_requested) {
+			notification_permission_requested = true;
 			Notification.requestPermission(function(status) {
-				Notification.permission = status;
 				//re-notify
 				UI.Notify(message, options);
 			});
@@ -42,29 +55,41 @@ UI.StopLoading = function() {
 		}
 		//fallback on html notification
 		else {
-			var notification = document.getElementById('notification');
-			//stop current animation if required
-			if(notification_interval) {
-				clearInterval(notification_interval);
+			//update icon
+			var notification_icon = document.getElementById('notification_icon');
+			if(options.hasOwnProperty('icon')) {
+				notification_icon.src = options.icon;
+				notification_icon.style.display = 'block';
 			}
+			else {
+				notification_icon.style.display = 'none';
+			}
+			//update title
+			var notification_title = document.getElementById('notification_title');
+			if(options.hasOwnProperty('body')) {
+				notification_title.textContent = message;
+			}
+			//update body
+			var notification_body = document.getElementById('notification_body');
+			if(options.hasOwnProperty('body')) {
+				notification_body.textContent = options.body;
+				notification_body.style.display = 'block';
+			}
+			else {
+				notification_body.style.display = 'none';
+			}
+
+			//manage display of animation
+			var notification = document.getElementById('notification');
 			if(notification_timeout) {
 				clearTimeout(notification_timeout);
 			}
 			//update notification
-			notification.textContent = message;
-			notification.style.opacity = 1;
+			notification.classList.remove('fadeout');
 			notification.style.display = 'block';
-			//start animation
+			//add class that will start animation
 			notification_timeout = setTimeout(function() {
-				notification_interval = setInterval(function() {
-					if(notification.style.opacity <= 0.01) {
-						notification.style.display = 'none';
-						clearInterval(notification_interval);
-					}
-					else {
-						notification.style.opacity -= 0.01;
-					}
-				}, 10);
+				notification.classList.add('fadeout');
 			}, notification_close_time);
 		}
 	};
@@ -81,7 +106,7 @@ UI.StopLoading = function() {
 		}
 	}
 
-	//close modal windows with echap
+	//close modal windows with escape key
 	function escape_close_modal(event) {
 		var modal = modals.last();
 		if(!modal.locked && event.keyCode === 27) {
@@ -93,16 +118,22 @@ UI.StopLoading = function() {
 		//store locking status
 		element.locked = locked || false;
 
-		//show overlay or hide previous modal
-		if(modals.isEmpty()) {
-			document.getElementById('modal_overlay').style.display = 'block';
-		}
-		else {
-			modals.last().style.zIndex = 99;
-		}
-		element.style.display = 'block';
 		//add new modal to list
 		modals.push(element);
+
+		var overlay = document.getElementById('modal_overlay');
+
+		//show overlay if this is first modal open
+		if(modals.length === 1) {
+			overlay.style.display = 'block';
+		}
+
+		//put modal window just over overlay
+		var index = parseInt(overlay.style.zIndex) || 100;
+		overlay.style.zIndex = index + 2;
+		element.style.zIndex = index + 3;
+		element.style.display = 'block';
+
 		//add document listeners for first modal
 		if(modals.length === 1) {
 			document.addEventListener('click', click_close_modal);
@@ -114,20 +145,33 @@ UI.StopLoading = function() {
 		//retrieve modal
 		var modal = element || modals.last();
 		if(modal) {
-			//remove modal from list
-			modals.removeElement(modal);
+			//hide modal window
 			modal.style.display = 'none';
-			//remove overlay or show previous modal
-			if(modals.isEmpty()) {
-				document.getElementById('modal_overlay').style.display = 'none';
-				//remove document listener for last modal
+
+			var overlay = document.getElementById('modal_overlay');
+
+			//remove document listener for last modal
+			if(modals.length === 1) {
 				document.removeEventListener('click', click_close_modal);
 				document.removeEventListener('keydown', escape_close_modal);
 			}
-			else {
-				modals.last().style.zIndex = 100;
+
+			//put overlay just under modal window
+			var index = parseInt(overlay.style.zIndex);
+			overlay.style.zIndex = index - 2;
+
+			if(modals.length === 1) {
+				//remove overlay if this is last open modal
+				overlay.style.display = 'none';
 			}
+
+			//remove modal from list
+			modals.removeElement(modal);
 		}
+	};
+
+	UI.CloseModals = function() {
+		modals.slice().forEach(UI.CloseModal);
 	};
 
 	UI.IsModalOpen = function() {
