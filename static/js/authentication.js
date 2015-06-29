@@ -30,6 +30,9 @@ var Authentication = (function() {
 				authentication_form['password'].focus();
 			}
 		},
+		IsAuthenticated : function() {
+			return authenticated;
+		},
 		Init : function() {
 			document.getElementById('initialization').addEventListener(
 				'submit',

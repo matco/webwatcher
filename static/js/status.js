@@ -2,6 +2,7 @@
 
 var Status = (function() {
 	var websites_service;
+	var selected_website_id;
 
 	//status
 	var states_grid;
@@ -61,11 +62,45 @@ var Status = (function() {
 		{label : 'Start', data: 'start', type : Grid.DataType.DATE, width : 150, render : render_date},
 		{label : 'Stop', data: 'stop', type : Grid.DataType.DATE, width : 150, render : render_date},
 		{label : 'Duration', data: 'duration', type : Grid.DataType.NUMBER, width : 200, render : render_duration},
-		{label : 'Rationale', data : 'rationale', type : Grid.DataType.STRING}
+		{label : 'Rationale', data : 'rationale', type : Grid.DataType.STRING},
+		{label : 'Action', width : 100, unsortable : true, render : render_details_action}
 	];
 
 	function render_duration(value) {
 		return value ? Date.getDurationLiteral(value) : 'NA';
+	}
+
+	function render_details_action(value, record) {
+		if(Authentication.IsAuthenticated()) {
+			var element = document.createFullElement(
+				'a',
+				{href : '#', title : 'Delete downtime'},
+				'Delete',
+				{
+					click : function(event) {
+						Event.stop(event);
+						var xhr = new XMLHttpRequest();
+						xhr.addEventListener(
+							'load',
+							function(xhr_event) {
+								if(xhr_event.target.status === 200) {
+									details_grid.datasource.data.removeElement(record);
+									details_grid.render(details_grid.datasource);
+									UI.Notify('Downtime has been deleted successfully');
+								}
+								else {
+									UI.Notify('Unable to delete downtime');
+								}
+							}
+						);
+						xhr.open('DELETE', '/api/website/' + selected_website_id + '/downtime/' + record.id, true);
+						xhr.send();
+					}
+				}
+			);
+			return element;
+		}
+		return document.createElement('span');
 	}
 
 	function update_website_details_age(date) {
@@ -84,6 +119,7 @@ var Status = (function() {
 			websites_service.list(draw_websites);
 		},
 		Detail : function(key) {
+			selected_website_id = key;
 			var xhr = new XMLHttpRequest();
 			xhr.addEventListener(
 				'load',
@@ -132,7 +168,7 @@ var Status = (function() {
 					details.downtimes.forEach(function(downtime) {
 						var duration;
 						if(downtime.start && downtime.stop) {
-							//TODO improve this as grid do the same job
+							//TODO improve this as grid does the same job
 							duration = Math.round((new Date(downtime.stop).getTime() - new Date(downtime.start).getTime()) / 1000);
 						}
 						downtime.duration = duration;

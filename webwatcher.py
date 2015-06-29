@@ -144,7 +144,7 @@ class JSONCustomEncoder(json.JSONEncoder):
 		if object.__class__.__name__ == "Website":
 			return {"name" : object.name, "url" : object.url, "texts" : object.texts, "online" : object.online, "update" : object.update, "uptime" : object.uptime, "downtime" : object.downtime, "disabled" : object.disabled}
 		if object.__class__.__name__ == "Downtime":
-			return {"rationale" : object.rationale, "start" : object.start, "stop" : object.stop}
+			return {"id" : object.key().id(), "rationale" : object.rationale, "start" : object.start, "stop" : object.stop}
 		if object.__class__.__name__ == "datetime":
 			return object.isoformat() + "Z"
 		return json.JSONEncoder.default(self, object)
@@ -441,6 +441,22 @@ class WebsiteDetails(CustomRequestHandler):
 			self.error(404)
 			self.response.write(json.dumps({"message" : "No website with name {0}".format(name)}))
 
+class WebsiteDowntime(CustomRequestHandler):
+
+	def delete(self, website_id, downtime_id):
+		website = Website.get_by_key_name(website_id)
+		if website is not None:
+			downtime = Downtime.get_by_id(int(downtime_id), website)
+			if downtime is not None:
+				downtime.delete()
+				self.response.write(json.dumps({"message" : "Downtime id {0} deleted successfully".format(downtime_id)}))
+			else:
+				self.error(404)
+				self.response.write(json.dumps({"message" : "No downtime with id {0}".format(downtime_id)}))
+		else:
+			self.error(404)
+			self.response.write(json.dumps({"message" : "No website with name {0}".format(website_id)}))
+
 secret_key = "".join(random.choice(string.ascii_letters + string.ascii_lowercase + string.punctuation) for x in range(20))
 webapp_config = {}
 webapp_config["webapp2_extras.sessions"] = {"secret_key" : secret_key}
@@ -458,6 +474,7 @@ application = webapp2.WSGIApplication([
 	("/api/website/([A-Za-z0-9]+)/disable", WebsiteDisable),
 	("/api/website/([A-Za-z0-9]+)/enable", WebsiteEnable),
 	("/api/website/([A-Za-z0-9]*)/details", WebsiteDetails),
+	("/api/website/([A-Za-z0-9]*)/downtime/([0-9]*)", WebsiteDowntime),
 	("/api/subscriber", SubscriberResource),
 	("/api/subscriber/(.+)", SubscriberResource),
 ], debug=True, config=webapp_config)
