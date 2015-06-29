@@ -249,6 +249,7 @@ var Configuration = (function() {
 							websites_ui.removeChild(websites_ui.querySelector('tr[data-key="' + website.name + '"]'));
 							websites_ui.appendChild(draw_website(website));
 							form.reset();
+							form.style.display = 'none';
 							UI.Notify('Website saved successfully');
 						});
 					}
