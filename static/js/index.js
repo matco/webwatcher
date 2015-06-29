@@ -720,7 +720,7 @@ window.addEventListener(
 
 			//add websites
 			Websites.add({name : 'Example', url : 'http://www.example.org', texts : 'Example Domain'});
-			//TODO a multiple text like 'This domain is established to be used for illustrative examples in documents.'
+			//TODO add a multiple text like 'This domain is established to be used for illustrative examples in documents.'
 			Websites.add({name : 'Invalid', url : 'http://www.invalid-website.org', texts : 'Invalid website'});
 		}
 	}
