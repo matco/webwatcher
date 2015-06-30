@@ -134,7 +134,7 @@ def check(website, avoid_cache, timeout):
 		#if website was online at previous check
 		if website.online is None or website.online:
 			#create a new downtime
-			downtime = Downtime(parent=website, website=website.name, rationale=error)
+			downtime = Downtime(start=previous_update, parent=website, website=website.name, rationale=error)
 			downtime.put()
 			#warn subscribers only the first time website is detected as offline
 			warn(website.name + " is offline", error)
