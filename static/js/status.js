@@ -93,7 +93,7 @@ var Status = (function() {
 								}
 							}
 						);
-						xhr.open('DELETE', '/api/websites/' + selected_website_id + '/downtime/' + record.id, true);
+						xhr.open('DELETE', '/api/websites/' + selected_website_id + '/downtimes/' + record.id, true);
 						xhr.send();
 					}
 				}
