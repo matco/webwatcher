@@ -75,6 +75,7 @@ def check(website, avoid_cache, timeout):
 	if avoid_cache:
 		url += "&" if "?" in url else "?"
 		url += str(time.time())
+	#do check
 	try:
 		response = urlfetch.fetch(
 			url=url,
@@ -99,6 +100,15 @@ def check(website, avoid_cache, timeout):
 		error = "Deadline exceeded while trying to reach website: {0}".format(e.message)
 	except Exception as e:
 		error = "Unable to reach website for unknown reason: {0}".format(e)
+	#return error or None if there is no error
+	#TODO improve this
+	return error
+
+def monitor(website, avoid_cache, timeout):
+	error = check(website, avoid_cache, timeout)
+	#if website was previously online and there is now an error, check a second time to avoid false positive
+	if(website.online and error is not None):
+		error = check(website, avoid_cache, timeout)
 	#update website last update
 	now = datetime.datetime.now()
 	previous_update = website.update or now
@@ -290,7 +300,7 @@ class Check(webapp2.RequestHandler):
 		timeout = int(Setting.get_by_key_name("website_timeout").value)
 		#check retrieved websites
 		for website in websites:
-			response[website.name] = check(website, avoid_cache, timeout)
+			response[website.name] = monitor(website, avoid_cache, timeout)
 		#self.response.write(json.dumps(response))
 		self.response.write(json.dumps(websites, cls=JSONCustomEncoder))
 
