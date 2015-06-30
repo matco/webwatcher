@@ -383,6 +383,7 @@ class WebsitesResource(REST):
 	db_model_name = "Website"
 	require_authentication = {"GET" : False, "PUT" : True, "POST" : True, "DELETE" : True}
 
+	#override delete method to delete downtimes when deleting a website
 	def delete(self, key):
 		object = self.db_model.get_by_key_name(key)
 		#delete associated downtimes
@@ -391,7 +392,7 @@ class WebsitesResource(REST):
 			for downtime in downtimes:
 				downtime.delete()
 		#delete website itself
-		super(WebsiteResource, self).delete(key)
+		super(WebsitesResource, self).delete(key)
 
 class SubscribersResource(REST):
 	db_model = Subscriber
