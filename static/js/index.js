@@ -1,7 +1,7 @@
 'use strict';
 
-var Subscribers = Restify('/api/subscriber');
-var Websites = Restify('/api/website');
+var Subscribers = Restify('/api/subscribers');
+var Websites = Restify('/api/websites');
 
 window.addEventListener(
 	'load',

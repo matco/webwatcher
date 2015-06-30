@@ -93,7 +93,7 @@ var Status = (function() {
 								}
 							}
 						);
-						xhr.open('DELETE', '/api/website/' + selected_website_id + '/downtime/' + record.id, true);
+						xhr.open('DELETE', '/api/websites/' + selected_website_id + '/downtime/' + record.id, true);
 						xhr.send();
 					}
 				}
@@ -118,8 +118,8 @@ var Status = (function() {
 		Show : function update_states() {
 			websites_service.list(draw_websites);
 		},
-		Detail : function(key) {
-			selected_website_id = key;
+		Detail : function(website_id) {
+			selected_website_id = website_id;
 			var xhr = new XMLHttpRequest();
 			xhr.addEventListener(
 				'load',
@@ -164,8 +164,17 @@ var Status = (function() {
 							}
 						}
 					));
+				}
+			);
+			xhr.open('GET', '/api/websites/' + website_id, true);
+			xhr.send();
+			var downtimes_xhr = new XMLHttpRequest();
+			downtimes_xhr.addEventListener(
+				'load',
+				function(event) {
+					var downtimes = JSON.parse(event.target.responseText);
 					//calculate duration for each downtime
-					details.downtimes.forEach(function(downtime) {
+					downtimes.forEach(function(downtime) {
 						var duration;
 						if(downtime.start && downtime.stop) {
 							//TODO improve this as grid does the same job
@@ -174,11 +183,11 @@ var Status = (function() {
 						downtime.duration = duration;
 					});
 					//update downtimes grid
-					details_grid.render(new Grid.Datasource({data : details.downtimes}));
+					details_grid.render(new Grid.Datasource({data : downtimes}));
 				}
 			);
-			xhr.open('GET', '/api/website/' + key + '/details', true);
-			xhr.send();
+			downtimes_xhr.open('GET', '/api/websites/' + website_id + '/downtimes', true);
+			downtimes_xhr.send();
 			UI.OpenModal(document.getElementById('website_details'));
 		},
 		Init : function(Websites) {

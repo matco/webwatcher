@@ -379,7 +379,7 @@ class REST(CustomRequestHandler):
 			response = json.dumps({"message" : "{0} {1} deleted successfully".format(self.db_model_name, key)})
 			self.response.write(response)
 
-class WebsiteResource(REST):
+class WebsitesResource(REST):
 	db_model = Website
 	db_model_name = "Website"
 	require_authentication = {"GET" : False, "PUT" : True, "POST" : True, "DELETE" : True}
@@ -394,7 +394,7 @@ class WebsiteResource(REST):
 		#delete website itself
 		super(WebsiteResource, self).delete(key)
 
-class SubscriberResource(REST):
+class SubscribersResource(REST):
 	db_model = Subscriber
 	db_model_name = "Subscriber"
 	require_authentication = {"GET" : True, "PUT" : True, "DELETE" : True}
@@ -423,25 +423,18 @@ class WebsiteEnable(AuthenticatedRequestHandler):
 			self.error(404)
 			self.response.write(json.dumps({"message" : "No website with name {0}".format(name)}))
 
-class WebsiteDetails(CustomRequestHandler):
+class WebsiteDowntimes(CustomRequestHandler):
 
 	def get(self, name):
 		response = {}
 		website = Website.get_by_key_name(name)
 		if website is not None:
-			response["name"] = website.name
-			response["url"] = website.url
-			response["update"] = website.update
-			response["downtime"] = website.downtime
-			response["uptime"] = website.uptime
-			response["downtimes"] = Downtime.gql("WHERE website = :1 ORDER BY start DESC", website.name).fetch(limit=None)
-			#response["downtimes"] = Downtime.all().filter("website=", website.name).order("-start").fetch(limit=None)
-			self.response.write(json.dumps(response, cls=JSONCustomEncoder))
+			downtimes = Downtime.gql("WHERE website = :1 ORDER BY start DESC", website.name).fetch(limit=None)
+			#downtimes = Downtime.all().filter("website=", website.name).order("-start").fetch(limit=None)
+			self.response.write(json.dumps(downtimes, cls=JSONCustomEncoder))
 		else:
 			self.error(404)
 			self.response.write(json.dumps({"message" : "No website with name {0}".format(name)}))
-
-class WebsiteDowntime(CustomRequestHandler):
 
 	def delete(self, website_id, downtime_id):
 		website = Website.get_by_key_name(website_id)
@@ -461,20 +454,23 @@ secret_key = "".join(random.choice(string.ascii_letters + string.ascii_lowercase
 webapp_config = {}
 webapp_config["webapp2_extras.sessions"] = {"secret_key" : secret_key}
 
+website_regexp = "([A-Za-z0-9]+)"
+downtime_regexp = "([A-Za-z0-9]+)"
+
 application = webapp2.WSGIApplication([
 	("/api/status", Status),
 	("/api/authenticate", Authenticate),
 	("/api/configuration", Configuration),
-	("/api/configuration/(.*)", Configuration),
+	("/api/configuration/(.+)", Configuration),
 	("/api/recalculate", Recalculate),
 	("/api/check", Check),
-	("/api/check/([A-Za-z0-9]*)", Check),
-	("/api/website", WebsiteResource),
-	("/api/website/([A-Za-z0-9]+)", WebsiteResource),
-	("/api/website/([A-Za-z0-9]+)/disable", WebsiteDisable),
-	("/api/website/([A-Za-z0-9]+)/enable", WebsiteEnable),
-	("/api/website/([A-Za-z0-9]*)/details", WebsiteDetails),
-	("/api/website/([A-Za-z0-9]*)/downtime/([0-9]*)", WebsiteDowntime),
-	("/api/subscriber", SubscriberResource),
-	("/api/subscriber/(.+)", SubscriberResource),
+	("/api/check/" + website_regexp, Check),
+	("/api/websites", WebsitesResource),
+	("/api/websites/" + website_regexp, WebsitesResource),
+	("/api/websites/" + website_regexp + "/disable", WebsiteDisable),
+	("/api/websites/" + website_regexp + "/enable", WebsiteEnable),
+	("/api/websites/" + website_regexp + "/downtimes", WebsiteDowntimes),
+	("/api/websites/" + website_regexp + "/downtimes/" + downtime_regexp, WebsiteDowntimes),
+	("/api/subscribers", SubscribersResource),
+	("/api/subscribers/(.+)", SubscribersResource),
 ], debug=True, config=webapp_config)

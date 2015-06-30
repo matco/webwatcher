@@ -101,7 +101,7 @@ var Configuration = (function() {
 				callback();
 			}
 		);
-		xhr.open('GET', '/api/website/' + website + '/' + action, true);
+		xhr.open('GET', '/api/websites/' + website + '/' + action, true);
 		xhr.send();
 	}
 
