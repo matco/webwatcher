@@ -188,7 +188,7 @@ var Status = (function() {
 			);
 			downtimes_xhr.open('GET', '/api/websites/' + website_id + '/downtimes', true);
 			downtimes_xhr.send();
-			UI.OpenModal(document.getElementById('website_details'));
+			UI.OpenModal(document.getElementById('website_details'), true);
 		},
 		Init : function(Websites) {
 			websites_service = Websites;
