@@ -46,6 +46,20 @@ class Downtime(db.Model):
 	start = db.DateTimeProperty(required=True, auto_now_add=True)
 	stop = db.DateTimeProperty()
 
+class JSONCustomEncoder(json.JSONEncoder):
+	def default(self, object):
+		if object.__class__.__name__ == "Setting":
+			return {"id" : object.id, "value" : object.value}
+		if object.__class__.__name__ == "Subscriber":
+			return {"email" : object.email}
+		if object.__class__.__name__ == "Website":
+			return {"name" : object.name, "url" : object.url, "texts" : object.texts, "online" : object.online, "update" : object.update, "uptime" : object.uptime, "downtime" : object.downtime, "disabled" : object.disabled}
+		if object.__class__.__name__ == "Downtime":
+			return {"id" : object.key().id(), "rationale" : object.rationale, "start" : object.start, "stop" : object.stop}
+		if object.__class__.__name__ == "datetime":
+			return object.isoformat() + "Z"
+		return json.JSONEncoder.default(self, object)
+
 #warn about the problem
 def warn(subject, message):
 	#send e-mails
@@ -134,22 +148,7 @@ def check(website, avoid_cache, timeout):
 def hash_password(password):
 	return hashlib.sha256(password).hexdigest()
 
-#api
-class JSONCustomEncoder(json.JSONEncoder):
-	def default(self, object):
-		if object.__class__.__name__ == "Setting":
-			return {"id" : object.id, "value" : object.value}
-		if object.__class__.__name__ == "Subscriber":
-			return {"email" : object.email}
-		if object.__class__.__name__ == "Website":
-			return {"name" : object.name, "url" : object.url, "texts" : object.texts, "online" : object.online, "update" : object.update, "uptime" : object.uptime, "downtime" : object.downtime, "disabled" : object.disabled}
-		if object.__class__.__name__ == "Downtime":
-			return {"id" : object.key().id(), "rationale" : object.rationale, "start" : object.start, "stop" : object.stop}
-		if object.__class__.__name__ == "datetime":
-			return object.isoformat() + "Z"
-		return json.JSONEncoder.default(self, object)
-
-#appengine needs webpages
+#rest api
 class CustomRequestHandler(webapp2.RequestHandler):
 
 	def __init__(self, request, response):
@@ -399,45 +398,38 @@ class SubscribersResource(REST):
 	db_model_name = "Subscriber"
 	require_authentication = {"GET" : True, "PUT" : True, "DELETE" : True}
 
-class WebsiteDisable(AuthenticatedRequestHandler):
+class WebsiteAction(AuthenticatedRequestHandler):
 
-	def get(self, name):
-		website = Website.get_by_key_name(name)
+	def get(self, website_name):
+		website = Website.get_by_key_name(website_name)
 		if website is not None:
-			website.disabled = True
+			website.disabled = self.website_action == "disable"
 			website.put()
 			self.response.write(json.dumps({"message" : "Website {0} disabled successfully".format(website.name)}))
 		else:
 			self.error(404)
-			self.response.write(json.dumps({"message" : "No website with name {0}".format(name)}))
+			self.response.write(json.dumps({"message" : "No website with name {0}".format(website_name)}))
 
-class WebsiteEnable(AuthenticatedRequestHandler):
+class WebsiteDisable(WebsiteAction):
+	website_action = "disable"
 
-	def get(self, name):
-		website = Website.get_by_key_name(name)
-		if website is not None:
-			website.disabled = False
-			website.put()
-			self.response.write(json.dumps({"message" : "Website {0} enabled successfully".format(website.name)}))
-		else:
-			self.error(404)
-			self.response.write(json.dumps({"message" : "No website with name {0}".format(name)}))
+class WebsiteEnable(WebsiteAction):
+	website_action = "enable"
 
 class WebsiteDowntimes(CustomRequestHandler):
 
-	def get(self, name):
-		response = {}
-		website = Website.get_by_key_name(name)
+	def get(self, website_name):
+		website = Website.get_by_key_name(website_name)
 		if website is not None:
 			downtimes = Downtime.gql("WHERE website = :1 ORDER BY start DESC", website.name).fetch(limit=None)
 			#downtimes = Downtime.all().filter("website=", website.name).order("-start").fetch(limit=None)
 			self.response.write(json.dumps(downtimes, cls=JSONCustomEncoder))
 		else:
 			self.error(404)
-			self.response.write(json.dumps({"message" : "No website with name {0}".format(name)}))
+			self.response.write(json.dumps({"message" : "No website with name {0}".format(website_name)}))
 
-	def delete(self, website_id, downtime_id):
-		website = Website.get_by_key_name(website_id)
+	def delete(self, website_name, downtime_id):
+		website = Website.get_by_key_name(website_name)
 		if website is not None:
 			downtime = Downtime.get_by_id(int(downtime_id), website)
 			if downtime is not None:
@@ -448,7 +440,7 @@ class WebsiteDowntimes(CustomRequestHandler):
 				self.response.write(json.dumps({"message" : "No downtime with id {0}".format(downtime_id)}))
 		else:
 			self.error(404)
-			self.response.write(json.dumps({"message" : "No website with name {0}".format(website_id)}))
+			self.response.write(json.dumps({"message" : "No website with name {0}".format(website_name)}))
 
 secret_key = "".join(random.choice(string.ascii_letters + string.ascii_lowercase + string.punctuation) for x in range(20))
 webapp_config = {}
