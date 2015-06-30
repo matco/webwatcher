@@ -104,16 +104,16 @@ def check(website, avoid_cache, timeout):
 	previous_update = website.update or now
 	website.update = now
 	time_since_last_check = int((now - previous_update).total_seconds())
-	#website is online
+	#website is now online
 	if error is None:
 		#if website was aready online at previous check, increase uptime
 		if website.online:
 			website.uptime += int((now - previous_update).total_seconds())
 		#if website was previously offline
-		elif website.online is False:
+		else:
 			#update last downtime
 			downtime = Downtime.gql("WHERE website = :1 AND stop = NULL", website.name).get()
-			#downtime = Downtime.all().filter("website=", website.name).filter("stop =", None).get()
+			#downtime = Downtime.all().filter("website=", website.name).filter("stop=", None).get()
 			#TODO fix this as downtime should never be None
 			if downtime is not None:
 				downtime.stop = now
@@ -129,7 +129,7 @@ def check(website, avoid_cache, timeout):
 		website.put()
 		#return message to be displayed
 		return "{0} is fine".format(website.name);
-	#website is offline
+	#website is now offline
 	else:
 		#if website was online at previous check
 		if website.online is None or website.online:
