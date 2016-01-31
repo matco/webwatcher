@@ -116,7 +116,7 @@ def monitor(website, avoid_cache, timeout):
 	time_since_last_check = int((now - previous_update).total_seconds())
 	#website is now online
 	if error is None:
-		#if website was aready online at previous check, increase uptime
+		#if website was already online at previous check, increase uptime
 		if website.online:
 			website.uptime += int((now - previous_update).total_seconds())
 		#if website was previously offline
@@ -211,7 +211,7 @@ class Authenticate(CustomRequestHandler):
 
 	def delete(self):
 		del self.session["authenticated"]
-		self.response.write(json.dumps({"message" : "Logout successfull"}))
+		self.response.write(json.dumps({"message" : "Logout successful"}))
 
 class Configuration(CustomRequestHandler):
 
@@ -257,7 +257,7 @@ class Configuration(CustomRequestHandler):
 			#encrypt password
 			if id == "password":
 				value = hash_password(value)
-			#changing a setting required authentication exept for password the first time
+			#changing a setting required authentication except for password the first time
 			if "authenticated" in self.session or id == "password" and setting is None:
 				if setting is None:
 					setting = Setting(id=id, value=value)
