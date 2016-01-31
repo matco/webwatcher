@@ -131,7 +131,7 @@ def monitor(website, avoid_cache, timeout):
 				#increase website downtime (pessimistic vision, website has returned online between 2 checks)
 				website.downtime += time_since_last_check
 			else:
-				warn("Error while retrieving current downtime for " + website.name)
+				print "Error while retrieving current downtime for " + website.name
 			#warn subscribers
 			message = website.name + " is back online"
 			warn(message, message)
