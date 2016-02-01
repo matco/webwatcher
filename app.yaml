@@ -1,6 +1,6 @@
 application: gae-app-id
 runtime: python27
-version: 4
+version: 5
 api_version: 1
 threadsafe: true
 
