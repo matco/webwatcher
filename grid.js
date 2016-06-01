@@ -93,8 +93,8 @@ function Grid(parameters) {
 	//footer
 	this.footer = document.createFullElement('div', {'class' : 'grid_footer'});
 
-	var actions_bar = document.createFullElement('div', {'class' : 'grid_footer_actions'});
-	this.footer.appendChild(actions_bar);
+	var search_bar = document.createFullElement('div', {'class' : 'grid_footer_search'});
+	this.footer.appendChild(search_bar);
 
 	/*this.refreshButton = document.createFullElement('a');
 	this.refreshButton.appendChild(document.createFullElement('img', {'src' : this.path + 'arrow_refresh.png'}));
@@ -114,23 +114,16 @@ function Grid(parameters) {
 		}, 300);
 		search_label.appendChild(this.search_input);
 		search_form.appendChild(search_label);
-		actions_bar.appendChild(search_form);
+		search_bar.appendChild(search_form);
 	}
 
 	this.loading = document.createFullElement('img', {src : this.path + 'loading.png'});
-	actions_bar.appendChild(this.loading);
+	search_bar.appendChild(this.loading);
 
-	for(var i = 0; i < this.actions.length; i++) {
-		var action = this.actions[i];
-		var action_item;
-		if(String.isString(action.label)) {
-			action_item = document.createFullElement('a', {href : action.url, 'class' : 'button'}, action.label);
-		}
-		else {
-			action_item = action.label;
-		}
-		actions_bar.appendChild(action_item);
-	}
+	this.buttons = document.createFullElement('div', {'class' : 'grid_footer_buttons'});
+	this.footer.appendChild(this.buttons);
+
+	this.setActions(this.actions);
 
 	if(this.rowPerPage) {
 		//info
@@ -201,11 +194,28 @@ function Grid(parameters) {
 	this.container.clear();
 	this.container.appendChild(this.header);
 	this.container.appendChild(this.table);
-	//add footer only if there is something in it
-	if(this.enableSearch || this.rowPerPage || !this.actions.isEmpty()) {
-		this.container.appendChild(this.footer);
-	}
+	this.container.appendChild(this.footer);
+	//display footer only if there is something in it
+	this.footer.style.display = this.enableSearch || this.rowPerPage || !this.actions.isEmpty() ? 'block' : 'none';
 }
+
+Grid.prototype.setActions = function(actions) {
+	this.actions = actions;
+	this.buttons.clear();
+	for(var i = 0; i < this.actions.length; i++) {
+		var action = this.actions[i];
+		var action_item;
+		if(String.isString(action.label)) {
+			action_item = document.createFullElement('a', {href : action.url, 'class' : 'nbutton'}, action.label);
+		}
+		else {
+			action_item = action.label;
+		}
+		this.buttons.appendChild(action_item);
+	}
+	//display footer only if there is something in it
+	this.footer.style.display = this.enableSearch || this.rowPerPage || !this.actions.isEmpty() ? 'block' : 'none';
+};
 
 (function() {
 	function resort(grid) {
@@ -217,7 +227,7 @@ function Grid(parameters) {
 		for(i = 0; i < grid.columns.length; i++) {
 			column = grid.columns[i];
 			//only columns with data are sortable
-			if(column.data) {
+			if(column.data && !column.unsortable) {
 				var header_column = grid.head.firstChild.childNodes[i];
 				if(column.data === sorting_order.field) {
 					header_column.lastChild.style.display = 'inline';
@@ -245,7 +255,7 @@ function Grid(parameters) {
 			this.datasource.sortingOrders.pop();
 		}
 		resort(this);
-	}
+	};
 })();
 
 (function() {
@@ -267,13 +277,13 @@ function Grid(parameters) {
 					//var value = column.render ? record[i].rendered : record[i].raw;
 					var value = record[column.data];
 					if(typeof value === 'string') {
-						if(exact_matching && value === filter || value.nocaseContains(filter)) {
+						if(exact_matching && value === filter || value.nocaseIncludes(filter)) {
 							return true;
 						}
 					}
 					else if(typeof value === 'object') {
 						//this does not work anymore
-						if(exact_matching && value.innerHTML === filter || value.innerHTML.nocaseContains(filter)) {
+						if(exact_matching && value.innerHTML === filter || value.innerHTML.nocaseIncludes(filter)) {
 							return true;
 						}
 					}
@@ -301,7 +311,7 @@ Grid.prototype.unfilter = function() {
 Grid.prototype.render = function(datasource) {
 	this.loading.style.display = 'inline';
 
-	//keep a handle on datastore
+	//keep a handle on datasource
 	this.datasource = datasource;
 
 	//datasource is required and must be a grid datasource
@@ -317,46 +327,35 @@ Grid.prototype.render = function(datasource) {
 	}
 
 	//restore state
-	try {
-		var state = JSON.parse(sessionStorage.getItem(this.id));
-		this.start = state.start;
-		//TODO improve this
-		this.datasource.sortingOrders = state.datasource.sortingOrders;
-		/*for(var property in state) {
-			if(state.hasOwnProperty(property)) {
-				Object.getLastObjectInPath(this, property)[property] = state
-				this[property] = state[property];
-			}
-		}*/
-		if(this.enableSearch && state.search) {
-			this.search_input.value = state.search;
+	var serialized_state = sessionStorage.getItem(this.id);
+	if(serialized_state) {
+		try {
+			var state = JSON.parse(serialized_state);
+
+			this.start = state.start;
+			this.datasource.sortingOrders = state.datasource.sortingOrders;
+			//remove now invalid columns from restored sorting columns
+			this.datasource.sortingOrders = this.datasource.sortingOrders.filter(function(sorting_order) {
+				var column = this.columns.find(Array.objectFilter({data : sorting_order.field}));
+				return column && !column.unsortable;
+			}, this);
+
+			/*if(this.enableSearch && state.search) {
+				this.search_input.value = state.search;
+			}*/
+		} catch(exception) {
+			//unable to restore state
+			console.error('Unable to restore state for grid ' + this.id);
 		}
-	} catch(exception) {
-		//unable to restore state
-		//console.log('Unable to restore state');
 	}
 
-	//check and clean restored sorting columns
-	var sorting_orders = this.datasource.sortingOrders.slice();
-	for(var i = 0; i < sorting_orders.length; i++) {
-		//check sorting column validity
-		try {
-			this.columns.find(Array.objectFilter({data : sorting_orders[i].field}));
-		}
-		catch(exception) {
-			this.datasource.sortingOrders.removeElement(sorting_orders[i]);
-		}
-	}
+	//set arbitrary sorting order if needed
 	if(this.datasource.sortingOrders.isEmpty()) {
 		//find first sortable column
-		try {
-			var column = this.columns.find(function(column) {
-				return !column.unsortable;
-			});
+		var column = this.columns.find(Array.objectFilter({unsortable : true}).negatize());
+		//if there is a sortable column, add it in sorting orders
+		if(column) {
 			this.datasource.sortingOrders.push({field : column.data, descendant : false});
-		}
-		catch(exception) {
-			//nothing to do, there is no sortable column
 		}
 	}
 
@@ -368,6 +367,12 @@ Grid.prototype.render = function(datasource) {
 		if(that.start > that.datasource.getLength()) {
 			that.start = 0;
 		}
+
+		//update column ui
+		var column_index = that.columns.indexOf(that.columns.find(Array.objectFilter({data : that.datasource.sortingOrders[0].field})));
+		var header_column = that.head.childNodes[0].childNodes[column_index];
+		header_column.lastChild.style.display = 'inline';
+		header_column.lastChild.src = that.path + (that.datasource.sortingOrders[0].descendant ? 'bullet_arrow_down.png' : 'bullet_arrow_up.png');
 
 		//data may already be available
 		if(datasource.data) {
@@ -387,12 +392,6 @@ Grid.prototype.render = function(datasource) {
 					}
 				}
 			}
-
-			//update ui
-			var column_index = that.columns.indexOf(that.columns.find(Array.objectFilter({data : that.datasource.sortingOrders[0].field})));
-			var header_column = that.head.childNodes[0].childNodes[column_index];
-			header_column.lastChild.style.display = 'inline';
-			header_column.lastChild.src = that.path + (that.datasource.sortingOrders[0].descendant ? 'bullet_arrow_down.png' : 'bullet_arrow_up.png');
 
 			//do search if needed
 			if(that.enableSearch && that.search_input.value) {
@@ -519,7 +518,7 @@ Grid.prototype.draw = function() {
 			for(var i = 0; i < rendered_data.length; i++) {
 				var line = document.createElement('tr');
 				if(that.rowClass) {
-					line.classList.add(that.rowClass.call(undefined, rendered_data[i].record))
+					line.classList.add(that.rowClass.call(undefined, rendered_data[i].record));
 				}
 				else {
 					line.classList.add(i % 2 === 0 ? 'even' : 'odd');
@@ -528,15 +527,28 @@ Grid.prototype.draw = function() {
 					var column = that.columns[j];
 					var value = column.render ? rendered_data[i][j].rendered : rendered_data[i][j].raw;
 					var element = document.createFullElement('td');
+					//string are just appended
 					if(typeof value === 'string') {
-						element.innerHTML = value;
+						//value must not be falsy
+						if(value) {
+							element.appendChild(document.createTextNode(value));
+						}
 					}
+					//number are aligned to the right
 					else if(typeof value === 'number') {
 						element.setAttribute('style', 'text-align: right;');
 						element.appendChild(document.createTextNode(value + ''));
 					}
+					//boolean are converted to string
+					else if(typeof value === 'boolean') {
+						element.appendChild(document.createTextNode(value + ''));
+					}
+					//render function may have returned a HTML element
 					else {
-						element.appendChild(value || document.createTextNode(''));
+						//value must not be falsy
+						if(value) {
+							element.appendChild(value);
+						}
 					}
 					line.appendChild(element);
 				}
@@ -557,7 +569,7 @@ Grid.prototype.draw = function() {
 
 (function() {
 	function uncache(url) {
-		return url + (url.contains('?') ? '&' : '?') + 't=' + new Date().getTime();
+		return url + (url.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
 	}
 
 	Grid.Datasource = function(parameters) {
@@ -596,15 +608,35 @@ Grid.prototype.draw = function() {
 	Grid.Datasource.prototype.init = function(callback) {
 		var that = this;
 
-		function get_length() {
-			//if data have been provided, length is length of data array
-			if(that.data) {
-				that.length = that.data.length;
-				if(callback) {
-					callback.call();
-				}
+		//retrieve amount (length) of data
+
+		//datasources that must retrieve data
+		if(this.url) {
+			//datasources that can retrieve all data at once using an url
+			if(!this.lazy) {
+				var url = uncache(this.url);
+				var that = this;
+				var xhr = new XMLHttpRequest();
+				xhr.addEventListener(
+					'load',
+					function(event) {
+						if(event.target.status === 200) {
+							that.data = event.target.response;
+							that.length = that.data.length;
+							if(callback) {
+								callback.call();
+							}
+						}
+						else {
+							throw new Error('Unable to retrieve data : ' + xhr.status + ' ' + xhr.statusText);
+						}
+					}
+				);
+				xhr.open('GET', url, true);
+				xhr.responseType = 'json';
+				xhr.send();
 			}
-			//if only an url has been provided
+			//datasources that are lazy, length must be retrieved explicitly
 			else {
 				var xhr = new XMLHttpRequest();
 				xhr.onreadystatechange = function() {
@@ -624,28 +656,12 @@ Grid.prototype.draw = function() {
 				xhr.send();
 			}
 		}
-
-		//retrieve data if an url has been provided and grid is not lazy
-		if(this.url && !this.lazy) {
-			var url = uncache(this.url);
-			var that = this;
-			var xhr = new XMLHttpRequest();
-			xhr.onreadystatechange = function() {
-				if(xhr.readyState === 4) {
-					if(xhr.status === 200) {
-						that.data = JSON.parse(xhr.responseText);
-						get_length();
-					}
-					else {
-						throw new Error('Unable to retrieve data : ' + xhr.status + ' ' + xhr.statusText);
-					}
-				}
-			};
-			xhr.open('GET', url, true);
-			xhr.send();
-		}
 		else {
-			get_length();
+			//datasources that already have data
+			this.length = this.data.length;
+			if(callback) {
+				callback.call();
+			}
 		}
 	};
 
@@ -690,17 +706,17 @@ Grid.prototype.draw = function() {
 			callback.call(undefined, this.filteredData.slice(start, limit ? start + limit : undefined));
 		}
 		else {
+			//non lazy grids, data are already here
 			if(this.data) {
 				sort.call(this, this.data);
 				callback.call(undefined, this.data.slice(start, limit ? start + limit : undefined));
 			}
+			//lazy grids
 			else {
 				var url = uncache(this.url);
 				if(this.lazy) {
 					url += ('&start=' + start);
-					if(limit) {
-						url += ('&limit=' + limit);
-					}
+					url += ('&limit=' + limit);
 					if(!this.sortingOrders.isEmpty()) {
 						url += ('&order=' + this.sortingOrders[0].field);
 						url += ('&descendant=' + this.sortingOrders[0].descendant);

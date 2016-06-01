@@ -22,6 +22,9 @@
 	-webkit-user-select: none;
 	-moz-user-select: none;
 	user-select: none;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 .grid_content th img {
 	vertical-align: bottom;
@@ -40,7 +43,7 @@
 	background-color: #e8e8e8;
 }
 .grid_content td {
-	font-size: 12px;
+	font-size: 11px;
 	overflow: hidden;
 	border: 1px solid #c0c0c0;
 	padding: 3px;
@@ -52,60 +55,61 @@
 	font-size: 12px;
 	background-color: #ddd;
 	color: #555;
-	height: 20px;
+	height: 26px;
 	border: 1px solid #c0c0c0;
 	border-top: 0;
-	padding: 4px;
+	padding: 0 5px;
 	margin: 0;
 }
-.grid_footer_actions {
+.grid_footer_search {
+	margin: 5px;
 	float: left;
 }
-.grid_footer_actions input {
-	font-size: 11px;
-	color: #333;
-	border-radius: 3px;
-	background-color: #fff;
-	border: 1px solid #999;
+.grid_footer_search input {
+	font-size: 12px;
+	padding: 0 2px;
+	border-radius: 2px;
+	border: 1px solid #C0C0C0;
 }
-.grid_footer_actions .button {
+.grid_footer_search img {
+	vertical-align: middle;
+	padding: 0 1px;
+	margin-bottom: 1px;
+	margin-right: 10px;
+}
+.grid_footer_buttons {
+	margin: 5px;
+	float: left;
+}
+.grid_footer_buttons .button {
 	color: #484848;
 	font-size: 12px;
 	font-weight: bold;
-	font-family: Helvetica, Arial, sans-serif;
 	text-decoration: none;
-	background-color: #F7F7F7;
-	background-image: -moz-linear-gradient(top, #F7F7F7, #D1D1D1);
-	background-image: -webkit-linear-gradient(top, #F7F7F7, #D1D1D1);
+	background-color: #f7f7f7;
+	background-image: linear-gradient(to bottom, #f7f7f7, #d1d1d1);
 	border: 1px solid #7F7F7F;
 	border-radius: 2px;
 	box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 	padding: 1px 9px;
 	cursor: pointer;
 }
-.grid_footer_actions .button:hover {
+.grid_footer_buttons .button:hover {
 	background-color: #ddd;
-	background-image: -moz-linear-gradient(top, #ddd, #D1D1D1);
-	background-image: -webkit-linear-gradient(top, #ddd, #D1D1D1);
-}
-.grid_footer_actions img {
-	vertical-align: middle;
-	padding: 0 1px;
-	margin-bottom: 1px;
-	margin-right: 10px;
+	background-image: linear-gradient(to bottom, #ddd, #d1d1d1);
 }
 .grid_footer_controls {
-	background-color: #F7F7F7;
-	background-image: -moz-linear-gradient(top, #F7F7F7, #D1D1D1);
-	background-image: -webkit-linear-gradient(top, #F7F7F7, #D1D1D1);
+	background-color: #f7f7f7;
+	background-image: linear-gradient(to bottom, #f7f7f7, #d1d1d1);
 	border: 1px solid #7F7F7F;
 	border-radius: 2px;
 	box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 	float: right;
+	margin: 3px;
 }
 .grid_footer_controls a {
 	float: left;
-	border-right: 1px solid #7F7F7F;
+	border-right: 1px solid #7f7f7f;
 	height: 18px;
 	width: 20px;
 	background-repeat: no-repeat;
@@ -113,8 +117,7 @@
 }
 .grid_footer_controls a:hover {
 	background-color: #ddd;
-	background-image: -moz-linear-gradient(top, #ddd, #D1D1D1);
-	background-image: -webkit-linear-gradient(top, #ddd, #D1D1D1);
+	background-image: linear-gradient(to bottom, #ddd, #d1d1d1);
 }
 .grid_footer_controls a.control_first {
 	background-image: url(resultset_first.png);
@@ -130,6 +133,6 @@
 	border: 0;
 }
 .grid_footer_info {
-	margin-top: 2px;
+	margin: 5px;
 	float: right;
 }
