@@ -3,15 +3,15 @@ html {
 	width: 100%;
 	padding: 0;
 	margin: 0;
+	font-family: Verdana;
+	font-size: 80%; /*let users choose their own font size, but decrease this size a little bit as most browsers have default font size set to 16px*/
 }
 body {
 	height: 100%;
 	width: 100%;
 	padding: 0;
 	margin: 0;
-	font-family: Verdana;
-	font-size: 12px;
-	background-color: #F5F5F5;
+	background-color: #f5f5f5;
 	color: #333;
 }
 header {
@@ -27,7 +27,7 @@ header {
 }
 header > h1 {
 	float: left;
-	font-size: 15px;
+	font-size: 1.2rem;
 	margin: 5px 60px 0 5px;
 }
 header > ul {
@@ -47,8 +47,6 @@ header > ul > li > a {
 	padding: 6px 10px 0 10px;
 	color: #ddd;
 	vertical-align: middle;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
 }
 header > ul > li > a:hover:not(.selected) {
@@ -194,17 +192,15 @@ input[type="checkbox"] {
 	margin: 0;
 	padding: 10px;
 	text-align: right;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
 }
 
 .error {
 	padding: 2px 8px;
 	border-radius: 5px;
-	background-color: #F2DEDE;
-	border: 1px solid #EED3D7;
-	color: #B94A48;
+	background-color: #f2dede;
+	border: 1px solid #eed3d7;
+	color: #b94a48;
 }
 .error:empty {
 	display: none;
@@ -227,8 +223,6 @@ input[type="checkbox"] {
 	width: 100%;
 	margin: 30px 0 0 0;
 	padding: 0 0 0 10px;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
 }
 #config > aside > ul > li {
@@ -236,7 +230,7 @@ input[type="checkbox"] {
 	padding: 5px 10px;
 }
 #config > aside > ul > li.selected {
-	background-color: #F5F5F5;
+	background-color: #f5f5f5;
 	border-radius: 5px 0 0 5px;
 }
 #config > div {
@@ -260,14 +254,15 @@ input[type="checkbox"] {
 	padding: 10px;
 }
 #status .na {
-	background-color: #D9EDF7;
+	background-color: #d9edf7;
 }
 #status .ok {
-	background-color: #DFF0D8;
+	background-color: #dff0d8;
 }
 #status .nok {
-	background-color: #F2DEDE;
+	background-color: #f2dede;
 }
+
 #website_details {
 	width: 1000px;
 	height: 380px;
