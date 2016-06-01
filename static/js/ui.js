@@ -32,11 +32,11 @@ UI.StopLoading = function() {
 		notification.addEventListener('oanimationend', hide_after_animation);
 	});
 
-	//remember if notification permission has been requested to avoir asking to the user more than once
+	//remember if notification permission has been requested to avoid asking to the user more than once
 	var notification_permission_requested = false;
 
 	UI.Notify = function(message, options) {
-		//ask for permission if user has not explicity denied nor granted notification (permission can be default or undefined)
+		//ask for permission if user has not explicitly denied nor granted notification (permission can be default or undefined)
 		if(!['granted', 'denied'].contains(Notification.permission) && !notification_permission_requested) {
 			notification_permission_requested = true;
 			Notification.requestPermission(function(status) {
