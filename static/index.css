@@ -171,10 +171,10 @@ input[type="checkbox"] {
 .modal {
 	display: none;
 	position: fixed;
-	height: 150px;
-	width: 350px;
+	height: 200px;
+	width: 400px;
 	top: 20%;
-	left: calc(50% - 175px);
+	left: calc(50% - 200px);
 	z-index: 11;
 	padding: 10px;
 	background-color: white;
