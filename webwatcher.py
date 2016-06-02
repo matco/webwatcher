@@ -446,7 +446,7 @@ class WebsiteDisable(WebsiteAction):
 class WebsiteEnable(WebsiteAction):
 	website_action = "enable"
 
-class WebsiteDowntimes(CustomRequestHandler):
+class WebsiteDowntimes(AuthenticatedRequestHandler):
 
 	def get(self, website_name):
 		website = Website.get_by_key_name(website_name)
