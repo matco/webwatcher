@@ -14,17 +14,25 @@ window.addEventListener(
 		xhr.addEventListener(
 			'load',
 			function(event) {
+				//application must be initialized
 				if(event.target.status === 403) {
-					location.hash = '#';
-					UI.OpenModal(document.getElementById('initialization'), true);
+					Authentication.OpenInitialization(function() {
+						document.getElementById('content').style.display = 'block';
+						location.hash = '#section=config';
+						Router.Init();
+					});
+				}
+				//application is protected
+				else if(event.target.status === 401) {
+					//location.hash = '#';
+					Authentication.Open(false, function() {
+						document.getElementById('content').style.display = 'block';
+						Router.Init();
+					});
 				}
 				else {
 					document.getElementById('content').style.display = 'block';
-					location.hash = '#section=status';
-					//trigger manually hash change event
-					var event = document.createEvent('UIEvent');
-					event.initUIEvent('hashchange', true, true, this.window, 1);
-					window.dispatchEvent(event);
+					Router.Init();
 				}
 			}
 		);
