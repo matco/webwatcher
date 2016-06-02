@@ -339,7 +339,7 @@ class REST(CustomRequestHandler):
 		session_store = sessions.get_store(request=self.request)
 		self.session = session_store.get_session()
 		try:
-			if not self.require_authentication[self.request.method] or "authenticated" in self.session:
+			if not self.require_authentication(self.request.method) or "authenticated" in self.session:
 				webapp2.RequestHandler.dispatch(self, *args, **kwargs)
 			else:
 				self.error(401)
@@ -400,7 +400,14 @@ class REST(CustomRequestHandler):
 class WebsitesResource(REST):
 	db_model = Website
 	db_model_name = "Website"
-	require_authentication = {"GET" : False, "PUT" : True, "POST" : True, "DELETE" : True}
+	authentication_requirements = {"GET" : False, "PUT" : True, "POST" : True, "DELETE" : True}
+
+	def require_authentication(self, method):
+		protect_app = Setting.get_by_key_name("protect_app")
+		protect_app = protect_app is not None and protect_app.value == "True"
+		if protect_app:
+			return True
+		return self.authentication_requirements[method]
 
 	#override delete method to delete downtimes when deleting a website
 	def delete(self, key):
@@ -416,7 +423,10 @@ class WebsitesResource(REST):
 class SubscribersResource(REST):
 	db_model = Subscriber
 	db_model_name = "Subscriber"
-	require_authentication = {"GET" : True, "PUT" : True, "DELETE" : True}
+	authentication_requirements = {"GET" : True, "PUT" : True, "DELETE" : True}
+
+	def require_authentication(self, method):
+		return self.authentication_requirements[method]
 
 class WebsiteAction(AuthenticatedRequestHandler):
 
