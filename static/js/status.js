@@ -38,7 +38,10 @@ var Status = (function() {
 	}
 
 	function render_actions(value, record) {
-		return document.createFullElement('a', {href : '#section=status&details=' + record.name, title : 'View website details'}, 'Details');
+		if(Authentication.IsAuthenticated()) {
+			return document.createFullElement('a', {href : '#section=status&details=' + record.name, title : 'View website details'}, 'Details');
+		}
+		return document.createElement('span');
 	}
 
 	function draw_websites(websites) {
@@ -71,36 +74,33 @@ var Status = (function() {
 	}
 
 	function render_details_action(value, record) {
-		if(Authentication.IsAuthenticated()) {
-			var element = document.createFullElement(
-				'a',
-				{href : '#', title : 'Delete downtime'},
-				'Delete',
-				{
-					click : function(event) {
-						Event.stop(event);
-						var xhr = new XMLHttpRequest();
-						xhr.addEventListener(
-							'load',
-							function(xhr_event) {
-								if(xhr_event.target.status === 200) {
-									details_grid.datasource.data.removeElement(record);
-									details_grid.render(details_grid.datasource);
-									UI.Notify('Downtime has been deleted successfully');
-								}
-								else {
-									UI.Notify('Unable to delete downtime');
-								}
+		var element = document.createFullElement(
+			'a',
+			{href : '#', title : 'Delete downtime'},
+			'Delete',
+			{
+				click : function(event) {
+					Event.stop(event);
+					var xhr = new XMLHttpRequest();
+					xhr.addEventListener(
+						'load',
+						function(xhr_event) {
+							if(xhr_event.target.status === 200) {
+								details_grid.datasource.data.removeElement(record);
+								details_grid.render(details_grid.datasource);
+								UI.Notify('Downtime has been deleted successfully');
 							}
-						);
-						xhr.open('DELETE', '/api/websites/' + selected_website_id + '/downtimes/' + record.id, true);
-						xhr.send();
-					}
+							else {
+								UI.Notify('Unable to delete downtime');
+							}
+						}
+					);
+					xhr.open('DELETE', '/api/websites/' + selected_website_id + '/downtimes/' + record.id, true);
+					xhr.send();
 				}
-			);
-			return element;
-		}
-		return document.createElement('span');
+			}
+		);
+		return element;
 	}
 
 	function update_website_details_age(date) {

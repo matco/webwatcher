@@ -157,6 +157,7 @@ var Configuration = (function() {
 				'load',
 				function(event) {
 					var settings = JSON.parse(event.target.responseText);
+					configuration['protect_app'].checked = settings.protect_app === 'True';
 					configuration['sender_email'].value = settings.sender_email || '';
 					configuration['website_timeout'].value = settings.website_timeout || '';
 					configuration['avoid_cache'].checked = settings.avoid_cache === 'True';
@@ -191,6 +192,7 @@ var Configuration = (function() {
 					);
 					var form_data = new FormData();
 					form_data.append('configuration', JSON.stringify({
+						protect_app : this['protect_app'].checked,
 						sender_email : this['sender_email'].value,
 						website_timeout : this['website_timeout'].value,
 						avoid_cache : this['avoid_cache'].checked

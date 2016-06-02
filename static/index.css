@@ -113,7 +113,7 @@ form {
 }
 label > span {
 	float: left;
-	width: 120px;
+	width: 160px;
 	margin-top: 4px;
 }
 input {
@@ -171,10 +171,10 @@ input[type="checkbox"] {
 .modal {
 	display: none;
 	position: fixed;
-	height: 150px;
-	width: 300px;
+	height: 200px;
+	width: 400px;
 	top: 20%;
-	left: calc(50% - 150px);
+	left: calc(50% - 200px);
 	z-index: 11;
 	padding: 10px;
 	background-color: white;

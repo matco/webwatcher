@@ -2,7 +2,9 @@
 
 var Authentication = (function() {
 	var authenticated = false;
+
 	var authentication_callback;
+	var initialization_callback;
 
 	function login() {
 		authenticated = true;
@@ -15,7 +17,8 @@ var Authentication = (function() {
 		authenticated = false;
 		document.getElementById('logout').style.display = 'none';
 		document.getElementById('login').style.display = 'block';
-		location.hash = '#status';
+		//TODO improve this
+		window.location.reload();
 	}
 
 	return {
@@ -24,14 +27,24 @@ var Authentication = (function() {
 				callback();
 			}
 			else {
-				authentication_callback = callback;
-				var authentication_form = document.getElementById('authentication');
-				UI.OpenModal(authentication_form, true);
-				authentication_form['password'].focus();
+				Authentication.Open(true, callback);
 			}
 		},
 		IsAuthenticated : function() {
 			return authenticated;
+		},
+		Open : function(cancellable, callback) {
+			authentication_callback = callback;
+			document.getElementById('authentication_cancel').style.display = cancellable ? 'inline' : 'none';
+			var authentication_form = document.getElementById('authentication');
+			UI.OpenModal(authentication_form, true);
+			authentication_form['password'].focus();
+		},
+		OpenInitialization : function(callback) {
+			initialization_callback = callback;
+			var initialization_form = document.getElementById('initialization');
+			UI.OpenModal(initialization_form, true);
+			initialization_form['password_1'].focus();
 		},
 		Init : function() {
 			document.getElementById('initialization').addEventListener(
@@ -53,9 +66,10 @@ var Authentication = (function() {
 							}
 							else {
 								login();
-								document.getElementById('content').style.display = 'block';
-								location.hash = '#section=config';
-								UI.CloseModal(document.getElementById('initialization'));
+								if(initialization_callback) {
+									initialization_callback();
+									initialization_callback = undefined;
+								}
 							}
 						}
 					);
@@ -107,7 +121,7 @@ var Authentication = (function() {
 			document.getElementById('login').addEventListener(
 				'click',
 				function() {
-					UI.OpenModal(document.getElementById('authentication'), true);
+					Authentication.Open(true);
 				}
 			);
 

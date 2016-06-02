@@ -167,6 +167,7 @@ class CustomRequestHandler(webapp2.RequestHandler):
 		self.response.headers["Content-Type"] = "application/json"
 
 	def dispatch(self, *args, **kwargs):
+		#retrieve session
 		session_store = sessions.get_store(request=self.request)
 		self.session = session_store.get_session()
 		try:
@@ -177,6 +178,7 @@ class CustomRequestHandler(webapp2.RequestHandler):
 class AuthenticatedRequestHandler(CustomRequestHandler):
 
 	def dispatch(self, *args, **kwargs):
+		#retrieve session
 		session_store = sessions.get_store(request=self.request)
 		self.session = session_store.get_session()
 		if "authenticated" in self.session and self.session["authenticated"]:
@@ -188,12 +190,21 @@ class AuthenticatedRequestHandler(CustomRequestHandler):
 class Status(CustomRequestHandler):
 
 	def get(self):
-		setting = Setting.get_by_key_name("password")
-		if setting is None:
+		#check if application has been initialized
+		password = Setting.get_by_key_name("password")
+		if password is None:
 			self.error(403)
-			self.response.write(json.dumps({"message" : "Application must be configured"}))
-		elif "authenticated" not in self.session:
+			self.response.write(json.dumps({"message" : "Application must be initialized"}))
+			return
+		#check if application is protected
+		protect_app = Setting.get_by_key_name("protect_app")
+		protect_app = protect_app is not None and protect_app.value == "True"
+		if protect_app:
 			self.error(401)
+			self.response.write(json.dumps({"message" : "Application is protected"}))
+			return
+		#return authentication status
+		if "authenticated" not in self.session:
 			self.response.write(json.dumps({"message" : "You are not authenticated yet"}))
 		else:
 			self.response.write(json.dumps({"message" : "You are already authenticated"}))
@@ -285,7 +296,7 @@ class Configuration(CustomRequestHandler):
 			self.error(401)
 			self.response.write(json.dumps({"message" : "You must be authenticated to perform this action"}))
 
-class Check(webapp2.RequestHandler):
+class Check(CustomRequestHandler):
 
 	def get(self, name=None):
 		response = {}
@@ -330,7 +341,7 @@ class REST(CustomRequestHandler):
 		session_store = sessions.get_store(request=self.request)
 		self.session = session_store.get_session()
 		try:
-			if not self.require_authentication[self.request.method] or "authenticated" in self.session:
+			if not self.require_authentication(self.request.method) or "authenticated" in self.session:
 				webapp2.RequestHandler.dispatch(self, *args, **kwargs)
 			else:
 				self.error(401)
@@ -391,7 +402,14 @@ class REST(CustomRequestHandler):
 class WebsitesResource(REST):
 	db_model = Website
 	db_model_name = "Website"
-	require_authentication = {"GET" : False, "PUT" : True, "POST" : True, "DELETE" : True}
+	authentication_requirements = {"GET" : False, "PUT" : True, "POST" : True, "DELETE" : True}
+
+	def require_authentication(self, method):
+		protect_app = Setting.get_by_key_name("protect_app")
+		protect_app = protect_app is not None and protect_app.value == "True"
+		if protect_app:
+			return True
+		return self.authentication_requirements[method]
 
 	#override delete method to delete downtimes when deleting a website
 	def delete(self, key):
@@ -407,7 +425,10 @@ class WebsitesResource(REST):
 class SubscribersResource(REST):
 	db_model = Subscriber
 	db_model_name = "Subscriber"
-	require_authentication = {"GET" : True, "PUT" : True, "DELETE" : True}
+	authentication_requirements = {"GET" : True, "PUT" : True, "DELETE" : True}
+
+	def require_authentication(self, method):
+		return self.authentication_requirements[method]
 
 class WebsiteAction(AuthenticatedRequestHandler):
 
@@ -427,7 +448,7 @@ class WebsiteDisable(WebsiteAction):
 class WebsiteEnable(WebsiteAction):
 	website_action = "enable"
 
-class WebsiteDowntimes(CustomRequestHandler):
+class WebsiteDowntimes(AuthenticatedRequestHandler):
 
 	def get(self, website_name):
 		website = Website.get_by_key_name(website_name)
