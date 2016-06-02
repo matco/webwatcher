@@ -167,6 +167,7 @@ class CustomRequestHandler(webapp2.RequestHandler):
 		self.response.headers["Content-Type"] = "application/json"
 
 	def dispatch(self, *args, **kwargs):
+		#retrieve session
 		session_store = sessions.get_store(request=self.request)
 		self.session = session_store.get_session()
 		try:
@@ -177,6 +178,7 @@ class CustomRequestHandler(webapp2.RequestHandler):
 class AuthenticatedRequestHandler(CustomRequestHandler):
 
 	def dispatch(self, *args, **kwargs):
+		#retrieve session
 		session_store = sessions.get_store(request=self.request)
 		self.session = session_store.get_session()
 		if "authenticated" in self.session and self.session["authenticated"]:
@@ -294,7 +296,7 @@ class Configuration(CustomRequestHandler):
 			self.error(401)
 			self.response.write(json.dumps({"message" : "You must be authenticated to perform this action"}))
 
-class Check(webapp2.RequestHandler):
+class Check(CustomRequestHandler):
 
 	def get(self, name=None):
 		response = {}
