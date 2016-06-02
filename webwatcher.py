@@ -188,12 +188,21 @@ class AuthenticatedRequestHandler(CustomRequestHandler):
 class Status(CustomRequestHandler):
 
 	def get(self):
-		setting = Setting.get_by_key_name("password")
-		if setting is None:
+		#check if application has been initialized
+		password = Setting.get_by_key_name("password")
+		if password is None:
 			self.error(403)
-			self.response.write(json.dumps({"message" : "Application must be configured"}))
-		elif "authenticated" not in self.session:
+			self.response.write(json.dumps({"message" : "Application must be initialized"}))
+			return
+		#check if application is protected
+		protect_app = Setting.get_by_key_name("protect_app")
+		protect_app = protect_app is not None and protect_app.value == "True"
+		if protect_app:
 			self.error(401)
+			self.response.write(json.dumps({"message" : "Application is protected"}))
+			return
+		#return authentication status
+		if "authenticated" not in self.session:
 			self.response.write(json.dumps({"message" : "You are not authenticated yet"}))
 		else:
 			self.response.write(json.dumps({"message" : "You are already authenticated"}))
