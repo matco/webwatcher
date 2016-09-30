@@ -206,7 +206,7 @@ Grid.prototype.setActions = function(actions) {
 		var action = this.actions[i];
 		var action_item;
 		if(String.isString(action.label)) {
-			action_item = document.createFullElement('a', {href : action.url, 'class' : 'nbutton'}, action.label);
+			action_item = document.createFullElement('a', {href : action.url, 'class' : 'button'}, action.label);
 		}
 		else {
 			action_item = action.label;
