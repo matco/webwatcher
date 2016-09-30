@@ -21,12 +21,14 @@ var Status = (function() {
 	}
 
 	function render_name(value, record) {
-		var element = document.createFullElement('span');
+		var title;
 		if(record.disabled) {
-			element.appendChild(document.createFullElement('img', {src : '/images/bullet_black.png', alt : 'Disabled', title : 'Disabled', style : 'vertical-align: bottom;'}));
+			title = 'Disabled';
 		}
-		element.appendChild(document.createTextNode(value));
-		return element;
+		else {
+			title = record.online === null ? 'Not checked yet' : record.online ? 'Online' : 'Offline';
+		}
+		return document.createFullElement('span', {title : title}, value);
 	}
 
 	function render_time(value, record) {
@@ -200,7 +202,10 @@ var Status = (function() {
 				path : '/js/grid/',
 				rowPerPage : undefined,
 				rowClass : function(record) {
-					return record.online === null ? 'na' : record.online ? 'ok' : 'nok';
+					if(record.disabled) {
+						return 'disabled';
+					}
+					return record.online === null ? 'unchecked' : record.online ? 'online' : 'offline';
 				}
 			});
 
