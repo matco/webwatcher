@@ -12,6 +12,8 @@ from google.appengine.api import urlfetch
 from google.appengine.api import mail
 from google.appengine.ext import db
 
+CHECK_TRIES = 2
+
 #model
 class NamedModel(db.Model):
 	def __init__(self, *args, **kwargs):
@@ -106,8 +108,11 @@ def check(website, avoid_cache, timeout):
 
 def monitor(website, avoid_cache, timeout):
 	error = check(website, avoid_cache, timeout)
-	#if website was previously online and there is now an error, check a second time to avoid false positive
-	if(website.online and error is not None):
+	#if website was previously online and there is now an error, check again to avoid false positive
+	i = 0
+	while(website.online and error is not None and i < CHECK_TRIES):
+		i += 1
+		time.sleep(1)
 		error = check(website, avoid_cache, timeout)
 	#update website last update
 	now = datetime.datetime.now()
