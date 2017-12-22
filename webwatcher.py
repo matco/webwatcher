@@ -138,7 +138,7 @@ def monitor(website, avoid_cache, timeout):
 		website.online = True
 		website.put()
 		#return message to be displayed
-		return "{0} is fine".format(website.name);
+		return "{0} is fine".format(website.name)
 	#website is now offline
 	else:
 		#if website was online at previous check
@@ -233,7 +233,7 @@ class Configuration(CustomRequestHandler):
 				configuration = {}
 				for object in objects:
 					if object.id != "password":
-						configuration[object.id] = object.value;
+						configuration[object.id] = object.value
 				self.response.write(json.dumps(configuration))
 			else:
 				setting = Setting.get_by_key_name(id)
@@ -256,7 +256,7 @@ class Configuration(CustomRequestHandler):
 					if setting is None:
 						setting = Setting(id=id, value=value)
 					else:
-						setting.value = value;
+						setting.value = value
 					setting.put()
 				self.response.write(json.dumps({"message" : "Configuration updated successfully"}))
 			else:
@@ -273,7 +273,7 @@ class Configuration(CustomRequestHandler):
 				if setting is None:
 					setting = Setting(id=id, value=value)
 				else:
-					setting.value = value;
+					setting.value = value
 				setting.put()
 				self.response.write(json.dumps({"message" : "Setting {0} set to {0}".format(id, value)}))
 				#authenticate user
@@ -368,7 +368,7 @@ class REST(CustomRequestHandler):
 			self.response.write(response)
 		else:
 			object = self.db_model(**parameters)
-			object.put();
+			object.put()
 			response = json.dumps({"message" : "{0} {1} added successfully".format(self.db_model_name, key)})
 			self.response.write(response)
 
@@ -384,7 +384,7 @@ class REST(CustomRequestHandler):
 			#warning "private" fields may be updated
 			for attribue, value in parameters.iteritems():
 				setattr(object, attribue, value)
-			object.put();
+			object.put()
 			response = json.dumps({"message" : "{0} {1} updated successfully".format(self.db_model_name, key)})
 			self.response.write(response)
 
