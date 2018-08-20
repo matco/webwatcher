@@ -466,7 +466,7 @@ class WebsiteDowntimes(AuthenticatedRequestHandler):
 			else:
 				self.response.headers["Content-Type"] = "text/csv"
 				self.response.headers["Content-Disposition"] = "attachment; filename=\"" + website_name + "_downtimes.csv\""
-				fieldnames = ["id", "rationale", "start", "stop"]
+				fieldnames = ["id", "start", "stop", "rationale"]
 				writer = csv.DictWriter(self.response, fieldnames=fieldnames)
 				writer.writeheader()
 				for downtime in downtimes:
