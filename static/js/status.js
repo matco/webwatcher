@@ -170,6 +170,17 @@ var Status = (function() {
 			);
 			xhr.open('GET', '/api/websites/' + website_id, true);
 			xhr.send();
+
+			//prepare grid with custom export link
+			details_grid = new Grid({
+				container : document.getElementById('website_details_downtimes'),
+				columns : details_columns,
+				path : '/js/grid/',
+				rowPerPage : 10,
+				actions : [
+					{label : 'Export', url : '/api/websites/' + website_id + '/downtimes'}
+				]
+			});
 			var downtimes_xhr = new XMLHttpRequest();
 			downtimes_xhr.addEventListener(
 				'load',
@@ -189,6 +200,7 @@ var Status = (function() {
 				}
 			);
 			downtimes_xhr.open('GET', '/api/websites/' + website_id + '/downtimes', true);
+			downtimes_xhr.setRequestHeader('Accept', 'application/json');
 			downtimes_xhr.send();
 			UI.OpenModal(document.getElementById('website_details'), true);
 		},
@@ -236,14 +248,6 @@ var Status = (function() {
 					xhr.send();
 				}
 			);
-
-			//details
-			details_grid = new Grid({
-				container : document.getElementById('website_details_downtimes'),
-				columns : details_columns,
-				path : '/js/grid/',
-				rowPerPage : 10
-			});
 		}
 	};
 })();

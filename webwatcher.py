@@ -1,6 +1,7 @@
 import datetime
 import time
 import json
+import csv
 import urllib2
 import webapp2
 import logging
@@ -460,7 +461,16 @@ class WebsiteDowntimes(AuthenticatedRequestHandler):
 		if website is not None:
 			downtimes = Downtime.gql("WHERE website = :1 ORDER BY start DESC", website.name).fetch(limit=None)
 			#downtimes = Downtime.all().filter("website=", website.name).order("-start").fetch(limit=None)
-			self.response.write(json.dumps(downtimes, cls=JSONCustomEncoder))
+			if self.request.headers["Accept"] == "application/json":
+				self.response.write(json.dumps(downtimes, cls=JSONCustomEncoder))
+			else:
+				self.response.headers["Content-Type"] = "text/csv"
+				self.response.headers["Content-Disposition"] = "attachment; filename=\"" + website_name + "_downtimes.csv\""
+				fieldnames = ["id", "rationale", "start", "stop"]
+				writer = csv.DictWriter(self.response, fieldnames=fieldnames)
+				writer.writeheader()
+				for downtime in downtimes:
+					writer.writerow({"id" : downtime.key().id(), "start" : downtime.start, "stop" : downtime.stop, "rationale" : downtime.rationale})
 		else:
 			self.error(404)
 			self.response.write(json.dumps({"message" : "No website with name {0}".format(website_name)}))
