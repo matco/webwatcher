@@ -1,0 +1,5 @@
+gunicorn
+requests
+google-cloud-ndb
+flask
+flask_restful

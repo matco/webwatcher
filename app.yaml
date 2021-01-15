@@ -1,12 +1,12 @@
-runtime: python27
-api_version: 1
-threadsafe: true
+runtime: python38
 automatic_scaling:
   min_instances: 1
+entrypoint: gunicorn -b :$PORT main:application
 
 handlers:
 - url: /api/.*
-  script: webwatcher.application
+  secure: always
+  script: auto
 - url: /
   static_files: static/index.html
   upload: static/index.html
