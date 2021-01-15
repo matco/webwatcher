@@ -1,6 +1,8 @@
 runtime: python27
 api_version: 1
 threadsafe: true
+automatic_scaling:
+  min_instances: 1
 
 handlers:
 - url: /api/.*
