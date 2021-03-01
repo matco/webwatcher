@@ -91,26 +91,56 @@
 									your password is required to view websites status
 								</label>
 							</p>
-							<p>
-								<label>
-									<span>Sender e-mail</span>
-									<input name="sender_email" type="email" required="required" />
-								</label>
-							</p>
-							<p>
-								<label>
-									<span>Timeout</span>
-									<input name="website_timeout" type="number" min="1" required="required" />
-									in seconds
-								</label>
-							</p>
-							<p>
-								<label>
-									<span>Avoid cache</span>
-									<input name="avoid_cache" type="checkbox" />
-									add a timestamp to website URLs (warning, this could trigger false positive on some websites)
-								</label>
-							</p>
+							<fieldset>
+								<legend>Email settings</legend>
+								<p>
+									<label>
+										<span>SMTP host</span>
+										<input name="smtp_host" required="required" style="width: 30rem" />
+									</label>
+								</p>
+								<p>
+									<label>
+										<span>SMTP port</span>
+										<input name="smtp_port" type="number" required="required" min="1" style="width: 5rem;" />
+									</label>
+								</p>
+								<p>
+									<label>
+										<span>SMTP username</span>
+										<input name="smtp_username" required="required" style="width: 30rem" />
+									</label>
+								</p>
+								<p>
+									<label>
+										<span>SMTP password</span>
+										<input name="smtp_password" required="required" style="width: 30rem" />
+									</label>
+								</p>
+								<p>
+									<label>
+										<span>Sender e-mail</span>
+										<input name="sender_email" type="email" required="required" />
+									</label>
+								</p>
+							</fieldset>
+							<fieldset>
+								<legend>Email settings</legend>
+								<p>
+									<label>
+										<span>Timeout</span>
+										<input name="website_timeout" type="number" min="1" required="required" />
+										in seconds
+									</label>
+								</p>
+								<p>
+									<label>
+										<span>Avoid cache</span>
+										<input name="avoid_cache" type="checkbox" />
+										add a timestamp to website URLs (warning, this could trigger false positive on some websites)
+									</label>
+								</p>
+							</fieldset>
 							<p>
 								<button>Save</button>
 							</p>

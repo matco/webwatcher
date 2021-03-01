@@ -158,6 +158,10 @@ var Configuration = (function() {
 				function(event) {
 					var settings = JSON.parse(event.target.responseText);
 					configuration['protect_app'].checked = settings.protect_app === 'True';
+					configuration['smtp_host'].value = settings.smtp_host || '';
+					configuration['smtp_port'].value = settings.smtp_port || '';
+					configuration['smtp_username'].value = settings.smtp_username || '';
+					configuration['smtp_password'].value = settings.smtp_password || '';
 					configuration['sender_email'].value = settings.sender_email || '';
 					configuration['website_timeout'].value = settings.website_timeout || '';
 					configuration['avoid_cache'].checked = settings.avoid_cache === 'True';
@@ -193,6 +197,10 @@ var Configuration = (function() {
 					var form_data = new FormData();
 					form_data.append('configuration', JSON.stringify({
 						protect_app : this['protect_app'].checked,
+						smtp_host : this['smtp_host'].value,
+						smtp_port : this['smtp_port'].value,
+						smtp_username : this['smtp_username'].value,
+						smtp_password : this['smtp_password'].value,
 						sender_email : this['sender_email'].value,
 						website_timeout : this['website_timeout'].value,
 						avoid_cache : this['avoid_cache'].checked
