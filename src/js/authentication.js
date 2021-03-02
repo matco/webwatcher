@@ -49,7 +49,7 @@ export const Authentication = {
 		document.getElementById('initialization').addEventListener(
 			'submit',
 			function(event) {
-				Event.stop(event);
+				event.stop();
 				const initialization_error = document.getElementById('initialization_error');
 				initialization_error.textContent = '';
 				if(this['password_1'].value !== this['password_2'].value) {
@@ -82,7 +82,7 @@ export const Authentication = {
 		document.getElementById('authentication').addEventListener(
 			'submit',
 			function(event) {
-				Event.stop(event);
+				event.stop();
 				const authentication_error = document.getElementById('authentication_error');
 				authentication_error.textContent = '';
 				const xhr = new XMLHttpRequest();

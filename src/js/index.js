@@ -1,5 +1,5 @@
-import './tools/extension.js';
-import './tools/browser_extension.js';
+import 'js-tools/extension.js';
+import 'js-tools/dom_extension.js';
 
 import {Configuration} from './configuration.js';
 import {Status} from './status.js';

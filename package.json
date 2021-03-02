@@ -3,6 +3,8 @@
 	"description": "Monitor your websites with Google App Engine",
 	"version": "1.0.0",
 	"scripts": {
+		"start": "webpack server",
+		"build": "webpack",
 		"lint": "eslint ."
 	},
 	"keywords": [],
@@ -15,7 +17,19 @@
 		"type": "git",
 		"url": "https://github.com/matco/webwatcher.git"
 	},
+	"dependencies": {
+		"@matco/basic-table": "1.1.0",
+		"js-tools": "git+ssh://git@github.com:matco/js-tools.git"
+	},
 	"devDependencies": {
-		"eslint": "7.21.0"
+		"clean-webpack-plugin": "3.0.0",
+		"css-loader": "5.1.1",
+		"eslint": "7.21.0",
+		"file-loader": "6.0.0",
+		"html-webpack-plugin": "5.2.0",
+		"style-loader": "2.0.0",
+		"webpack": "5.24.2",
+		"webpack-cli": "4.5.0",
+		"webpack-dev-server": "3.11.2"
 	}
 }

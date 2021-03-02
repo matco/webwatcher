@@ -1,7 +1,7 @@
-/*global Grid*/
-
 import {Authentication} from './authentication.js';
 import {UI} from './ui.js';
+import {Table} from '@matco/basic-table/table.js';
+import {Datasource} from '@matco/basic-table/datasource.js';
 
 let websites_service;
 let selected_website_id;
@@ -10,11 +10,11 @@ let selected_website_id;
 let states_grid;
 
 const states_columns = [
-	{label: 'Name', data: 'name', type: Grid.DataType.STRING, width: 120, render: render_name},
-	{label: 'Last check', data: 'update', type: Grid.DataType.DATE, width: 150, render: render_date},
-	{label: 'Downtime', data: 'downtime', type: Grid.DataType.NUMBER, width: 250, render: render_time},
-	{label: 'Uptime', data: 'uptime', type: Grid.DataType.NUMBER, width: 250, render: render_time},
-	{label: 'Availability', data: 'availability', type: Grid.DataType.NUMBER, width: 80, render: render_online},
+	{label: 'Name', data: 'name', type: Table.DataType.STRING, width: 120, render: render_name},
+	{label: 'Last check', data: 'update', type: Table.DataType.DATE, width: 150, render: render_date},
+	{label: 'Downtime', data: 'downtime', type: Table.DataType.NUMBER, width: 250, render: render_time},
+	{label: 'Uptime', data: 'uptime', type: Table.DataType.NUMBER, width: 250, render: render_time},
+	{label: 'Availability', data: 'availability', type: Table.DataType.NUMBER, width: 80, render: render_online},
 	{label: 'Actions', width: 100, unsortable: true, render: render_actions}
 ];
 
@@ -59,17 +59,17 @@ function draw_websites(websites) {
 		website.availability = availability;
 	});
 	//update states grid
-	states_grid.render(new Grid.Datasource({data: websites}));
+	states_grid.render(new Datasource({data: websites}));
 }
 
 //details
 let details_grid;
 
 const details_columns = [
-	{label: 'Start', data: 'start', type: Grid.DataType.DATE, width: 150, render: render_date},
-	{label: 'Stop', data: 'stop', type: Grid.DataType.DATE, width: 150, render: render_date},
-	{label: 'Duration', data: 'duration', type: Grid.DataType.NUMBER, width: 200, render: render_duration},
-	{label: 'Rationale', data: 'rationale', type: Grid.DataType.STRING},
+	{label: 'Start', data: 'start', type: Table.DataType.DATE, width: 150, render: render_date},
+	{label: 'Stop', data: 'stop', type: Table.DataType.DATE, width: 150, render: render_date},
+	{label: 'Duration', data: 'duration', type: Table.DataType.NUMBER, width: 200, render: render_duration},
+	{label: 'Rationale', data: 'rationale', type: Table.DataType.STRING},
 	{label: 'Action', width: 100, unsortable: true, render: render_details_action}
 ];
 
@@ -84,7 +84,7 @@ function render_details_action(value, record) {
 		'Delete',
 		{
 			click: function(event) {
-				Event.stop(event);
+				event.stop();
 				const xhr = new XMLHttpRequest();
 				xhr.addEventListener(
 					'load',
@@ -144,7 +144,7 @@ export const Status = {
 					'Check now',
 					{
 						click: function(event) {
-							Event.stop(event);
+							event.stop();
 							const that = this;
 							this.setAttribute('disabled', 'disabled');
 							this.classList.add('loading');
@@ -174,7 +174,7 @@ export const Status = {
 		xhr.send();
 
 		//prepare grid with custom export link
-		details_grid = new Grid({
+		details_grid = new Table({
 			container: document.getElementById('website_details_downtimes'),
 			columns: details_columns,
 			path: '/js/grid/',
@@ -198,7 +198,7 @@ export const Status = {
 					downtime.duration = duration;
 				});
 				//update downtimes grid
-				details_grid.render(new Grid.Datasource({data: downtimes}));
+				details_grid.render(new Datasource({data: downtimes}));
 			}
 		);
 		downtimes_xhr.open('GET', `/api/websites/${website_id}/downtimes`, true);
@@ -210,7 +210,7 @@ export const Status = {
 		websites_service = Websites;
 
 		//status
-		states_grid = new Grid({
+		states_grid = new Table({
 			container: document.getElementById('states'),
 			columns: states_columns,
 			path: '/js/grid/',
@@ -226,7 +226,7 @@ export const Status = {
 		document.getElementById('status_check_now').addEventListener(
 			'click',
 			function(event) {
-				Event.stop(event);
+				event.stop();
 				const that = this;
 				this.setAttribute('disabled', 'disabled');
 				this.classList.add('loading');

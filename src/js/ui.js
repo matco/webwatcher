@@ -35,7 +35,7 @@ UI.StopLoading = function() {
 
 	UI.Notify = function(message, options) {
 		//ask for permission if user has not explicitly denied nor granted notification (permission can be default or undefined)
-		if(!['granted', 'denied'].contains(Notification.permission) && !notification_permission_requested) {
+		if(!['granted', 'denied'].includes(Notification.permission) && !notification_permission_requested) {
 			notification_permission_requested = true;
 			Notification.requestPermission(function() {
 				//re-notify
@@ -212,7 +212,7 @@ UI.Validate = function(message, yes_callback, no_callback, context, yes_text, no
 		no_text || 'No',
 		{
 			click: function(event) {
-				Event.stop(event);
+				event.stop();
 				if(no_callback) {
 					no_callback.call(context || this);
 				}
@@ -226,7 +226,7 @@ UI.Validate = function(message, yes_callback, no_callback, context, yes_text, no
 		yes_text || 'Yes',
 		{
 			click: function(event) {
-				Event.stop(event);
+				event.stop();
 				if(yes_callback) {
 					yes_callback.call(context || this);
 				}

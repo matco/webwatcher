@@ -3,8 +3,15 @@ Webwatcher is a tiny web app that monitors websites for you and send you an e-ma
 It is ready to be deployed on Google App Engine.
 
 ## Deployment
-Install the Google Cloud SDK. Then, execute:
+Following dependencies are required:
+* Node.js
+* NPM
+* Google Cloud SDK
+
+Then, execute:
 ```
+npm install
+npm run build
 gcloud app deploy
 ```
 

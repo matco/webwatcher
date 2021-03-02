@@ -5,7 +5,7 @@ let subscribers_service;
 let subscribers_ui;
 
 function delete_subscriber_listener(event) {
-	Event.stop(event);
+	event.stop();
 	const subscriber_ui = this.parentNode.parentNode;
 	subscribers_service.remove(subscriber_ui.dataset.key, function() {
 		subscriber_ui.parentNode.removeChild(subscriber_ui);
@@ -40,7 +40,7 @@ let websites_ui;
 let website_form;
 
 function edit_website_listener(event) {
-	Event.stop(event);
+	event.stop();
 	const website_ui = this.parentNode.parentNode;
 	websites_service.get(website_ui.dataset.key, function(website) {
 		website_form['name'].setAttribute('disabled', 'disabled');
@@ -52,7 +52,7 @@ function edit_website_listener(event) {
 }
 
 function delete_website_listener(event) {
-	Event.stop(event);
+	event.stop();
 	const website_ui = this.parentNode.parentNode;
 	websites_service.remove(website_ui.dataset.key, function() {
 		website_ui.parentNode.removeChild(website_ui);
@@ -61,7 +61,7 @@ function delete_website_listener(event) {
 }
 
 function disable_website_listener(event) {
-	Event.stop(event);
+	event.stop();
 	const link = this;
 	const container = this.parentNode;
 	website_action(container.parentNode.dataset.key, 'disable', function() {
@@ -76,7 +76,7 @@ function disable_website_listener(event) {
 }
 
 function enable_website_listener(event) {
-	Event.stop(event);
+	event.stop();
 	const link = this;
 	const container = this.parentNode;
 	website_action(container.parentNode.dataset.key, 'enable', function() {
@@ -185,7 +185,7 @@ export const Configuration = {
 		document.getElementById('configuration').addEventListener(
 			'submit',
 			function(event) {
-				Event.stop(event);
+				event.stop();
 				const xhr = new XMLHttpRequest();
 				xhr.addEventListener(
 					'load',
@@ -215,7 +215,7 @@ export const Configuration = {
 		document.getElementById('subscriber').addEventListener(
 			'submit',
 			function(event) {
-				Event.stop(event);
+				event.stop();
 				const form = this;
 				const subscriber = {email: this['email'].value};
 				subscribers_service.add(subscriber, function() {
@@ -249,7 +249,7 @@ export const Configuration = {
 		website_form.addEventListener(
 			'submit',
 			function(event) {
-				Event.stop(event);
+				event.stop();
 				const form = this;
 				const website = {name: this['name'].value, url: this['url'].value, texts: this['texts'].value, online: null};
 				if(this['name'].hasAttribute('disabled')) {
@@ -276,7 +276,7 @@ export const Configuration = {
 		document.getElementById('recalculate').addEventListener(
 			'click',
 			function(event) {
-				Event.stop(event);
+				event.stop();
 				const that = this;
 				this.setAttribute('disabled', 'disabled');
 				this.classList.add('loading');
