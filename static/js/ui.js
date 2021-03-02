@@ -66,9 +66,7 @@ UI.StopLoading = function() {
 			}
 			//update title
 			var notification_title = document.getElementById('notification_title');
-			if(options.hasOwnProperty('body')) {
-				notification_title.textContent = message;
-			}
+			notification_title.textContent = message;
 			//update body
 			var notification_body = document.getElementById('notification_body');
 			if(options.hasOwnProperty('body')) {
