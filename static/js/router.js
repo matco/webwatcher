@@ -1,19 +1,19 @@
-'use strict';
+/*global Configuration, Status, Authentication, UI, Hash*/
 
-var Router = (function() {
-	var refresh_status_page_inverval;
+const Router = (function() {
+	let refresh_status_page_inverval;
 
 	return {
-		Init : function() {
+		Init: function() {
 			window.addEventListener(
 				'hashchange',
 				function() {
 					//retrieve pages
-					var config = document.getElementById('config');
-					var status = document.getElementById('status');
+					const config = document.getElementById('config');
+					const status = document.getElementById('status');
 					//retrieve links
-					var menu_config = document.getElementById('menu_config');
-					var menu_status = document.getElementById('menu_status');
+					const menu_config = document.getElementById('menu_config');
+					const menu_status = document.getElementById('menu_status');
 
 					function unselect_all() {
 						//stop refreshing status page
@@ -32,7 +32,7 @@ var Router = (function() {
 					UI.CloseModals();
 
 					//retrieve data encoded in hash
-					var data = Hash.Decode(location.hash);
+					const data = Hash.Decode(location.hash);
 
 					if(data.section === 'config') {
 						//check authentication
@@ -63,7 +63,7 @@ var Router = (function() {
 			);
 
 			//trigger manually hash change event
-			var event = document.createEvent('UIEvent');
+			const event = document.createEvent('UIEvent');
 			event.initUIEvent('hashchange', true, true, window, 1);
 			window.dispatchEvent(event);
 		}

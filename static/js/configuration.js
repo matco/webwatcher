@@ -1,13 +1,13 @@
-'use strict';
+/*global UI*/
 
-var Configuration = (function() {
+const Configuration = (function() {
 	//subscribers
-	var subscribers_service;
-	var subscribers_ui;
+	let subscribers_service;
+	let subscribers_ui;
 
 	function delete_subscriber_listener(event) {
 		Event.stop(event);
-		var subscriber_ui = this.parentNode.parentNode;
+		const subscriber_ui = this.parentNode.parentNode;
 		subscribers_service.remove(subscriber_ui.dataset.key, function() {
 			subscriber_ui.parentNode.removeChild(subscriber_ui);
 			UI.Notify('Subscriber deleted successfully');
@@ -15,14 +15,14 @@ var Configuration = (function() {
 	}
 
 	function draw_subscriber(subscriber) {
-		var subscriber_ui = document.createFullElement('tr', {'data-key' : subscriber.email});
+		const subscriber_ui = document.createFullElement('tr', {'data-key': subscriber.email});
 		subscriber_ui.appendChild(document.createFullElement('td', {}, subscriber.email));
-		var subscribe_actions = document.createFullElement('td');
+		const subscribe_actions = document.createFullElement('td');
 		subscribe_actions.appendChild(document.createFullElement(
 			'a',
-			{href : '#', title : 'Delete this subscriber'},
+			{href: '#', title: 'Delete this subscriber'},
 			'Delete',
-			{click : delete_subscriber_listener}
+			{click: delete_subscriber_listener}
 		));
 		subscriber_ui.appendChild(subscribe_actions);
 		return subscriber_ui;
@@ -36,14 +36,13 @@ var Configuration = (function() {
 	}
 
 	//websites
-	var websites_service;
-	var websites_ui;
-	var website_form;
+	let websites_service;
+	let websites_ui;
+	let website_form;
 
 	function edit_website_listener(event) {
 		Event.stop(event);
-		var website_ui = this.parentNode.parentNode;
-		var website_ui = this.parentNode.parentNode;
+		const website_ui = this.parentNode.parentNode;
 		websites_service.get(website_ui.dataset.key, function(website) {
 			website_form['name'].setAttribute('disabled', 'disabled');
 			website_form['name'].value = website.name;
@@ -55,7 +54,7 @@ var Configuration = (function() {
 
 	function delete_website_listener(event) {
 		Event.stop(event);
-		var website_ui = this.parentNode.parentNode;
+		const website_ui = this.parentNode.parentNode;
 		websites_service.remove(website_ui.dataset.key, function() {
 			website_ui.parentNode.removeChild(website_ui);
 			UI.Notify('Website deleted successfully');
@@ -64,36 +63,36 @@ var Configuration = (function() {
 
 	function disable_website_listener(event) {
 		Event.stop(event);
-		var link = this;
-		var container = this.parentNode;
+		const link = this;
+		const container = this.parentNode;
 		website_action(container.parentNode.dataset.key, 'disable', function() {
 			container.removeChild(link);
 			container.insertBefore(document.createFullElement(
 				'a',
-				{href : '#', title : 'Re-enable this website'},
+				{href: '#', title: 'Re-enable this website'},
 				'Enable',
-				{click : enable_website_listener}
+				{click: enable_website_listener}
 			), container.lastChild);
 		});
 	}
 
 	function enable_website_listener(event) {
 		Event.stop(event);
-		var link = this;
-		var container = this.parentNode;
+		const link = this;
+		const container = this.parentNode;
 		website_action(container.parentNode.dataset.key, 'enable', function() {
 			container.removeChild(link);
 			container.insertBefore(document.createFullElement(
 				'a',
-				{href : '#', title : 'Disable this website temporarily'},
+				{href: '#', title: 'Disable this website temporarily'},
 				'Disable',
-				{click : disable_website_listener}
+				{click: disable_website_listener}
 			), container.lastChild);
 		});
 	}
 
 	function website_action(website, action, callback) {
-		var xhr = new XMLHttpRequest();
+		const xhr = new XMLHttpRequest();
 		xhr.addEventListener(
 			'load',
 			function(event) {
@@ -101,43 +100,43 @@ var Configuration = (function() {
 				callback();
 			}
 		);
-		xhr.open('GET', '/api/websites/' + website + '/action/' + action, true);
+		xhr.open('GET', `/api/websites/${website}/action/${action}`, true);
 		xhr.send();
 	}
 
 	function draw_website(website) {
-		var website_ui = document.createFullElement('tr', {'data-key' : website.name});
+		const website_ui = document.createFullElement('tr', {'data-key': website.name});
 		website_ui.appendChild(document.createFullElement('td', {}, website.name));
 		website_ui.appendChild(document.createFullElement('td', {}, website.url));
 		website_ui.appendChild(document.createFullElement('td', {}, website.texts));
-		var website_actions = document.createFullElement('td');
+		const website_actions = document.createFullElement('td');
 		website_actions.appendChild(document.createFullElement(
 			'a',
-			{href : '#', title : 'Edit this website', style : 'margin-right: 5px;'},
+			{href: '#', title: 'Edit this website', style: 'margin-right: 5px;'},
 			'Edit',
-			{click : edit_website_listener}
+			{click: edit_website_listener}
 		));
 		if(website.disabled) {
 			website_actions.appendChild(document.createFullElement(
 				'a',
-				{href : '#', title : 'Re-enable this website'},
+				{href: '#', title: 'Re-enable this website'},
 				'Enable',
-				{click : enable_website_listener}
+				{click: enable_website_listener}
 			));
 		}
 		else {
 			website_actions.appendChild(document.createFullElement(
 				'a',
-				{href : '#', title : 'Disable this website temporarily'},
+				{href: '#', title: 'Disable this website temporarily'},
 				'Disable',
-				{click : disable_website_listener}
+				{click: disable_website_listener}
 			));
 		}
 		website_actions.appendChild(document.createFullElement(
 			'a',
-			{href : '#', title : 'Unwatch this website and delete all logs', style : 'margin-left: 5px;'},
+			{href: '#', title: 'Unwatch this website and delete all logs', style: 'margin-left: 5px;'},
 			'Delete',
-			{click : delete_website_listener}
+			{click: delete_website_listener}
 		));
 		website_ui.appendChild(website_actions);
 		return website_ui;
@@ -151,12 +150,13 @@ var Configuration = (function() {
 	}
 
 	return {
-		Show : function() {
-			var xhr = new XMLHttpRequest();
+		Show: function() {
+			const xhr = new XMLHttpRequest();
 			xhr.addEventListener(
 				'load',
 				function(event) {
-					var settings = JSON.parse(event.target.responseText);
+					const settings = JSON.parse(event.target.responseText);
+					const configuration = document.getElementById('configuration');
 					configuration['protect_app'].checked = settings.protect_app === 'True';
 					configuration['smtp_host'].value = settings.smtp_host || '';
 					configuration['smtp_port'].value = settings.smtp_port || '';
@@ -173,7 +173,7 @@ var Configuration = (function() {
 			update_subscribers();
 			update_websites();
 		},
-		Init : function(Websites, Subscribers) {
+		Init: function(Websites, Subscribers) {
 			//services
 			websites_service = Websites;
 			subscribers_service = Subscribers;
@@ -187,23 +187,23 @@ var Configuration = (function() {
 				'submit',
 				function(event) {
 					Event.stop(event);
-					var xhr = new XMLHttpRequest();
+					const xhr = new XMLHttpRequest();
 					xhr.addEventListener(
 						'load',
-						function(event) {
+						function() {
 							UI.Notify('Modifications saved successfully');
 						}
 					);
-					var form_data = new FormData();
+					const form_data = new FormData();
 					form_data.append('configuration', JSON.stringify({
-						protect_app : this['protect_app'].checked,
-						smtp_host : this['smtp_host'].value,
-						smtp_port : this['smtp_port'].value,
-						smtp_username : this['smtp_username'].value,
-						smtp_password : this['smtp_password'].value,
-						sender_email : this['sender_email'].value,
-						website_timeout : this['website_timeout'].value,
-						avoid_cache : this['avoid_cache'].checked
+						protect_app: this['protect_app'].checked,
+						smtp_host: this['smtp_host'].value,
+						smtp_port: this['smtp_port'].value,
+						smtp_username: this['smtp_username'].value,
+						smtp_password: this['smtp_password'].value,
+						sender_email: this['sender_email'].value,
+						website_timeout: this['website_timeout'].value,
+						avoid_cache: this['avoid_cache'].checked
 					}));
 					xhr.open('POST', '/api/configuration', true);
 					xhr.send(form_data);
@@ -217,8 +217,8 @@ var Configuration = (function() {
 				'submit',
 				function(event) {
 					Event.stop(event);
-					var form = this;
-					var subscriber = {email : this['email'].value};
+					const form = this;
+					const subscriber = {email: this['email'].value};
 					subscribers_service.add(subscriber, function() {
 						subscribers_ui.appendChild(draw_subscriber(subscriber));
 						form.reset();
@@ -251,12 +251,12 @@ var Configuration = (function() {
 				'submit',
 				function(event) {
 					Event.stop(event);
-					var form = this;
-					var website = {name : this['name'].value, url : this['url'].value, texts : this['texts'].value, online : null};
+					const form = this;
+					const website = {name: this['name'].value, url: this['url'].value, texts: this['texts'].value, online: null};
 					if(this['name'].hasAttribute('disabled')) {
 						website.key = website.name;
 						websites_service.save(website, function() {
-							websites_ui.removeChild(websites_ui.querySelector('tr[data-key="' + website.name + '"]'));
+							websites_ui.removeChild(websites_ui.querySelector(`tr[data-key="${website.name}"]`));
 							websites_ui.appendChild(draw_website(website));
 							form.reset();
 							form.style.display = 'none';
@@ -278,10 +278,10 @@ var Configuration = (function() {
 				'click',
 				function(event) {
 					Event.stop(event);
-					var that = this;
+					const that = this;
 					this.setAttribute('disabled', 'disabled');
 					this.classList.add('loading');
-					var xhr = new XMLHttpRequest();
+					const xhr = new XMLHttpRequest();
 					xhr.addEventListener(
 						'load',
 						function(xhr_event) {

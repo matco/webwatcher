@@ -1,6 +1,4 @@
-'use strict';
-
-var UI = {};
+const UI = {};
 
 UI.Info = function(message, locked) {
 	document.getElementById('info_message').textContent = message;
@@ -18,14 +16,14 @@ UI.StopLoading = function() {
 };
 
 (function() {
-	var notification_close_time = 5000;
-	var notification_timeout;
+	const notification_close_time = 5000;
+	let notification_timeout;
 
 	window.addEventListener('load', function() {
 		function hide_after_animation() {
 			this.style.display = 'none';
 		}
-		var notification = document.getElementById('notification');
+		const notification = document.getElementById('notification');
 		//TODO clean this when all browsers support good event
 		notification.addEventListener('animationend', hide_after_animation);
 		notification.addEventListener('webkitAnimationEnd', hide_after_animation);
@@ -33,20 +31,20 @@ UI.StopLoading = function() {
 	});
 
 	//remember if notification permission has been requested to avoid asking to the user more than once
-	var notification_permission_requested = false;
+	let notification_permission_requested = false;
 
 	UI.Notify = function(message, options) {
 		//ask for permission if user has not explicitly denied nor granted notification (permission can be default or undefined)
 		if(!['granted', 'denied'].contains(Notification.permission) && !notification_permission_requested) {
 			notification_permission_requested = true;
-			Notification.requestPermission(function(status) {
+			Notification.requestPermission(function() {
 				//re-notify
 				UI.Notify(message, options);
 			});
 		}
 		//use native notification
 		else if(Notification.permission === 'granted') {
-			var notification = new Notification(message, options);
+			const notification = new Notification(message, options);
 			notification.addEventListener('show', function() {
 				setTimeout(function() {
 					notification.close();
@@ -56,8 +54,8 @@ UI.StopLoading = function() {
 		//fallback on html notification
 		else {
 			//update icon
-			var notification_icon = document.getElementById('notification_icon');
-			if(options.hasOwnProperty('icon')) {
+			const notification_icon = document.getElementById('notification_icon');
+			if(options && options.hasOwnProperty('icon')) {
 				notification_icon.src = options.icon;
 				notification_icon.style.display = 'block';
 			}
@@ -65,11 +63,11 @@ UI.StopLoading = function() {
 				notification_icon.style.display = 'none';
 			}
 			//update title
-			var notification_title = document.getElementById('notification_title');
+			const notification_title = document.getElementById('notification_title');
 			notification_title.textContent = message;
 			//update body
-			var notification_body = document.getElementById('notification_body');
-			if(options.hasOwnProperty('body')) {
+			const notification_body = document.getElementById('notification_body');
+			if(options && options.hasOwnProperty('body')) {
 				notification_body.textContent = options.body;
 				notification_body.style.display = 'block';
 			}
@@ -78,7 +76,7 @@ UI.StopLoading = function() {
 			}
 
 			//manage display of animation
-			var notification = document.getElementById('notification');
+			const notification = document.getElementById('notification');
 			if(notification_timeout) {
 				clearTimeout(notification_timeout);
 			}
@@ -94,11 +92,11 @@ UI.StopLoading = function() {
 })();
 
 (function() {
-	var modals = [];
+	const modals = [];
 
 	//close modal with click outside modal
 	function click_close_modal(event) {
-		var modal = modals.last();
+		const modal = modals.last();
 		if(!modal.locked && !modal.contains(event.target)) {
 			UI.CloseModal(modal);
 		}
@@ -106,7 +104,7 @@ UI.StopLoading = function() {
 
 	//close modal windows with escape key
 	function escape_close_modal(event) {
-		var modal = modals.last();
+		const modal = modals.last();
 		if(!modal.locked && event.keyCode === 27) {
 			UI.CloseModal(modal);
 		}
@@ -119,7 +117,7 @@ UI.StopLoading = function() {
 		//add new modal to list
 		modals.push(element);
 
-		var overlay = document.getElementById('modal_overlay');
+		const overlay = document.getElementById('modal_overlay');
 
 		//show overlay if this is first modal open
 		if(modals.length === 1) {
@@ -127,7 +125,7 @@ UI.StopLoading = function() {
 		}
 
 		//put modal window just over overlay
-		var index = parseInt(overlay.style.zIndex) || 100;
+		const index = parseInt(overlay.style.zIndex) || 100;
 		overlay.style.zIndex = index + 2;
 		element.style.zIndex = index + 3;
 		element.style.display = 'block';
@@ -141,12 +139,12 @@ UI.StopLoading = function() {
 
 	UI.CloseModal = function(element) {
 		//retrieve modal
-		var modal = element || modals.last();
+		const modal = element || modals.last();
 		if(modal) {
 			//hide modal window
 			modal.style.display = 'none';
 
-			var overlay = document.getElementById('modal_overlay');
+			const overlay = document.getElementById('modal_overlay');
 
 			//remove document listener for last modal
 			if(modals.length === 1) {
@@ -155,7 +153,7 @@ UI.StopLoading = function() {
 			}
 
 			//put overlay just under modal window
-			var index = parseInt(overlay.style.zIndex);
+			const index = parseInt(overlay.style.zIndex);
 			overlay.style.zIndex = index - 2;
 
 			if(modals.length === 1) {
@@ -203,17 +201,17 @@ UI.StopLoading = function() {
 })();
 
 UI.Validate = function(message, yes_callback, no_callback, context, yes_text, no_text) {
-	var validate_window = document.getElementById('validate');
+	const validate_window = document.getElementById('validate');
 	document.getElementById('validate_message').textContent = message;
 	//manage buttons
-	var validate_buttons = document.getElementById('validate_buttons');
+	const validate_buttons = document.getElementById('validate_buttons');
 	validate_buttons.clear();
-	var no_button = document.createFullElement(
+	const no_button = document.createFullElement(
 		'button',
-		{type : 'button'},
+		{type: 'button'},
 		no_text || 'No',
 		{
-			click : function(event) {
+			click: function(event) {
 				Event.stop(event);
 				if(no_callback) {
 					no_callback.call(context || this);
@@ -222,12 +220,12 @@ UI.Validate = function(message, yes_callback, no_callback, context, yes_text, no
 			}
 		}
 	);
-	var yes_button = document.createFullElement(
+	const yes_button = document.createFullElement(
 		'button',
-		{type : 'button', style : 'margin-left: 5px;', autofocus : true},
+		{type: 'button', style: 'margin-left: 5px;', autofocus: true},
 		yes_text || 'Yes',
 		{
-			click : function(event) {
+			click: function(event) {
 				Event.stop(event);
 				if(yes_callback) {
 					yes_callback.call(context || this);

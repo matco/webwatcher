@@ -1,0 +1,21 @@
+{
+	"name": "@matco/webwatcher",
+	"description": "Monitor your websites with Google App Engine",
+	"version": "1.0.0",
+	"scripts": {
+		"lint": "eslint ."
+	},
+	"keywords": [],
+	"author": {
+		"name": "Matthieu Corageoud",
+		"email": "matthieu.corageoud@gmail.com"
+	},
+	"license": "Unlicense",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/matco/webwatcher.git"
+	},
+	"devDependencies": {
+		"eslint": "7.21.0"
+	}
+}

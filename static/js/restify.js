@@ -1,11 +1,11 @@
-'use strict';
+/*global UI*/
 
 function Restify(url) {
 
 	function send_object(object, callback) {
-		var form_data = new FormData();
+		const form_data = new FormData();
 		form_data.append('object', JSON.stringify(object));
-		var xhr = new XMLHttpRequest();
+		const xhr = new XMLHttpRequest();
 		xhr.addEventListener(
 			'load',
 			function(event) {
@@ -25,7 +25,7 @@ function Restify(url) {
 			}
 		);
 		if(object.key) {
-			xhr.open('POST', url + '/' + object.name, true);
+			xhr.open('POST', `${url}/${object.name}`, true);
 		}
 		else {
 			xhr.open('PUT', url, true);
@@ -34,12 +34,12 @@ function Restify(url) {
 	}
 
 	return {
-		list : function(callback) {
-			var xhr = new XMLHttpRequest();
+		list: function(callback) {
+			const xhr = new XMLHttpRequest();
 			xhr.addEventListener(
 				'load',
 				function(event) {
-					var objects = JSON.parse(event.target.responseText);
+					const objects = JSON.parse(event.target.responseText);
 					callback(objects);
 				}
 			);
@@ -47,25 +47,25 @@ function Restify(url) {
 			xhr.send();
 		},
 
-		get : function(key, callback) {
-			var xhr = new XMLHttpRequest();
+		get: function(key, callback) {
+			const xhr = new XMLHttpRequest();
 			xhr.addEventListener(
 				'load',
 				function(event) {
-					var object = JSON.parse(event.target.responseText);
+					const object = JSON.parse(event.target.responseText);
 					callback(object);
 				}
 			);
-			xhr.open('GET', url + '/' + key, true);
+			xhr.open('GET', `${url}/${key}`, true);
 			xhr.send();
 		},
 
-		save : send_object,
+		save: send_object,
 
-		add : send_object,
+		add: send_object,
 
-		remove : function(key, callback) {
-			var xhr = new XMLHttpRequest();
+		remove: function(key, callback) {
+			const xhr = new XMLHttpRequest();
 			xhr.addEventListener(
 				'load',
 				function(event) {
@@ -79,7 +79,7 @@ function Restify(url) {
 					}
 				}
 			);
-			xhr.open('DELETE', url + '/' + key, true);
+			xhr.open('DELETE', `${url}/${key}`, true);
 			xhr.send();
 		}
 	};

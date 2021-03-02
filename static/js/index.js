@@ -1,7 +1,7 @@
-'use strict';
+/*global Restify, Configuration, Status, Authentication, Router*/
 
-var Subscribers = Restify('/api/subscribers');
-var Websites = Restify('/api/websites');
+const Subscribers = Restify('/api/subscribers');
+const Websites = Restify('/api/websites');
 
 window.addEventListener(
 	'load',
@@ -10,7 +10,7 @@ window.addEventListener(
 		Status.Init(Websites);
 		Authentication.Init();
 
-		var xhr = new XMLHttpRequest();
+		const xhr = new XMLHttpRequest();
 		xhr.addEventListener(
 			'load',
 			function(event) {
@@ -40,15 +40,15 @@ window.addEventListener(
 		xhr.send();
 
 		//debug
-		var debug = false;
+		const debug = false;
 		if(debug) {
 			//add subscriber
-			Subscribers.add({email : 'john.doe@example.com'});
+			Subscribers.add({email: 'john.doe@example.com'});
 
 			//add websites
-			Websites.add({name : 'Example', url : 'http://www.example.org', texts : 'Example Domain'});
+			Websites.add({name: 'Example', url: 'http://www.example.org', texts: 'Example Domain'});
 			//TODO add a multiple text like 'This domain is established to be used for illustrative examples in documents.'
-			Websites.add({name : 'Invalid', url : 'http://www.invalid-website.org', texts : 'Invalid website'});
+			Websites.add({name: 'Invalid', url: 'http://www.invalid-website.org', texts: 'Invalid website'});
 		}
 	}
-)
+);
