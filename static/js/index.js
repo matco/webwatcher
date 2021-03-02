@@ -1,4 +1,11 @@
-/*global Restify, Configuration, Status, Authentication, Router*/
+import './tools/extension.js';
+import './tools/browser_extension.js';
+
+import {Configuration} from './configuration.js';
+import {Status} from './status.js';
+import {Authentication} from './authentication.js';
+import {Restify} from './restify.js';
+import {Router} from './router.js';
 
 const Subscribers = Restify('/api/subscribers');
 const Websites = Restify('/api/websites');

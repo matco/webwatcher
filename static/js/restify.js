@@ -1,6 +1,6 @@
-/*global UI*/
+import {UI} from './ui.js';
 
-function Restify(url) {
+export function Restify(url) {
 
 	function send_object(object, callback) {
 		const form_data = new FormData();

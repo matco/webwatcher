@@ -245,3 +245,5 @@ UI.Validate = function(message, yes_callback, no_callback, context, yes_text, no
 UI.Delay = function(callback) {
 	setTimeout(callback, 50);
 };
+
+export {UI};

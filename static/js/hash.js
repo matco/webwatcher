@@ -1,4 +1,4 @@
-const Hash = {
+export const Hash = {
 	Encode: function(object) {
 		let hash = '';
 		for(const key in object) {
