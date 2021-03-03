@@ -1,4 +1,4 @@
-@import url(~@matco/basic-table/table.css);
+@import url(~@matco/basic-table/src/table.css);
 
 html {
 	font-family: 'Open Sans';

@@ -18,7 +18,7 @@
 		"url": "https://github.com/matco/webwatcher.git"
 	},
 	"dependencies": {
-		"@matco/basic-table": "1.1.0",
+		"@matco/basic-table": "2.0.0",
 		"js-tools": "git+ssh://git@github.com:matco/js-tools.git"
 	},
 	"devDependencies": {

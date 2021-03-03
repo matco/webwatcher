@@ -1,7 +1,6 @@
 import {Authentication} from './authentication.js';
 import {UI} from './ui.js';
-import {Table} from '@matco/basic-table/table.js';
-import {Datasource} from '@matco/basic-table/datasource.js';
+import {Table, Datasource} from '@matco/basic-table';
 
 let websites_service;
 let selected_website_id;
