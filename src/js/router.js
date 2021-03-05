@@ -4,7 +4,7 @@ import {Authentication} from './authentication.js';
 import {UI} from './ui.js';
 import {Hash} from './hash.js';
 
-let refresh_status_page_inverval;
+let refresh_status_page_interval;
 
 export const Router = {
 	Init: function() {
@@ -20,8 +20,8 @@ export const Router = {
 
 				function unselect_all() {
 					//stop refreshing status page
-					if(refresh_status_page_inverval) {
-						clearInterval(refresh_status_page_inverval);
+					if(refresh_status_page_interval) {
+						clearInterval(refresh_status_page_interval);
 					}
 					//hide all pages
 					config.style.display = 'none';
@@ -53,7 +53,7 @@ export const Router = {
 					//update page
 					Status.Show();
 					//refresh page automatically
-					refresh_status_page_inverval = setInterval(Status.Show, 10000);
+					refresh_status_page_interval = setInterval(Status.Show, 10000);
 					//display page
 					menu_status.classList.add('selected');
 					status.style.display = 'block';
