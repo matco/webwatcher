@@ -11,7 +11,13 @@ export function Restify(url) {
 			function(event) {
 				if(event.target.status === 200) {
 					if(callback) {
-						callback();
+						if(!object.id) {
+							const object = JSON.parse(event.target.responseText);
+							callback(object);
+						}
+						else {
+							callback();
+						}
 					}
 				}
 				else if(event.target.status === 400) {
@@ -24,11 +30,11 @@ export function Restify(url) {
 				}
 			}
 		);
-		if(object.key) {
-			xhr.open('POST', `${url}/${object.name}`, true);
+		if(object.id) {
+			xhr.open('PUT', `${url}/${object.id}`, true);
 		}
 		else {
-			xhr.open('PUT', url, true);
+			xhr.open('POST', url, true);
 		}
 		xhr.send(form_data);
 	}
@@ -47,7 +53,7 @@ export function Restify(url) {
 			xhr.send();
 		},
 
-		get: function(key, callback) {
+		get: function(id, callback) {
 			const xhr = new XMLHttpRequest();
 			xhr.addEventListener(
 				'load',
@@ -56,7 +62,7 @@ export function Restify(url) {
 					callback(object);
 				}
 			);
-			xhr.open('GET', `${url}/${key}`, true);
+			xhr.open('GET', `${url}/${id}`, true);
 			xhr.send();
 		},
 
@@ -64,7 +70,7 @@ export function Restify(url) {
 
 		add: send_object,
 
-		remove: function(key, callback) {
+		remove: function(id, callback) {
 			const xhr = new XMLHttpRequest();
 			xhr.addEventListener(
 				'load',
@@ -79,7 +85,7 @@ export function Restify(url) {
 					}
 				}
 			);
-			xhr.open('DELETE', `${url}/${key}`, true);
+			xhr.open('DELETE', `${url}/${id}`, true);
 			xhr.send();
 		}
 	};

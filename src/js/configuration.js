@@ -7,14 +7,14 @@ let subscribers_ui;
 function delete_subscriber_listener(event) {
 	event.stop();
 	const subscriber_ui = this.parentNode.parentNode;
-	subscribers_service.remove(subscriber_ui.dataset.key, function() {
+	subscribers_service.remove(subscriber_ui.dataset.id, function() {
 		subscriber_ui.parentNode.removeChild(subscriber_ui);
 		UI.Notify('Subscriber deleted successfully');
 	});
 }
 
 function draw_subscriber(subscriber) {
-	const subscriber_ui = document.createFullElement('tr', {'data-key': subscriber.email});
+	const subscriber_ui = document.createFullElement('tr', {'data-id': subscriber.id});
 	subscriber_ui.appendChild(document.createFullElement('td', {}, subscriber.email));
 	const subscribe_actions = document.createFullElement('td');
 	subscribe_actions.appendChild(document.createFullElement(
@@ -42,7 +42,8 @@ let website_form;
 function edit_website_listener(event) {
 	event.stop();
 	const website_ui = this.parentNode.parentNode;
-	websites_service.get(website_ui.dataset.key, function(website) {
+	websites_service.get(website_ui.dataset.id, function(website) {
+		website_form['id'].value = website.id;
 		website_form['name'].setAttribute('disabled', 'disabled');
 		website_form['name'].value = website.name;
 		website_form['url'].value = website.url;
@@ -54,7 +55,7 @@ function edit_website_listener(event) {
 function delete_website_listener(event) {
 	event.stop();
 	const website_ui = this.parentNode.parentNode;
-	websites_service.remove(website_ui.dataset.key, function() {
+	websites_service.remove(website_ui.dataset.id, function() {
 		website_ui.parentNode.removeChild(website_ui);
 		UI.Notify('Website deleted successfully');
 	});
@@ -64,7 +65,7 @@ function disable_website_listener(event) {
 	event.stop();
 	const link = this;
 	const container = this.parentNode;
-	website_action(container.parentNode.dataset.key, 'disable', function() {
+	website_action(container.parentNode.dataset.id, 'disable', function() {
 		container.removeChild(link);
 		container.insertBefore(document.createFullElement(
 			'a',
@@ -79,7 +80,7 @@ function enable_website_listener(event) {
 	event.stop();
 	const link = this;
 	const container = this.parentNode;
-	website_action(container.parentNode.dataset.key, 'enable', function() {
+	website_action(container.parentNode.dataset.id, 'enable', function() {
 		container.removeChild(link);
 		container.insertBefore(document.createFullElement(
 			'a',
@@ -104,7 +105,7 @@ function website_action(website, action, callback) {
 }
 
 function draw_website(website) {
-	const website_ui = document.createFullElement('tr', {'data-key': website.name});
+	const website_ui = document.createFullElement('tr', {'data-id': website.id});
 	website_ui.appendChild(document.createFullElement('td', {}, website.name));
 	website_ui.appendChild(document.createFullElement('td', {}, website.url));
 	website_ui.appendChild(document.createFullElement('td', {}, website.texts));
@@ -234,6 +235,7 @@ export const Configuration = {
 			'click',
 			function() {
 				website_form.reset();
+				website_form['id'].value = '';
 				website_form['name'].removeAttribute('disabled');
 				website_form.style.display = 'block';
 			}
@@ -251,11 +253,10 @@ export const Configuration = {
 			function(event) {
 				event.stop();
 				const form = this;
-				const website = {name: this['name'].value, url: this['url'].value, texts: this['texts'].value, online: null};
-				if(this['name'].hasAttribute('disabled')) {
-					website.key = website.name;
+				const website = {id: this['id'].value || undefined, name: this['name'].value, url: this['url'].value, texts: this['texts'].value, online: null};
+				if(website.id) {
 					websites_service.save(website, function() {
-						websites_ui.removeChild(websites_ui.querySelector(`tr[data-key="${website.name}"]`));
+						websites_ui.removeChild(websites_ui.querySelector(`tr[data-id="${website.id}"]`));
 						websites_ui.appendChild(draw_website(website));
 						form.reset();
 						form.style.display = 'none';
@@ -263,7 +264,7 @@ export const Configuration = {
 					});
 				}
 				else {
-					websites_service.add(website, function() {
+					websites_service.add(website, function(website) {
 						websites_ui.appendChild(draw_website(website));
 						form.reset();
 						UI.Notify('Website added successfully');

@@ -56,9 +56,9 @@ class JSONCustomEncoder(json.JSONEncoder):
 		if object.__class__.__name__ == "Setting":
 			return {"id" : object.id, "value" : object.value}
 		if object.__class__.__name__ == "Subscriber":
-			return {"email" : object.email}
+			return {"id" : object.key.id(), "email" : object.email}
 		if object.__class__.__name__ == "Website":
-			return {"name" : object.name, "url" : object.url, "texts" : object.texts, "online" : object.online, "update" : object.update, "uptime" : object.uptime, "downtime" : object.downtime, "disabled" : object.disabled}
+			return {"id" : object.key.id(), "name" : object.name, "url" : object.url, "texts" : object.texts, "online" : object.online, "update" : object.update, "uptime" : object.uptime, "downtime" : object.downtime, "disabled" : object.disabled}
 		if object.__class__.__name__ == "Downtime":
 			return {"id" : object.key.id(), "rationale" : object.rationale, "start" : object.start, "stop" : object.stop}
 		if object.__class__.__name__ == "datetime":
@@ -287,16 +287,15 @@ class Configuration(Resource):
 
 api.add_resource(Configuration, "/configuration", "/configuration/<string:id>",)
 
-@app.route("/check", defaults={"name": None})
-@app.route("/check/<string:name>")
-def website_check(name):
-	response = {}
+@app.route("/check", defaults={"id": None})
+@app.route("/check/<int:id>")
+def website_check(id):
 	#retrieve websites
 	with ndb.Client().context():
-		if name is None:
+		if id is None:
 			websites = Website.query(Website.disabled != True).fetch()
 		else:
-			websites = [Website.query(Website.name == name).get()]
+			websites = [ndb.Key(Website, id).get()]
 		#retrieve settings
 		avoid_cache_setting = Setting.query(Setting.id == "avoid_cache").get()
 		avoid_cache = avoid_cache_setting is not None and avoid_cache_setting.value
@@ -304,7 +303,7 @@ def website_check(name):
 		timeout = int(timeout_setting.value) if timeout_setting is not None else DEFAULT_TIMEOUT
 		#check retrieved websites
 		for website in websites:
-			response[website.name] = monitor(website, avoid_cache, timeout)
+			monitor(website, avoid_cache, timeout)
 		return jsonify(websites)
 
 @app.route("/recalculate")
@@ -332,73 +331,66 @@ def recalculate():
 		return {"message" : "Website downtimes calculated successfully"}
 
 class REST(Resource):
-	def get(self, key = None):
+	def get(self, id = None):
 		#check rights
 		if self.require_authentication(request.method) and not "authenticated" in session:
 			return {"message" : "You must be authenticated to perform this action"}, 401
 
 		with ndb.Client().context():
-			if key is not None:
-				object = self.db_model.query(self.db_model_key == key).get()
+			if id is not None:
+				object = ndb.Key(self.db_model, id).get()
 				return jsonify(object)
 			else:
 				objects = self.db_model.query().fetch()
 				return jsonify(objects)
 
-	def put(self):
+	def post(self):
 		#check rights
 		if self.require_authentication(request.method) and not "authenticated" in session:
 			return {"message" : "You must be authenticated to perform this action"}, 401
 
 		parameters = json.loads(request.form.get("object"))
-		key = parameters[self.db_model.key_property]
 
 		with ndb.Client().context():
-			existing_object = self.db_model.query(self.db_model_key == key)
-			existing_object = existing_object.get()
-			if existing_object is not None:
-				return {"message" : "There is already a {0} with key {1}".format(self.db_model_name, key)}, 400
-			else:
-				object = self.db_model(**parameters)
-				object.put()
-				return {"message" : "{0} {1} added successfully".format(self.db_model_name, key)}
+			object = self.db_model(**parameters)
+			object.put()
+			return jsonify(object)
 
-	def post(self, key):
+	def put(self, id):
 		#check rights
 		if self.require_authentication(request.method) and not "authenticated" in session:
 			return {"message" : "You must be authenticated to perform this action"}, 401
 
 		with ndb.Client().context():
-			object = self.db_model.query(self.db_model_key == key).get()
+			object = ndb.Key(self.db_model, id).get()
 			if object is None:
-				return {"message" : "There is no {0} with key {1}".format(self.db_model_name, key)}, 400
-			else:
-				parameters = json.loads(request.form.get("object"))
-				#warning "private" fields may be updated
-				for attribute, value in parameters.items():
-					if attribute != "key":
-						setattr(object, attribute, value)
-				object.put()
-				return {"message" : "{0} {1} updated successfully".format(self.db_model_name, key)}
+				return {"message" : "There is no {0} with id {1}".format(self.db_model_name, id)}, 400
 
-	def delete(self, key):
+			parameters = json.loads(request.form.get("object"))
+			#warning "private" fields may be updated
+			for attribute, value in parameters.items():
+				if attribute != "key":
+					setattr(object, attribute, value)
+			object.put()
+			return {"message" : "{0} {1} updated successfully".format(self.db_model_name, id)}
+
+	def delete(self, id):
 		#check rights
 		if self.require_authentication(request.method) and not "authenticated" in session:
 			return {"message" : "You must be authenticated to perform this action"}, 401
 
 		with ndb.Client().context():
-			object = self.db_model.query(self.db_model_key == key).get()
+			object = ndb.Key(self.db_model, id).get()
 			if object is None:
-				return {"message" : "There is no {0} with key {1}".format(self.db_model_name, key)}, 400
-			else:
-				object.key.delete()
-				return {"message" : "{0} {1} deleted successfully".format(self.db_model_name, key)}
+				return {"message" : "There is no {0} with id {1}".format(self.db_model_name, id)}, 400
+
+			object.key.delete()
+			return {"message" : "{0} with id {1} deleted successfully".format(self.db_model_name, id)}
 
 class WebsitesResource(REST):
 	def __init__(self):
 		self.db_model_name = "Website"
 		self.db_model = Website
-		self.db_model_key = Website.name
 		self.authentication_requirements = {"GET" : False, "PUT" : True, "POST" : True, "DELETE" : True}
 
 	def require_authentication(self, method):
@@ -409,56 +401,55 @@ class WebsitesResource(REST):
 			return self.authentication_requirements[method]
 
 	#override delete method to delete downtimes when deleting a website
-	def delete(self, key):
+	def delete(self, id):
 		with ndb.Client().context():
-			object = self.db_model.query(self.db_model_key == key).get()
+			website = ndb.Key(Website, id).get()
 			#delete associated downtimes
-			if object is not None:
+			if website is not None:
 				downtimes = Downtime.query(Downtime.website == website.key).fetch()
 				for downtime in downtimes:
 					downtime.key.delete()
 			#delete website itself
-			super(WebsitesResource, self).delete(key)
+			website.key.delete()
 
-api.add_resource(WebsitesResource, "/websites", "/websites/<string:key>")
+api.add_resource(WebsitesResource, "/websites", "/websites/<int:id>")
 
 class SubscribersResource(REST):
 	def __init__(self):
 		self.db_model_name = "Subscriber"
 		self.db_model = Subscriber
-		self.db_model_key = Subscriber.email
-		self.authentication_requirements = {"GET" : True, "PUT" : True, "DELETE" : True}
+		self.authentication_requirements = {"GET" : True, "POST" : True, "DELETE" : True}
 
 	def require_authentication(self, method):
 		return self.authentication_requirements[method]
 
-api.add_resource(SubscribersResource, "/subscribers", "/subscribers/<string:key>")
+api.add_resource(SubscribersResource, "/subscribers", "/subscribers/<int:id>")
 
-@app.route("/websites/<name>/action/<string:action>")
-def website_action(name, action):
+@app.route("/websites/<int:id>/action/<string:action>")
+def website_action(id, action):
 	#check rights
 	if not "authenticated" in session:
 		return {"message" : "You must be authenticated to perform this action"}, 401
 
 	with ndb.Client().context():
-		website = Website.query(Website.name == name).get()
+		website = ndb.Key(Website, id).get()
 		if website is None:
-			return {"message" : "No website with name {0}".format(name)}, 404
+			return {"message" : "No website with id {0}".format(id)}, 404
 
 		website.disabled = action == "disable"
 		website.put()
-		return {"message" : "Website {0} disabled successfully".format(website.name)}
+		return {"message" : "Website with id {0} updated successfully".format(id)}
 
 class WebsiteDowntimes(Resource):
-	def get(self, name):
+	def get(self, website_id):
 		#check rights
 		if not "authenticated" in session:
 			return {"message" : "You must be authenticated to perform this action"}, 401
 
 		with ndb.Client().context():
-			website = Website.query(Website.name == name).get()
+			website = ndb.Key(Website, website_id).get()
 			if website is None:
-				return {"message" : "No website with name {0}".format(name)}, 404
+				return {"message" : "No website with id {0}".format(id)}, 404
 
 			downtimes = Downtime.query(Downtime.website == website.key).fetch()#.order(-Downtime.start).fetch()
 			if request.headers["Accept"] == "application/json":
@@ -475,24 +466,23 @@ class WebsiteDowntimes(Resource):
 				response.headers["Content-Disposition"] = "attachment; filename=downtimes.csv"
 				return response
 
-	def delete(self, name, id):
+	def delete(self, website_id, id):
 		#check rights
 		if not "authenticated" in session:
 			return {"message" : "You must be authenticated to perform this action"}, 401
 
 		with ndb.Client().context():
-			website = Website.query(Website.name == name).get()
+			website = ndb.Key(Website, website_id).get()
 			if website is None:
-				return {"message" : "No website with name {0}".format(name)}, 404
-			key = ndb.Key(Downtime, id)
-			downtime = key.get()
+				return {"message" : "No website with id {0}".format(website_id)}, 404
+			downtime = ndb.Key(Downtime, id).get()
 			if downtime is None:
 				return {"message" : "No downtime with id {0}".format(id)}, 404
 
 			downtime.key.delete()
-			return {"message" : "Downtime id {0} deleted successfully".format(id)}
+			return {"message" : "Downtime with id {0} deleted successfully".format(id)}
 
-api.add_resource(WebsiteDowntimes, "/websites/<string:name>/downtimes", "/websites/<string:name>/downtimes/<int:id>")
+api.add_resource(WebsiteDowntimes, "/websites/<int:website_id>/downtimes", "/websites/<int:website_id>/downtimes/<int:id>")
 
 #local only for debug purpose
 if __name__ == "__main__":

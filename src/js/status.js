@@ -42,7 +42,7 @@ function render_online(value) {
 
 function render_actions(value, record) {
 	if(Authentication.IsAuthenticated()) {
-		return document.createFullElement('a', {href: `#section=status&details=${record.name}`, title: 'View website details'}, 'Details');
+		return document.createFullElement('a', {href: `#section=status&details=${record.id}`, title: 'View website details'}, 'Details');
 	}
 	return document.createElement('span');
 }
@@ -162,7 +162,7 @@ export const Status = {
 									}
 								}
 							);
-							xhr.open('GET', `/api/check/${details.name}`, true);
+							xhr.open('GET', `/api/check/${details.id}`, true);
 							xhr.send();
 						}
 					}
