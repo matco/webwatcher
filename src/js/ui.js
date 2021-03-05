@@ -81,11 +81,10 @@ UI.StopLoading = function() {
 				clearTimeout(notification_timeout);
 			}
 			//update notification
-			notification.classList.remove('fadeout');
 			notification.style.display = 'block';
 			//add class that will start animation
 			notification_timeout = setTimeout(function() {
-				notification.classList.add('fadeout');
+				notification.style.display = 'none';
 			}, notification_close_time);
 		}
 	};
@@ -128,7 +127,7 @@ UI.StopLoading = function() {
 		const index = parseInt(overlay.style.zIndex) || 100;
 		overlay.style.zIndex = index + 2;
 		element.style.zIndex = index + 3;
-		element.style.display = 'block';
+		element.style.display = 'flex';
 
 		//add document listeners for first modal
 		if(modals.length === 1) {

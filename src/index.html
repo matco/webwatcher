@@ -10,28 +10,30 @@
 		<div id="modal_overlay"></div>
 
 		<div id="notification">
-			<h2>
+			<p>
 				<img id="notification_icon" />
 				<span id="notification_title"></span>
-			</h2>
+			</p>
 			<p id="notification_body"></p>
 		</div>
 
 		<form id="initialization" method="post" action="#" class="modal">
 			<h2>Initialization</h2>
-			<p id="initialization_error" class="error"></p>
-			<p>
-				<label>
-					<span>Password</span>
-					<input name="password_1" type="password" required="required" />
-				</label>
-			</p>
-			<p>
-				<label>
-					<span>Retype password</span>
-					<input name="password_2" type="password" required="required" />
-				</label>
-			</p>
+			<div class="content">
+				<p id="initialization_error" class="error"></p>
+				<p>
+					<label>
+						<span>Password</span>
+						<input name="password_1" type="password" required="required" />
+					</label>
+				</p>
+				<p>
+					<label>
+						<span>Retype password</span>
+						<input name="password_2" type="password" required="required" />
+					</label>
+				</p>
+			</div>
 			<menu>
 				<button>Validate</button>
 			</menu>
@@ -39,13 +41,15 @@
 
 		<form id="authentication" method="post" action="#" class="modal">
 			<h2>Authentication</h2>
-			<p id="authentication_error" class="error"></p>
-			<p>
-				<label>
-					<span>Password</span>
-					<input name="password" type="password" required="required" />
-				</label>
-			</p>
+			<div class="content">
+				<p id="authentication_error" class="error"></p>
+				<p>
+					<label>
+						<span>Password</span>
+						<input name="password" type="password" required="required" />
+					</label>
+				</p>
+			</div>
 			<menu>
 				<button id="authentication_cancel" type="button">Cancel</button>
 				<button>Login</button>
@@ -220,11 +224,13 @@
 
 				<div id="website_details" class="modal">
 					<h2>Details for <a id="website_details_link" href="#"></a></h2>
-					<p>
-						<span id="website_details_age"></span>.
-						<span id="website_details_check"></span>
-					</p>
-					<div id="website_details_downtimes"></div>
+					<div class="content">
+						<p>
+							<span id="website_details_age"></span>.
+							<span id="website_details_check"></span>
+						</p>
+						<div id="website_details_downtimes"></div>
+					</div>
 					<menu>
 						<a href="#section=status" class="button">Close</a>
 					</menu>

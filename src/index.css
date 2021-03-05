@@ -142,15 +142,25 @@ input[type="checkbox"] {
 
 #notification {
 	position: fixed;
-	bottom: 20px;
-	right: 20px;
-	padding: 8px;
-	border-radius: 5px;
-	background-color: #111;
-	color: #ddd;
-}
-#notification:empty {
+	right: 1rem;
+	bottom: 1rem;
 	display: none;
+	z-index: 120;
+	color: #ddd;
+	background-color: #111;
+	border-radius: 0.5rem;
+	padding: 1rem;
+	min-width: 20rem;
+	max-width: 40rem;
+}
+#notification_icon {
+	float: left;
+	width: 26px;
+	height: 26px;
+	margin-right: 1rem;
+}
+#notification_title {
+	vertical-align: middle;
 }
 
 #modal_overlay {
@@ -166,27 +176,31 @@ input[type="checkbox"] {
 }
 .modal {
 	display: none;
+	flex-direction: column;
 	position: fixed;
-	height: 200px;
-	width: 400px;
+	height: 20rem;
+	width: 50rem;
 	top: 20%;
-	left: calc(50% - 200px);
+	left: calc(50% - 25rem);
 	z-index: 11;
-	padding: 1rem;
 	background-color: white;
 	border: 1px solid #aaa;
 	border-radius: 5px;
 }
 .modal > h2 {
-	margin: 0 0 1rem 0;
+	margin: 0;
+	padding: 0.5rem;
+	border-bottom: 1px solid #aaa;
+	text-align: center;
+}
+.modal > div.content {
+	flex-grow: 1;
+	padding: 1rem;
 }
 .modal > menu {
-	position: absolute;
 	width: 100%;
-	left: 0;
-	bottom: 0;
 	margin: 0;
-	padding: 10px;
+	padding: 1rem;
 	text-align: right;
 	box-sizing: border-box;
 }
