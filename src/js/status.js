@@ -1,8 +1,8 @@
 import {Authentication} from './authentication.js';
 import {UI} from './ui.js';
 import {Table, Datasource} from '@matco/basic-table';
+import {Websites} from './services.js';
 
-let websites_service;
 let selected_website_id;
 
 //status
@@ -119,7 +119,7 @@ function update_website_details_age(date) {
 
 export const Status = {
 	Show: function update_states() {
-		websites_service.list(draw_websites);
+		Websites.list().then(draw_websites);
 	},
 	Detail: function(website_id) {
 		selected_website_id = website_id;
@@ -205,9 +205,7 @@ export const Status = {
 		downtimes_xhr.send();
 		UI.OpenModal(document.getElementById('website_details'), true);
 	},
-	Init: function(Websites) {
-		websites_service = Websites;
-
+	Init: function() {
 		//status
 		states_grid = new Table({
 			container: document.getElementById('states'),

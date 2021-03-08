@@ -1,13 +1,13 @@
 import {UI} from './ui.js';
+import {Subscribers, Websites} from './services.js';
 
 //subscribers
-let subscribers_service;
 let subscribers_ui;
 
 function delete_subscriber_listener(event) {
 	event.stop();
 	const subscriber_ui = this.parentNode.parentNode;
-	subscribers_service.remove(subscriber_ui.dataset.id, function() {
+	Subscribers.delete(subscriber_ui.dataset.id).then(() => {
 		subscriber_ui.parentNode.removeChild(subscriber_ui);
 		UI.Notify('Subscriber deleted successfully');
 	});
@@ -29,20 +29,17 @@ function draw_subscriber(subscriber) {
 
 function update_subscribers() {
 	subscribers_ui.clear();
-	subscribers_service.list(function(subscribers) {
-		subscribers.map(draw_subscriber).forEach(Node.prototype.appendChild, subscribers_ui);
-	});
+	Subscribers.list().then(s => s.map(draw_subscriber).forEach(Node.prototype.appendChild, subscribers_ui));
 }
 
 //websites
-let websites_service;
 let websites_ui;
 let website_form;
 
 function edit_website_listener(event) {
 	event.stop();
 	const website_ui = this.parentNode.parentNode;
-	websites_service.get(website_ui.dataset.id, function(website) {
+	Websites.get(website_ui.dataset.id).then(website => {
 		website_form['id'].value = website.id;
 		website_form['name'].setAttribute('disabled', 'disabled');
 		website_form['name'].value = website.name;
@@ -55,7 +52,7 @@ function edit_website_listener(event) {
 function delete_website_listener(event) {
 	event.stop();
 	const website_ui = this.parentNode.parentNode;
-	websites_service.remove(website_ui.dataset.id, function() {
+	Websites.delete(website_ui.dataset.id).then(() => {
 		website_ui.parentNode.removeChild(website_ui);
 		UI.Notify('Website deleted successfully');
 	});
@@ -144,9 +141,7 @@ function draw_website(website) {
 
 function update_websites() {
 	websites_ui.clear();
-	websites_service.list(function(websites) {
-		websites.map(draw_website).forEach(Node.prototype.appendChild, websites_ui);
-	});
+	Websites.list().then(w => w.map(draw_website).forEach(Node.prototype.appendChild, websites_ui));
 }
 
 export const Configuration = {
@@ -173,11 +168,7 @@ export const Configuration = {
 		update_subscribers();
 		update_websites();
 	},
-	Init: function(Websites, Subscribers) {
-		//services
-		websites_service = Websites;
-		subscribers_service = Subscribers;
-
+	Init: function() {
 		//general
 		UI.Tabify(document.querySelector('#config > aside > ul'));
 		document.querySelector('#config > aside > ul > li[data-tab="section_1"]').click();
@@ -219,7 +210,7 @@ export const Configuration = {
 				event.stop();
 				const form = this;
 				const subscriber = {email: this['email'].value};
-				subscribers_service.add(subscriber, function() {
+				Subscribers.add(subscriber).then(subscriber => {
 					subscribers_ui.appendChild(draw_subscriber(subscriber));
 					form.reset();
 					UI.Notify('Subscriber added successfully');
@@ -255,7 +246,7 @@ export const Configuration = {
 				const form = this;
 				const website = {id: this['id'].value || undefined, name: this['name'].value, url: this['url'].value, texts: this['texts'].value, online: null};
 				if(website.id) {
-					websites_service.save(website, function() {
+					Websites.save(website).then(() => {
 						websites_ui.removeChild(websites_ui.querySelector(`tr[data-id="${website.id}"]`));
 						websites_ui.appendChild(draw_website(website));
 						form.reset();
@@ -264,7 +255,7 @@ export const Configuration = {
 					});
 				}
 				else {
-					websites_service.add(website, function(website) {
+					Websites.add(website).then(website => {
 						websites_ui.appendChild(draw_website(website));
 						form.reset();
 						UI.Notify('Website added successfully');

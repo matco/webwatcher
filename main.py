@@ -349,7 +349,7 @@ class REST(Resource):
 		if self.require_authentication(request.method) and not "authenticated" in session:
 			return {"message" : "You must be authenticated to perform this action"}, 401
 
-		parameters = json.loads(request.form.get("object"))
+		parameters = request.get_json()
 
 		with ndb.Client().context():
 			object = self.db_model(**parameters)
@@ -366,7 +366,7 @@ class REST(Resource):
 			if object is None:
 				return {"message" : "There is no {0} with id {1}".format(self.db_model_name, id)}, 400
 
-			parameters = json.loads(request.form.get("object"))
+			parameters = request.get_json()
 			#warning "private" fields may be updated
 			for attribute, value in parameters.items():
 				if attribute != "key":

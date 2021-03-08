@@ -4,17 +4,14 @@ import 'js-tools/dom_extension.js';
 import {Configuration} from './configuration.js';
 import {Status} from './status.js';
 import {Authentication} from './authentication.js';
-import {Restify} from './restify.js';
 import {Router} from './router.js';
-
-const Subscribers = Restify('/api/subscribers');
-const Websites = Restify('/api/websites');
+import {Subscribers, Websites} from './services.js';
 
 window.addEventListener(
 	'load',
 	function() {
-		Configuration.Init(Websites, Subscribers);
-		Status.Init(Websites);
+		Configuration.Init();
+		Status.Init();
 		Authentication.Init();
 
 		const xhr = new XMLHttpRequest();
