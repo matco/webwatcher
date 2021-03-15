@@ -192,15 +192,12 @@ def status():
 		#check if application has been initialized
 		if Setting.query(Setting.id == "password").count() == 0:
 			return {"message" : "Application must be initialized"}, 403
-		#check if application is protected
+		#return protection and authentication status
 		protect_app_setting = Setting.query(Setting.id == "protect_app").get()
-		if protect_app_setting is not None and protect_app_setting.value == "True":
-			return {"message" : "Application is protected"}, 401
-		#return authentication status
-		if "authenticated" not in session:
-			return {"message" : "You are not authenticated yet"}
-		else:
-			return {"message" : "You are already authenticated"}
+		return {
+			"protected": protect_app_setting is not None and protect_app_setting.value == "True",
+			"authenticated": "authenticated" in session
+		}
 
 @app.route("/authenticate", methods=["POST", "DELETE"])
 def authenticate():

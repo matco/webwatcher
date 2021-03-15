@@ -1,6 +1,5 @@
 import {Configuration} from './configuration.js';
 import {Status} from './status.js';
-import {Authentication} from './authentication.js';
 import {UI} from './ui.js';
 import {Hash} from './hash.js';
 
@@ -38,15 +37,12 @@ export const Router = {
 				const data = Hash.Decode(location.hash);
 
 				if(data.section === 'config') {
-					//check authentication
-					Authentication.Check(function() {
-						unselect_all();
-						//update page
-						Configuration.Show();
-						//display page
-						menu_config.classList.add('selected');
-						config.style.display = 'block';
-					});
+					unselect_all();
+					//update page
+					Configuration.Show();
+					//display page
+					menu_config.classList.add('selected');
+					config.style.display = 'block';
 				}
 				else {
 					unselect_all();
@@ -62,6 +58,9 @@ export const Router = {
 						Status.Detail(data.details);
 					}
 				}
+
+				//show content
+				document.getElementById('content').style.display = 'block';
 			}
 		);
 

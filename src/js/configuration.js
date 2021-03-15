@@ -145,25 +145,18 @@ function update_websites() {
 }
 
 export const Configuration = {
-	Show: function() {
-		const xhr = new XMLHttpRequest();
-		xhr.addEventListener(
-			'load',
-			function(event) {
-				const settings = JSON.parse(event.target.responseText);
-				const configuration = document.getElementById('configuration');
-				configuration['protect_app'].checked = settings.protect_app === 'True';
-				configuration['smtp_host'].value = settings.smtp_host || '';
-				configuration['smtp_port'].value = settings.smtp_port || '';
-				configuration['smtp_username'].value = settings.smtp_username || '';
-				configuration['smtp_password'].value = settings.smtp_password || '';
-				configuration['sender_email'].value = settings.sender_email || '';
-				configuration['website_timeout'].value = settings.website_timeout || '';
-				configuration['avoid_cache'].checked = settings.avoid_cache === 'True';
-			}
-		);
-		xhr.open('GET', '/api/configuration', true);
-		xhr.send();
+	Show: async function() {
+		const response = await fetch('/api/configuration');
+		const configuration = await response.json();
+		const configuration_form = document.getElementById('configuration');
+		configuration_form['protect_app'].checked = configuration.protect_app === 'True';
+		configuration_form['smtp_host'].value = configuration.smtp_host || '';
+		configuration_form['smtp_port'].value = configuration.smtp_port || '';
+		configuration_form['smtp_username'].value = configuration.smtp_username || '';
+		configuration_form['smtp_password'].value = configuration.smtp_password || '';
+		configuration_form['sender_email'].value = configuration.sender_email || '';
+		configuration_form['website_timeout'].value = configuration.website_timeout || '';
+		configuration_form['avoid_cache'].checked = configuration.avoid_cache === 'True';
 		//update other sections
 		update_subscribers();
 		update_websites();

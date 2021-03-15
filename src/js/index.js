@@ -9,39 +9,11 @@ import {Subscribers, Websites} from './services.js';
 
 window.addEventListener(
 	'load',
-	function() {
+	async function() {
+		await Authentication.Init();
 		Configuration.Init();
 		Status.Init();
-		Authentication.Init();
-
-		const xhr = new XMLHttpRequest();
-		xhr.addEventListener(
-			'load',
-			function(event) {
-				//application must be initialized
-				if(event.target.status === 403) {
-					Authentication.OpenInitialization(function() {
-						document.getElementById('content').style.display = 'block';
-						location.hash = '#section=config';
-						Router.Init();
-					});
-				}
-				//application is protected
-				else if(event.target.status === 401) {
-					//location.hash = '#';
-					Authentication.Open(false, function() {
-						document.getElementById('content').style.display = 'block';
-						Router.Init();
-					});
-				}
-				else {
-					document.getElementById('content').style.display = 'block';
-					Router.Init();
-				}
-			}
-		);
-		xhr.open('GET', '/api/status', true);
-		xhr.send();
+		Router.Init();
 
 		//debug
 		const debug = false;

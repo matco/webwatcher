@@ -1,51 +1,71 @@
 import {UI} from './ui.js';
 
-let authenticated = false;
+//override fetch function to intercept errors
+const original_fetch = window.fetch;
+window.fetch = function() {
+	return new Promise(resolve => {
+		original_fetch.apply(this, arguments).then(response => {
+			//no right to perform the request
+			if(response.status === 401) {
+				Authentication.Open(true).then(() => resolve(original_fetch.apply(this, arguments)));
+			}
+			else {
+				resolve(response);
+			}
+		});
+	});
+};
 
-let authentication_callback;
-let initialization_callback;
+const status = {
+	protected: true,
+	authenticated: false
+};
 
-function login() {
-	authenticated = true;
-	UI.CloseModal(document.getElementById('authentication'));
-	document.getElementById('login').style.display = 'none';
-	document.getElementById('logout').style.display = 'block';
-}
+let authentication_promise = undefined;
+let authentication_resolve = undefined;
+let authentication_reject = undefined;
 
-function logout() {
-	authenticated = false;
-	document.getElementById('logout').style.display = 'none';
-	document.getElementById('login').style.display = 'block';
-	//TODO improve this
-	window.location.reload();
-}
+let initialization_promise = undefined;
+let initialization_resolve = undefined;
+let initialization_reject = undefined;
 
 export const Authentication = {
-	Check: function(callback) {
-		if(authenticated) {
-			callback();
+	GetStatus: function() {
+		//return a copy of the status object
+		return Object.assign({}, status);
+	},
+	Open: function(cancellable) {
+		//authentication window may have already been open
+		if(authentication_promise) {
+			return authentication_promise;
 		}
-		else {
-			Authentication.Open(true, callback);
+		authentication_promise = new Promise((resolve, reject) => {
+			authentication_resolve = resolve;
+			authentication_reject = reject;
+
+			document.getElementById('authentication_cancel').style.display = cancellable ? 'inline' : 'none';
+			const authentication_form = document.getElementById('authentication');
+			UI.OpenModal(authentication_form, true);
+			authentication_form['password'].focus();
+		});
+		return authentication_promise;
+	},
+	OpenInitialization: function() {
+		//initialization window may have already been open
+		if(initialization_promise) {
+			return initialization_promise;
 		}
+		initialization_promise = new Promise((resolve, reject) => {
+			initialization_resolve = resolve;
+			initialization_reject = reject;
+
+			const initialization_form = document.getElementById('initialization');
+			UI.OpenModal(initialization_form, true);
+			initialization_form['password_1'].focus();
+		});
+		return initialization_promise;
 	},
-	IsAuthenticated: function() {
-		return authenticated;
-	},
-	Open: function(cancellable, callback) {
-		authentication_callback = callback;
-		document.getElementById('authentication_cancel').style.display = cancellable ? 'inline' : 'none';
-		const authentication_form = document.getElementById('authentication');
-		UI.OpenModal(authentication_form, true);
-		authentication_form['password'].focus();
-	},
-	OpenInitialization: function(callback) {
-		initialization_callback = callback;
-		const initialization_form = document.getElementById('initialization');
-		UI.OpenModal(initialization_form, true);
-		initialization_form['password_1'].focus();
-	},
-	Init: function() {
+	Init: async function() {
 		document.getElementById('initialization').addEventListener(
 			'submit',
 			function(event) {
@@ -62,13 +82,21 @@ export const Authentication = {
 					function(event) {
 						if(event.target.status === 401) {
 							document.getElementById('authentication_error').textContent = JSON.parse(event.target.responseText).message;
+
+							initialization_promise = undefined;
+							initialization_reject();
 						}
 						else {
-							login();
-							if(initialization_callback) {
-								initialization_callback();
-								initialization_callback = undefined;
-							}
+							//after initialization, consider that user is logged in
+							status.protected = true;
+							status.authenticated = true;
+							UI.CloseModal(document.getElementById('initialization'));
+							document.getElementById('login').style.display = 'none';
+							document.getElementById('logout').style.display = 'block';
+							location.hash = '#section=config';
+
+							initialization_promise = undefined;
+							initialization_resolve();
 						}
 					}
 				);
@@ -91,13 +119,18 @@ export const Authentication = {
 					function(event) {
 						if(event.target.status === 401) {
 							authentication_error.textContent = JSON.parse(event.target.responseText).message;
+
+							authentication_promise = undefined;
+							authentication_reject();
 						}
 						else {
-							login();
-							if(authentication_callback) {
-								authentication_callback();
-								authentication_callback = undefined;
-							}
+							status.authenticated = true;
+							UI.CloseModal(document.getElementById('authentication'));
+							document.getElementById('login').style.display = 'none';
+							document.getElementById('logout').style.display = 'block';
+
+							authentication_promise = undefined;
+							authentication_resolve();
 						}
 					}
 				);
@@ -111,9 +144,11 @@ export const Authentication = {
 		document.getElementById('authentication_cancel').addEventListener(
 			'click',
 			function() {
-				authentication_callback = undefined;
-				location.hash = '#section=status';
 				UI.CloseModal(document.getElementById('authentication'));
+				location.hash = '#section=status';
+
+				authentication_promise = undefined;
+				authentication_reject();
 			}
 		);
 
@@ -128,10 +163,46 @@ export const Authentication = {
 			'click',
 			function() {
 				const xhr = new XMLHttpRequest();
-				xhr.addEventListener('load', logout);
+				xhr.addEventListener(
+					'load',
+					function() {
+						status.authenticated = false;
+						//if application is protected, display login panel
+						if(status.protected) {
+							Authentication.Open();
+						}
+						//if application is not protected, return to status page
+						else {
+							document.getElementById('logout').style.display = 'none';
+							document.getElementById('login').style.display = 'block';
+							location.hash = '#section=status';
+						}
+					});
 				xhr.open('DELETE', '/api/authenticate', true);
 				xhr.send();
 			}
 		);
+
+		//it's important to check the status to know if application is protected or not
+		//the UI will be different depending on if application is protected or not
+		const response = await fetch('/api/status');
+		//application must be initialized
+		if(response.status === 403) {
+			await Authentication.OpenInitialization();
+		}
+		else {
+			//update stored status from response
+			Object.assign(status, await response.json());
+			//application is protected and user is not logged in
+			if(status.protected && !status.authenticated) {
+				await Authentication.Open();
+				location.hash = '#section=status';
+			}
+			//update login and logout buttons
+			else {
+				document.getElementById('login').style.display = status.authenticated ? 'none' : 'block';
+				document.getElementById('logout').style.display = !status.authenticated ? 'none' : 'block';
+			}
+		}
 	}
 };
