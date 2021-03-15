@@ -1,20 +1,5 @@
 const UI = {};
 
-UI.Info = function(message, locked) {
-	document.getElementById('info_message').textContent = message;
-	UI.OpenModal(document.getElementById('info'), locked);
-};
-
-UI.StartLoading = function() {
-	document.body.classList.add('loading');
-	document.getElementById('loading').style.display = 'block';
-};
-
-UI.StopLoading = function() {
-	document.body.classList.remove('loading');
-	document.getElementById('loading').style.display = 'none';
-};
-
 (function() {
 	const notification_close_time = 5000;
 	let notification_timeout;
@@ -213,11 +198,6 @@ UI.Validate = function(message, yes_callback, no_callback, context, yes_text, no
 
 	//yes_button.focus();
 	UI.OpenModal(validate_window, true);
-};
-
-//delay task to let browser time to repaint
-UI.Delay = function(callback) {
-	setTimeout(callback, 50);
 };
 
 export {UI};
