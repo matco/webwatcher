@@ -82,24 +82,21 @@ function render_details_action(value, record) {
 		{href: '#', title: 'Delete downtime'},
 		'Delete',
 		{
-			click: function(event) {
+			click: async function(event) {
 				event.stop();
-				const xhr = new XMLHttpRequest();
-				xhr.addEventListener(
-					'load',
-					function(xhr_event) {
-						if(xhr_event.target.status === 200) {
-							details_grid.datasource.data.removeElement(record);
-							details_grid.render(details_grid.datasource);
-							UI.Notify('Downtime has been deleted successfully');
-						}
-						else {
-							UI.Notify('Unable to delete downtime');
-						}
-					}
-				);
-				xhr.open('DELETE', `/api/websites/${selected_website_id}/downtimes/${record.id}`, true);
-				xhr.send();
+
+				const options = {
+					method: 'DELETE',
+				};
+				const response = await fetch(`/api/websites/${selected_website_id}/downtimes/${record.id}`, options);
+				if(response.status === 200) {
+					details_grid.datasource.data.removeElement(record);
+					details_grid.render(details_grid.datasource);
+					UI.Notify('Downtime has been deleted successfully');
+				}
+				else {
+					UI.Notify('Unable to delete downtime');
+				}
 			}
 		}
 	);
@@ -121,56 +118,19 @@ export const Status = {
 	Show: function update_states() {
 		Websites.list().then(draw_websites);
 	},
-	Detail: function(website_id) {
+	Detail: async function(website_id) {
 		selected_website_id = website_id;
-		const xhr = new XMLHttpRequest();
-		xhr.addEventListener(
-			'load',
-			function(event) {
-				const details = JSON.parse(event.target.responseText);
-				//update link
-				const website_details_link = document.getElementById('website_details_link');
-				website_details_link.setAttribute('href', details.url);
-				website_details_link.textContent = details.name;
-				//update age
-				update_website_details_age(details.update ? new Date(details.update) : undefined);
-				//update check link
-				const website_details_check = document.getElementById('website_details_check');
-				website_details_check.clear();
-				website_details_check.appendChild(document.createFullElement(
-					'button',
-					{},
-					'Check now',
-					{
-						click: function(event) {
-							event.stop();
-							const that = this;
-							this.setAttribute('disabled', 'disabled');
-							this.classList.add('loading');
-							const xhr = new XMLHttpRequest();
-							xhr.addEventListener(
-								'load',
-								function(xhr_event) {
-									that.removeAttribute('disabled');
-									that.classList.remove('loading');
-									if(xhr_event.target.status === 200) {
-										update_website_details_age(new Date());
-										UI.Notify('Website has been checked successfully');
-									}
-									else {
-										UI.Notify('Unable to check website');
-									}
-								}
-							);
-							xhr.open('GET', `/api/check/${details.id}`, true);
-							xhr.send();
-						}
-					}
-				));
-			}
-		);
-		xhr.open('GET', `/api/websites/${website_id}`, true);
-		xhr.send();
+
+		const response = await fetch(`/api/websites/${website_id}`);
+		const details = await response.json();
+		//update link
+		const website_details_link = document.getElementById('website_details_link');
+		website_details_link.setAttribute('href', details.url);
+		website_details_link.textContent = details.name;
+		//update age
+		update_website_details_age(details.update ? new Date(details.update) : undefined);
+		//update check link
+		document.getElementById('website_details_check').dataset.websiteId = website_id;
 
 		//prepare grid with custom export link
 		details_grid = new Table({
@@ -182,27 +142,20 @@ export const Status = {
 				{label: 'Export', url: `/api/websites/${website_id}/downtimes`}
 			]
 		});
-		const downtimes_xhr = new XMLHttpRequest();
-		downtimes_xhr.addEventListener(
-			'load',
-			function(event) {
-				const downtimes = JSON.parse(event.target.responseText);
-				//calculate duration for each downtime
-				downtimes.forEach(function(downtime) {
-					let duration;
-					if(downtime.start && downtime.stop) {
-						//TODO improve this as grid does the same job
-						duration = Math.round((new Date(downtime.stop).getTime() - new Date(downtime.start).getTime()) / 1000);
-					}
-					downtime.duration = duration;
-				});
-				//update downtimes grid
-				details_grid.render(new Datasource({data: downtimes}));
+
+		const downtimes_response = await fetch(`/api/websites/${website_id}/downtimes`, {headers: {'Accept': 'application/json'}});
+		const downtimes = await downtimes_response.json();
+		//calculate duration for each downtime
+		downtimes.forEach(function(downtime) {
+			let duration;
+			if(downtime.start && downtime.stop) {
+				//TODO improve this as grid does the same job
+				duration = Math.round((new Date(downtime.stop).getTime() - new Date(downtime.start).getTime()) / 1000);
 			}
-		);
-		downtimes_xhr.open('GET', `/api/websites/${website_id}/downtimes`, true);
-		downtimes_xhr.setRequestHeader('Accept', 'application/json');
-		downtimes_xhr.send();
+			downtime.duration = duration;
+		});
+		//update downtimes grid
+		details_grid.render(new Datasource({data: downtimes}));
 		UI.OpenModal(document.getElementById('website_details'), true);
 	},
 	Init: function() {
@@ -222,29 +175,41 @@ export const Status = {
 
 		document.getElementById('status_check_now').addEventListener(
 			'click',
-			function(event) {
+			async function(event) {
 				event.stop();
-				const that = this;
 				this.setAttribute('disabled', 'disabled');
 				this.classList.add('loading');
-				const xhr = new XMLHttpRequest();
-				xhr.addEventListener(
-					'load',
-					function(xhr_event) {
-						that.removeAttribute('disabled');
-						that.classList.remove('loading');
-						if(xhr_event.target.status === 200) {
-							//TODO improve this as only enabled websites are checked
-							draw_websites(JSON.parse(xhr_event.target.responseText));
-							UI.Notify('Websites have been checked successfully');
-						}
-						else {
-							UI.Notify('Unable to check websites');
-						}
-					}
-				);
-				xhr.open('GET', '/api/check', true);
-				xhr.send();
+
+				const response = await fetch('/api/check');
+				this.removeAttribute('disabled');
+				this.classList.remove('loading');
+				if(response.status === 200) {
+					const websites = await response.json();
+					//TODO improve this as only enabled websites are checked
+					draw_websites(websites);
+					UI.Notify('Websites have been checked successfully');
+				}
+				else {
+					UI.Notify('Unable to check websites');
+				}
+			}
+		);
+
+		document.getElementById('website_details_check').addEventListener(
+			'click',
+			async function() {
+				this.setAttribute('disabled', 'disabled');
+				this.classList.add('loading');
+				const response = await fetch(`/api/check/${this.dataset.websiteId}`)
+				this.removeAttribute('disabled');
+				this.classList.remove('loading');
+				if(response.status === 200) {
+					update_website_details_age(new Date());
+					UI.Notify('Website has been checked successfully');
+				}
+				else {
+					UI.Notify('Unable to check website');
+				}
 			}
 		);
 	}

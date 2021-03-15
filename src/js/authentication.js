@@ -3,6 +3,10 @@ import {UI} from './ui.js';
 //override fetch function to intercept errors
 const original_fetch = window.fetch;
 window.fetch = function() {
+	const options = arguments.length > 1 ? arguments[1] : {};
+	if(options.skipInterceptor) {
+		return original_fetch.apply(this, arguments);
+	}
 	return new Promise(resolve => {
 		original_fetch.apply(this, arguments).then(response => {
 			//no right to perform the request
@@ -68,7 +72,7 @@ export const Authentication = {
 	Init: async function() {
 		document.getElementById('initialization').addEventListener(
 			'submit',
-			function(event) {
+			async function(event) {
 				event.stop();
 				const initialization_error = document.getElementById('initialization_error');
 				initialization_error.textContent = '';
@@ -76,68 +80,68 @@ export const Authentication = {
 					initialization_error.textContent = 'Passwords don\'t match';
 					return;
 				}
-				const xhr = new XMLHttpRequest();
-				xhr.addEventListener(
-					'load',
-					function(event) {
-						if(event.target.status === 401) {
-							document.getElementById('authentication_error').textContent = JSON.parse(event.target.responseText).message;
+				const options = {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({value: this['password_1'].value}),
+					skipInterceptor: true
+				};
+				const response = await fetch('/api/configuration/password', options);
+				if(response.status === 401) {
+					const result = await response.json();
+					document.getElementById('initialization_error').textContent = result.message;
 
-							initialization_promise = undefined;
-							initialization_reject();
-						}
-						else {
-							//after initialization, consider that user is logged in
-							status.protected = true;
-							status.authenticated = true;
-							UI.CloseModal(document.getElementById('initialization'));
-							document.getElementById('login').style.display = 'none';
-							document.getElementById('logout').style.display = 'block';
-							location.hash = '#section=config';
+					initialization_promise = undefined;
+					initialization_reject();
+				}
+				else {
+					//after initialization, consider that user is logged in
+					status.protected = true;
+					status.authenticated = true;
+					UI.CloseModal(document.getElementById('initialization'));
+					document.getElementById('login').style.display = 'none';
+					document.getElementById('logout').style.display = 'block';
+					location.hash = '#section=config';
 
-							initialization_promise = undefined;
-							initialization_resolve();
-						}
-					}
-				);
-				const form_data = new FormData();
-				form_data.append('value', this['password_1'].value);
-				xhr.open('POST', '/api/configuration/password', true);
-				xhr.send(form_data);
+					initialization_promise = undefined;
+					initialization_resolve();
+				}
 			}
 		);
 
 		document.getElementById('authentication').addEventListener(
 			'submit',
-			function(event) {
+			async function(event) {
 				event.stop();
 				const authentication_error = document.getElementById('authentication_error');
 				authentication_error.textContent = '';
-				const xhr = new XMLHttpRequest();
-				xhr.addEventListener(
-					'load',
-					function(event) {
-						if(event.target.status === 401) {
-							authentication_error.textContent = JSON.parse(event.target.responseText).message;
+				const options = {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({password: this['password'].value}),
+					skipInterceptor: true
+				};
+				const response = await fetch('/api/authenticate', options);
+				if(response.status === 401) {
+					const result = await response.json();
+					authentication_error.textContent = result.message;
 
-							authentication_promise = undefined;
-							authentication_reject();
-						}
-						else {
-							status.authenticated = true;
-							UI.CloseModal(document.getElementById('authentication'));
-							document.getElementById('login').style.display = 'none';
-							document.getElementById('logout').style.display = 'block';
+					authentication_promise = undefined;
+					authentication_reject();
+				}
+				else {
+					status.authenticated = true;
+					UI.CloseModal(document.getElementById('authentication'));
+					document.getElementById('login').style.display = 'none';
+					document.getElementById('logout').style.display = 'block';
 
-							authentication_promise = undefined;
-							authentication_resolve();
-						}
-					}
-				);
-				const form_data = new FormData();
-				form_data.append('credentials', JSON.stringify({password: this['password'].value}));
-				xhr.open('POST', '/api/authenticate', true);
-				xhr.send(form_data);
+					authentication_promise = undefined;
+					authentication_resolve();
+				}
 			}
 		);
 
@@ -161,25 +165,22 @@ export const Authentication = {
 
 		document.getElementById('logout').addEventListener(
 			'click',
-			function() {
-				const xhr = new XMLHttpRequest();
-				xhr.addEventListener(
-					'load',
-					function() {
-						status.authenticated = false;
-						//if application is protected, display login panel
-						if(status.protected) {
-							Authentication.Open();
-						}
-						//if application is not protected, return to status page
-						else {
-							document.getElementById('logout').style.display = 'none';
-							document.getElementById('login').style.display = 'block';
-							location.hash = '#section=status';
-						}
-					});
-				xhr.open('DELETE', '/api/authenticate', true);
-				xhr.send();
+			async function() {
+				const options = {
+					method: 'DELETE'
+				};
+				await fetch('/api/authenticate', options);
+				status.authenticated = false;
+				//if application is protected, display login panel
+				if(status.protected) {
+					Authentication.Open();
+				}
+				//if application is not protected, return to status page
+				else {
+					document.getElementById('logout').style.display = 'none';
+					document.getElementById('login').style.display = 'block';
+					location.hash = '#section=status';
+				}
 			}
 		);
 

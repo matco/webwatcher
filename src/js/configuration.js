@@ -62,7 +62,7 @@ function disable_website_listener(event) {
 	event.stop();
 	const link = this;
 	const container = this.parentNode;
-	website_action(container.parentNode.dataset.id, 'disable', function() {
+	website_action(container.parentNode.dataset.id, 'disable').then(() => {
 		container.removeChild(link);
 		container.insertBefore(document.createFullElement(
 			'a',
@@ -88,17 +88,10 @@ function enable_website_listener(event) {
 	});
 }
 
-function website_action(website, action, callback) {
-	const xhr = new XMLHttpRequest();
-	xhr.addEventListener(
-		'load',
-		function(event) {
-			UI.Notify(JSON.parse(event.target.responseText).message);
-			callback();
-		}
-	);
-	xhr.open('GET', `/api/websites/${website}/action/${action}`, true);
-	xhr.send();
+function website_action(website, action) {
+	return fetch(`/api/websites/${website}/action/${action}`)
+		.then(r => r.json())
+		.then(r => UI.Notify(r.message));
 }
 
 function draw_website(website) {
@@ -169,17 +162,9 @@ export const Configuration = {
 		//basic configuration
 		document.getElementById('configuration').addEventListener(
 			'submit',
-			function(event) {
+			async function(event) {
 				event.stop();
-				const xhr = new XMLHttpRequest();
-				xhr.addEventListener(
-					'load',
-					function() {
-						UI.Notify('Modifications saved successfully');
-					}
-				);
-				const form_data = new FormData();
-				form_data.append('configuration', JSON.stringify({
+				const configuration = {
 					protect_app: this['protect_app'].checked,
 					smtp_host: this['smtp_host'].value,
 					smtp_port: this['smtp_port'].value,
@@ -188,9 +173,16 @@ export const Configuration = {
 					sender_email: this['sender_email'].value,
 					website_timeout: this['website_timeout'].value,
 					avoid_cache: this['avoid_cache'].checked
-				}));
-				xhr.open('POST', '/api/configuration', true);
-				xhr.send(form_data);
+				};
+				const options = {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(configuration)
+				};
+				await fetch('/api/configuration', options);
+				UI.Notify('Modifications saved successfully');
 			}
 		);
 
@@ -260,22 +252,18 @@ export const Configuration = {
 		//other
 		document.getElementById('recalculate').addEventListener(
 			'click',
-			function(event) {
+			async function(event) {
 				event.stop();
 				const that = this;
 				this.setAttribute('disabled', 'disabled');
 				this.classList.add('loading');
-				const xhr = new XMLHttpRequest();
-				xhr.addEventListener(
-					'load',
-					function(xhr_event) {
-						that.removeAttribute('disabled');
-						that.classList.remove('loading');
-						UI.Notify(JSON.parse(xhr_event.target.responseText).message);
-					}
-				);
-				xhr.open('GET', '/api/recalculate', true);
-				xhr.send();
+
+				const response = await fetch('/api/recalculate');
+				const result = await response.json();
+
+				that.removeAttribute('disabled');
+				that.classList.remove('loading');
+				UI.Notify(result.message);
 			}
 		);
 	}

@@ -202,7 +202,7 @@ def status():
 @app.route("/authenticate", methods=["POST", "DELETE"])
 def authenticate():
 	if request.method == "POST":
-		credentials = json.loads(request.form.get("credentials"))
+		credentials = request.get_json()
 		with ndb.Client().context():
 			if hash_password(credentials["password"]) == Setting.query(Setting.id == "password").get().value:
 				session["authenticated"] = True
@@ -238,9 +238,9 @@ class Configuration(Resource):
 			if not "authenticated" in session:
 				return {"message" : "You must be authenticated to perform this action"}, 401
 
-			configuration = json.loads(request.form.get("configuration"))
+			dto = request.get_json()
 			with ndb.Client().context():
-				for id, value in configuration.items():
+				for id, value in dto.items():
 					value = str(value)
 					setting = Setting.query(Setting.id == id).get()
 					if setting is None:
@@ -252,7 +252,8 @@ class Configuration(Resource):
 		else:
 			with ndb.Client().context():
 				setting = Setting.query(Setting.id == id).get()
-				value = request.form.get("value")
+				dto = request.get_json()
+				value = dto["value"]
 				#encrypt password
 				if id == "password":
 					value = hash_password(value)
@@ -346,10 +347,10 @@ class REST(Resource):
 		if self.require_authentication(request.method) and not "authenticated" in session:
 			return {"message" : "You must be authenticated to perform this action"}, 401
 
-		parameters = request.get_json()
+		dto = request.get_json()
 
 		with ndb.Client().context():
-			object = self.db_model(**parameters)
+			object = self.db_model(**dto)
 			object.put()
 			return jsonify(object)
 
@@ -363,9 +364,9 @@ class REST(Resource):
 			if object is None:
 				return {"message" : "There is no {0} with id {1}".format(self.db_model_name, id)}, 400
 
-			parameters = request.get_json()
+			dto = request.get_json()
 			#warning "private" fields may be updated
-			for attribute, value in parameters.items():
+			for attribute, value in dto.items():
 				if attribute != "key":
 					setattr(object, attribute, value)
 			object.put()
