@@ -235,11 +235,15 @@ input[type="checkbox"] {
 	padding: 0 0 0 1rem;
 	box-sizing: border-box;
 }
-#config > aside > ul > li {
-	cursor: pointer;
+#config > aside > ul > li > a {
+	text-decoration: none;
+	color: black;
+	display: inline-block;
+	width: 100%;
+	box-sizing: border-box;
 	padding: 0.5rem 2rem 0.5rem 0.5rem;
 }
-#config > aside > ul > li.selected {
+#config > aside > ul > li > a.selected {
 	background-color: white;
 	border-radius: 5px 0 0 5px;
 }

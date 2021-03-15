@@ -174,31 +174,6 @@ UI.StopLoading = function() {
 	};
 })();
 
-(function() {
-	//show tab associated content and hide other contents
-	function select_tab() {
-		if(!this.classList.contains('disabled')) {
-			this.parentNode.children.forEach(function(tab) {
-				if(tab === this) {
-					tab.classList.add('selected');
-					document.getElementById(tab.dataset.tab).style.display = 'block';
-				}
-				else {
-					tab.classList.remove('selected');
-					document.getElementById(tab.dataset.tab).style.display = 'none';
-				}
-			}, this);
-		}
-	}
-
-	UI.Tabify = function(container) {
-		container.children.forEach(function(tab) {
-			document.getElementById(tab.dataset.tab).style.display = tab.classList.contains('selected') ? 'block' : 'none';
-			tab.addEventListener('click', select_tab);
-		});
-	};
-})();
-
 UI.Validate = function(message, yes_callback, no_callback, context, yes_text, no_text) {
 	const validate_window = document.getElementById('validate');
 	document.getElementById('validate_message').textContent = message;

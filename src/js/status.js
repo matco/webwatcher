@@ -42,7 +42,7 @@ function render_online(value) {
 
 function render_actions(_, record) {
 	if(Authentication.GetStatus().authenticated) {
-		return document.createFullElement('a', {href: `#section=status&details=${record.id}`, title: 'View website details'}, 'Details');
+		return document.createFullElement('a', {href: `#page=status&details=${record.id}`, title: 'View website details'}, 'Details');
 	}
 	return document.createElement('span');
 }

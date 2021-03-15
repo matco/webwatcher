@@ -103,7 +103,7 @@ export const Authentication = {
 					UI.CloseModal(document.getElementById('initialization'));
 					document.getElementById('login').style.display = 'none';
 					document.getElementById('logout').style.display = 'block';
-					location.hash = '#section=config';
+					location.hash = '#page=config';
 
 					initialization_promise = undefined;
 					initialization_resolve();
@@ -149,7 +149,7 @@ export const Authentication = {
 			'click',
 			function() {
 				UI.CloseModal(document.getElementById('authentication'));
-				location.hash = '#section=status';
+				location.hash = '#page=status';
 
 				authentication_promise = undefined;
 				authentication_reject();
@@ -179,7 +179,7 @@ export const Authentication = {
 				else {
 					document.getElementById('logout').style.display = 'none';
 					document.getElementById('login').style.display = 'block';
-					location.hash = '#section=status';
+					location.hash = '#page=status';
 				}
 			}
 		);
@@ -197,7 +197,7 @@ export const Authentication = {
 			//application is protected and user is not logged in
 			if(status.protected && !status.authenticated) {
 				await Authentication.Open();
-				location.hash = '#section=status';
+				location.hash = '#page=status';
 			}
 			//update login and logout buttons
 			else {

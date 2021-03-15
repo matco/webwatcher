@@ -30,16 +30,43 @@ export const Router = {
 					menu_status.classList.remove('selected');
 				}
 
+				function unselect_all_config() {
+					document.querySelectorAll('a[href^="#page=config"]').forEach(a => a.classList.remove('selected'));
+					document.getElementById('section_main').style.display = 'none';
+					document.getElementById('section_subscribers').style.display = 'none';
+					document.getElementById('section_websites').style.display = 'none';
+					document.getElementById('section_other').style.display = 'none';
+				}
+
 				//close all modals
 				UI.CloseModals();
 
 				//retrieve data encoded in hash
 				const data = Hash.Decode(location.hash);
 
-				if(data.section === 'config') {
+				if(data.page === 'config') {
 					unselect_all();
+					unselect_all_config();
 					//update page
-					Configuration.Show();
+					if(data.section === 'subscribers') {
+						Configuration.ShowSubscribers();
+						document.querySelector('a[href="#page=config&section=subscribers"]').classList.add('selected');
+						document.getElementById('section_subscribers').style.display = 'block';
+					}
+					else if(data.section === 'websites') {
+						Configuration.ShowWebsites();
+						document.querySelector('a[href="#page=config&section=websites"]').classList.add('selected');
+						document.getElementById('section_websites').style.display = 'block';
+					}
+					else if(data.section === 'other') {
+						document.querySelector('a[href="#page=config&section=other"]').classList.add('selected');
+						document.getElementById('section_other').style.display = 'block';
+					}
+					else {
+						Configuration.ShowMain();
+						document.querySelector('a[href="#page=config&section=main"]').classList.add('selected');
+						document.getElementById('section_main').style.display = 'block';
+					}
 					//display page
 					menu_config.classList.add('selected');
 					config.style.display = 'block';

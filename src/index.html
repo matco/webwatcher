@@ -60,8 +60,8 @@
 			<header>
 				<h1>Webwatcher</h1>
 				<ul>
-					<li><a id="menu_config" href="#section=config">Configuration</a></li>
-					<li><a id="menu_status" href="#section=status">Status</a></li>
+					<li><a id="menu_config" href="#page=config">Configuration</a></li>
+					<li><a id="menu_status" href="#page=status">Status</a></li>
 				</ul>
 				<button id="login">Login</button>
 				<button id="logout" style="display: none;">Logout</button>
@@ -70,14 +70,14 @@
 			<div id="config" style="display: none;">
 				<aside>
 					<ul>
-						<li data-tab="section_1">Main</li>
-						<li data-tab="section_2">Subscribers</li>
-						<li data-tab="section_3">Websites</li>
-						<li data-tab="section_4">Other</li>
+						<li><a href="#page=config&section=main">Main</a></li>
+						<li><a href="#page=config&section=subscribers">Subscribers</a></li>
+						<li><a href="#page=config&section=websites">Websites</a></li>
+						<li><a href="#page=config&section=other">Other</a></li>
 					</ul>
 				</aside>
 				<div>
-					<div id="section_1">
+					<div id="section_main">
 						<h2>Main</h2>
 						<form id="configuration" method="post" action="#">
 							<p>
@@ -142,7 +142,7 @@
 							</p>
 						</form>
 					</div>
-					<div id="section_2">
+					<div id="section_subscribers">
 						<h2>Subscribers</h2>
 						<table>
 							<thead>
@@ -166,7 +166,7 @@
 							</p>
 						</form>
 					</div>
-					<div id="section_3">
+					<div id="section_websites">
 						<h2>Websites</h2>
 						<table style="width: 100%;">
 							<thead>
@@ -207,7 +207,7 @@
 							</p>
 						</form>
 					</div>
-					<div id="section_4">
+					<div id="section_other">
 						<h2>Other</h2>
 						<p>
 							<button id="recalculate">Recalculate websites downtime</button>
@@ -233,7 +233,7 @@
 						<div id="website_details_downtimes"></div>
 					</div>
 					<menu>
-						<a href="#section=status" class="button">Close</a>
+						<a href="#page=status" class="button">Close</a>
 					</menu>
 				</div>
 			</div>

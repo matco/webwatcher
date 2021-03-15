@@ -2,8 +2,6 @@ import {UI} from './ui.js';
 import {Subscribers, Websites} from './services.js';
 
 //subscribers
-let subscribers_ui;
-
 function delete_subscriber_listener(event) {
 	event.stop();
 	const subscriber_ui = this.parentNode.parentNode;
@@ -27,19 +25,12 @@ function draw_subscriber(subscriber) {
 	return subscriber_ui;
 }
 
-function update_subscribers() {
-	subscribers_ui.clear();
-	Subscribers.list().then(s => s.map(draw_subscriber).forEach(Node.prototype.appendChild, subscribers_ui));
-}
-
 //websites
-let websites_ui;
-let website_form;
-
 function edit_website_listener(event) {
 	event.stop();
 	const website_ui = this.parentNode.parentNode;
 	Websites.get(website_ui.dataset.id).then(website => {
+		const website_form = document.getElementById('website');
 		website_form['id'].value = website.id;
 		website_form['name'].setAttribute('disabled', 'disabled');
 		website_form['name'].value = website.name;
@@ -132,13 +123,8 @@ function draw_website(website) {
 	return website_ui;
 }
 
-function update_websites() {
-	websites_ui.clear();
-	Websites.list().then(w => w.map(draw_website).forEach(Node.prototype.appendChild, websites_ui));
-}
-
 export const Configuration = {
-	Show: async function() {
+	ShowMain: async function() {
 		const response = await fetch('/api/configuration');
 		const configuration = await response.json();
 		const configuration_form = document.getElementById('configuration');
@@ -150,15 +136,18 @@ export const Configuration = {
 		configuration_form['sender_email'].value = configuration.sender_email || '';
 		configuration_form['website_timeout'].value = configuration.website_timeout || '';
 		configuration_form['avoid_cache'].checked = configuration.avoid_cache === 'True';
-		//update other sections
-		update_subscribers();
-		update_websites();
+	},
+	ShowSubscribers: function() {
+		const subscribers_ui = document.getElementById('subscribers');
+		subscribers_ui.clear();
+		Subscribers.list().then(s => s.map(draw_subscriber).forEach(Node.prototype.appendChild, subscribers_ui));
+	},
+	ShowWebsites: function() {
+		const websites_ui = document.getElementById('websites');
+		websites_ui.clear();
+		Websites.list().then(w => w.map(draw_website).forEach(Node.prototype.appendChild, websites_ui));
 	},
 	Init: function() {
-		//general
-		UI.Tabify(document.querySelector('#config > aside > ul'));
-		document.querySelector('#config > aside > ul > li[data-tab="section_1"]').click();
-
 		//basic configuration
 		document.getElementById('configuration').addEventListener(
 			'submit',
@@ -187,8 +176,6 @@ export const Configuration = {
 		);
 
 		//subscribers
-		subscribers_ui = document.getElementById('subscribers');
-
 		document.getElementById('subscriber').addEventListener(
 			'submit',
 			function(event) {
@@ -196,7 +183,7 @@ export const Configuration = {
 				const form = this;
 				const subscriber = {email: this['email'].value};
 				Subscribers.add(subscriber).then(subscriber => {
-					subscribers_ui.appendChild(draw_subscriber(subscriber));
+					document.getElementById('subscribers').appendChild(draw_subscriber(subscriber));
 					form.reset();
 					UI.Notify('Subscriber added successfully');
 				});
@@ -204,12 +191,10 @@ export const Configuration = {
 		);
 
 		//websites
-		websites_ui = document.getElementById('websites');
-		website_form = document.getElementById('website');
-
 		document.getElementById('website_add').addEventListener(
 			'click',
 			function() {
+				const website_form = document.getElementById('website');
 				website_form.reset();
 				website_form['id'].value = '';
 				website_form['name'].removeAttribute('disabled');
@@ -220,16 +205,17 @@ export const Configuration = {
 		document.getElementById('website_cancel').addEventListener(
 			'click',
 			function() {
-				website_form.style.display = 'none';
+				document.getElementById('website').style.display = 'none';
 			}
 		);
 
-		website_form.addEventListener(
+		document.getElementById('website').addEventListener(
 			'submit',
 			function(event) {
 				event.stop();
 				const form = this;
 				const website = {id: this['id'].value || undefined, name: this['name'].value, url: this['url'].value, texts: this['texts'].value, online: null};
+				const websites_ui = document.getElementById('websites');
 				if(website.id) {
 					Websites.save(website).then(() => {
 						websites_ui.removeChild(websites_ui.querySelector(`tr[data-id="${website.id}"]`));
