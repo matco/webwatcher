@@ -78,7 +78,7 @@ class Downtime(Base):
 	__tablename__ = "downtime"
 	pk = Column(Integer, primary_key=True)
 	website_fk = Column(Integer, ForeignKey(Website.pk))
-	rationale = Column(String(255), nullable=False)
+	rationale = Column(String(1000), nullable=False)
 	start = Column(DateTime, nullable=False, default=datetime.datetime.now)
 	stop = Column(DateTime)
 
@@ -121,6 +121,12 @@ def warn(subject, content):
 				message.set_content(content)
 				smtp.send_message(message)
 
+#get error message
+def get_exception_message(exception):
+	if hasattr(exception, 'message'):
+		return e.message
+	return str(exception)
+
 #website checker
 def check(website, avoid_cache, timeout):
 	error = None
@@ -143,13 +149,15 @@ def check(website, avoid_cache, timeout):
 			else:
 				error = "Response status is {0}".format(response.status_code)
 		except Exception as e:
-			error = "Unable to read website response: {0}".format(e)
-	except requests.ConnectionError as e:
-		error = "Unable to retrieve website data: {0}".format(e.message)
-	except requests.Timeout as e:
-		error = "Deadline exceeded while trying to reach website: {0}".format(e.message)
+			error = "Unable to read website response: {0}".format(get_exception_message(e))
+	except requests.exceptions.ConnectionError as e:
+		error = "Unable to retrieve website data: {0}".format(get_exception_message(e))
+	except requests.exceptions.TooManyRedirects as e:
+		error = "Too many redirects while trying to reach website: {0}".format(get_exception_message(e))
+	except requests.exceptions.Timeout as e:
+		error = "Deadline exceeded while trying to reach website: {0}".format(get_exception_message(e))
 	except Exception as e:
-		error = "Unable to reach website for unknown reason: {0}".format(e)
+		error = "Unable to reach website for unknown reason: {0}".format(get_exception_message(e))
 	#return error or None if there is no error
 	#TODO improve this
 	return error
