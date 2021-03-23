@@ -6,8 +6,8 @@ export class Restify {
 	list() {
 		return fetch(this.url).then(r => r.json());
 	}
-	get(id) {
-		return fetch(`${this.url}/${id}`).then(r => r.json());
+	get(pk) {
+		return fetch(`${this.url}/${pk}`).then(r => r.json());
 	}
 	save(object) {
 		const options = {
@@ -17,7 +17,7 @@ export class Restify {
 			},
 			body: JSON.stringify(object)
 		};
-		return fetch(`${this.url}/${object.id}`, options).then(r => r.json());
+		return fetch(`${this.url}/${object.pk}`, options).then(r => r.json());
 	}
 	add(object) {
 		const options = {
@@ -29,10 +29,10 @@ export class Restify {
 		};
 		return fetch(this.url, options).then(r => r.json());
 	}
-	delete(id) {
+	delete(pk) {
 		const options = {
 			method: 'DELETE',
 		};
-		return fetch(`${this.url}/${id}`, options).then(r => r.json());
+		return fetch(`${this.url}/${pk}`, options).then(r => r.json());
 	}
 }

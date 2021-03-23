@@ -260,7 +260,7 @@ input[type="checkbox"] {
 #website input[name="url"] {
 	width: 18rem;
 }
-#website input[name^="texts"] {
+#website input[name^="text"] {
 	width: 18rem;
 }
 

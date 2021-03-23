@@ -1,5 +1,6 @@
 gunicorn
 requests
-google-cloud-ndb
+SQLAlchemy
 flask
 flask_restful
+PyMySQL

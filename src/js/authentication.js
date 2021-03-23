@@ -85,10 +85,10 @@ export const Authentication = {
 					headers: {
 						'Content-Type': 'application/json',
 					},
-					body: JSON.stringify({value: this['password_1'].value}),
+					body: JSON.stringify({password: this['password_1'].value}),
 					skipInterceptor: true
 				};
-				const response = await fetch('/api/configuration/password', options);
+				const response = await fetch('/api/initialize', options);
 				if(response.status === 401) {
 					const result = await response.json();
 					document.getElementById('initialization_error').textContent = result.message;

@@ -22,9 +22,9 @@ window.addEventListener(
 			Subscribers.add({email: 'john.doe@example.com'});
 
 			//add websites
-			Websites.add({name: 'Example', url: 'http://www.example.org', texts: 'Example Domain'});
+			Websites.add({name: 'Example', url: 'http://www.example.org', text: 'Example Domain'});
 			//TODO add a multiple text like 'This domain is established to be used for illustrative examples in documents.'
-			Websites.add({name: 'Invalid', url: 'http://www.invalid-website.org', texts: 'Invalid website'});
+			Websites.add({name: 'Invalid', url: 'http://www.invalid-website.org', text: 'Invalid website'});
 		}
 	}
 );

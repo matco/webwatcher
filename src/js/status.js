@@ -3,7 +3,7 @@ import {UI} from './ui.js';
 import {Table, Datasource} from '@matco/basic-table';
 import {Websites} from './services.js';
 
-let selected_website_id;
+let selected_website_pk;
 
 //status
 let states_grid;
@@ -42,7 +42,7 @@ function render_online(value) {
 
 function render_actions(_, record) {
 	if(Authentication.GetStatus().authenticated) {
-		return document.createFullElement('a', {href: `#page=status&details=${record.id}`, title: 'View website details'}, 'Details');
+		return document.createFullElement('a', {href: `#page=status&details=${record.pk}`, title: 'View website details'}, 'Details');
 	}
 	return document.createElement('span');
 }
@@ -88,7 +88,7 @@ function render_details_action(value, record) {
 				const options = {
 					method: 'DELETE',
 				};
-				const response = await fetch(`/api/websites/${selected_website_id}/downtimes/${record.id}`, options);
+				const response = await fetch(`/api/websites/${selected_website_pk}/downtimes/${record.pk}`, options);
 				if(response.status === 200) {
 					details_grid.datasource.data.removeElement(record);
 					details_grid.render(details_grid.datasource);
@@ -118,10 +118,10 @@ export const Status = {
 	Show: function update_states() {
 		Websites.list().then(draw_websites);
 	},
-	Detail: async function(website_id) {
-		selected_website_id = website_id;
+	Detail: async function(website_pk) {
+		selected_website_pk = website_pk;
 
-		const response = await fetch(`/api/websites/${website_id}`);
+		const response = await fetch(`/api/websites/${website_pk}`);
 		const details = await response.json();
 		//update link
 		const website_details_link = document.getElementById('website_details_link');
@@ -130,7 +130,7 @@ export const Status = {
 		//update age
 		update_website_details_age(details.update ? new Date(details.update) : undefined);
 		//update check link
-		document.getElementById('website_details_check').dataset.websiteId = website_id;
+		document.getElementById('website_details_check').dataset.websiteId = website_pk;
 
 		//prepare grid with custom export link
 		details_grid = new Table({
@@ -139,11 +139,11 @@ export const Status = {
 			path: '/js/grid/',
 			rowPerPage: 10,
 			actions: [
-				{label: 'Export', url: `/api/websites/${website_id}/downtimes`}
+				{label: 'Export', url: `/api/websites/${website_pk}/downtimes`}
 			]
 		});
 
-		const downtimes_response = await fetch(`/api/websites/${website_id}/downtimes`, {headers: {'Accept': 'application/json'}});
+		const downtimes_response = await fetch(`/api/websites/${website_pk}/downtimes`, {headers: {'Accept': 'application/json'}});
 		const downtimes = await downtimes_response.json();
 		//calculate duration for each downtime
 		downtimes.forEach(function(downtime) {

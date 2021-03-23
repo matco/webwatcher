@@ -5,14 +5,14 @@ import {Subscribers, Websites} from './services.js';
 function delete_subscriber_listener(event) {
 	event.stop();
 	const subscriber_ui = this.parentNode.parentNode;
-	Subscribers.delete(subscriber_ui.dataset.id).then(() => {
+	Subscribers.delete(subscriber_ui.dataset.pk).then(() => {
 		subscriber_ui.parentNode.removeChild(subscriber_ui);
 		UI.Notify('Subscriber deleted successfully');
 	});
 }
 
 function draw_subscriber(subscriber) {
-	const subscriber_ui = document.createFullElement('tr', {'data-id': subscriber.id});
+	const subscriber_ui = document.createFullElement('tr', {'data-pk': subscriber.pk});
 	subscriber_ui.appendChild(document.createFullElement('td', {}, subscriber.email));
 	const subscribe_actions = document.createFullElement('td');
 	subscribe_actions.appendChild(document.createFullElement(
@@ -29,13 +29,12 @@ function draw_subscriber(subscriber) {
 function edit_website_listener(event) {
 	event.stop();
 	const website_ui = this.parentNode.parentNode;
-	Websites.get(website_ui.dataset.id).then(website => {
+	Websites.get(website_ui.dataset.pk).then(website => {
 		const website_form = document.getElementById('website');
-		website_form['id'].value = website.id;
-		website_form['name'].setAttribute('disabled', 'disabled');
+		website_form['pk'].value = website.pk;
 		website_form['name'].value = website.name;
 		website_form['url'].value = website.url;
-		website_form['texts'].value = website.texts;
+		website_form['text'].value = website.text;
 		website_form.style.display = 'block';
 	});
 }
@@ -43,7 +42,7 @@ function edit_website_listener(event) {
 function delete_website_listener(event) {
 	event.stop();
 	const website_ui = this.parentNode.parentNode;
-	Websites.delete(website_ui.dataset.id).then(() => {
+	Websites.delete(website_ui.dataset.pk).then(() => {
 		website_ui.parentNode.removeChild(website_ui);
 		UI.Notify('Website deleted successfully');
 	});
@@ -53,7 +52,7 @@ function disable_website_listener(event) {
 	event.stop();
 	const link = this;
 	const container = this.parentNode;
-	website_action(container.parentNode.dataset.id, 'disable').then(() => {
+	website_action(container.parentNode.dataset.pk, 'disable').then(() => {
 		container.removeChild(link);
 		container.insertBefore(document.createFullElement(
 			'a',
@@ -68,7 +67,7 @@ function enable_website_listener(event) {
 	event.stop();
 	const link = this;
 	const container = this.parentNode;
-	website_action(container.parentNode.dataset.id, 'enable', function() {
+	website_action(container.parentNode.dataset.pk, 'enable').then(() => {
 		container.removeChild(link);
 		container.insertBefore(document.createFullElement(
 			'a',
@@ -86,10 +85,10 @@ function website_action(website, action) {
 }
 
 function draw_website(website) {
-	const website_ui = document.createFullElement('tr', {'data-id': website.id});
+	const website_ui = document.createFullElement('tr', {'data-pk': website.pk});
 	website_ui.appendChild(document.createFullElement('td', {}, website.name));
 	website_ui.appendChild(document.createFullElement('td', {}, website.url));
-	website_ui.appendChild(document.createFullElement('td', {}, website.texts));
+	website_ui.appendChild(document.createFullElement('td', {}, website.text));
 	const website_actions = document.createFullElement('td');
 	website_actions.appendChild(document.createFullElement(
 		'a',
@@ -164,7 +163,7 @@ export const Configuration = {
 					avoid_cache: this['avoid_cache'].checked
 				};
 				const options = {
-					method: 'POST',
+					method: 'PUT',
 					headers: {
 						'Content-Type': 'application/json',
 					},
@@ -196,7 +195,7 @@ export const Configuration = {
 			function() {
 				const website_form = document.getElementById('website');
 				website_form.reset();
-				website_form['id'].value = '';
+				website_form['pk'].value = '';
 				website_form['name'].removeAttribute('disabled');
 				website_form.style.display = 'block';
 			}
@@ -214,11 +213,11 @@ export const Configuration = {
 			function(event) {
 				event.stop();
 				const form = this;
-				const website = {id: this['id'].value || undefined, name: this['name'].value, url: this['url'].value, texts: this['texts'].value, online: null};
+				const website = {pk: this['pk'].value || undefined, name: this['name'].value, url: this['url'].value, text: this['text'].value};
 				const websites_ui = document.getElementById('websites');
-				if(website.id) {
+				if(website.pk) {
 					Websites.save(website).then(() => {
-						websites_ui.removeChild(websites_ui.querySelector(`tr[data-id="${website.id}"]`));
+						websites_ui.removeChild(websites_ui.querySelector(`tr[data-pk="${website.pk}"]`));
 						websites_ui.appendChild(draw_website(website));
 						form.reset();
 						form.style.display = 'none';
