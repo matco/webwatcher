@@ -68,7 +68,8 @@ class Website(Base):
 	name = Column(String(100), nullable=False, unique=True)
 	url = Column(String(255), nullable=False)
 	text = Column(String(255), nullable=False)
-	online = Column(Boolean, nullable=False, default=0)
+	#following two columns are null when a website has not been checked yet
+	online = Column(Boolean)
 	update = Column(DateTime)
 	uptime = Column(Integer, nullable=False, default=0)
 	downtime = Column(Integer, nullable=False, default=0)
@@ -177,8 +178,8 @@ def monitor(db_session, website, avoid_cache, timeout):
 	time_since_last_check = int((now - previous_update).total_seconds())
 	#website is now online
 	if error is None:
-		#if website was already online at previous check, increase uptime
-		if website.online:
+		#if this is first check or if website was already online at previous check, increase uptime
+		if website.online is None or website.online:
 			website.uptime += int((now - previous_update).total_seconds())
 		#if website was previously offline
 		else:
@@ -201,7 +202,7 @@ def monitor(db_session, website, avoid_cache, timeout):
 		return "{0} is fine".format(website.name)
 	#website is now offline
 	else:
-		#if website was online at previous check
+		#if this is first check website was online at previous check
 		if website.online is None or website.online:
 			#create a new downtime
 			downtime = Downtime(website_fk=website.pk, start=previous_update, rationale=error)

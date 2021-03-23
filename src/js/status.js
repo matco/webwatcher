@@ -169,7 +169,7 @@ export const Status = {
 				if(record.disabled) {
 					return 'disabled';
 				}
-				return record.online === null ? 'unchecked' : record.online ? 'online' : 'offline';
+				return !record.update ? 'unchecked' : record.online ? 'online' : 'offline';
 			}
 		});
 
