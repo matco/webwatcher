@@ -239,15 +239,14 @@ export const Configuration = {
 			'click',
 			async function(event) {
 				event.stop();
-				const that = this;
 				this.setAttribute('disabled', 'disabled');
 				this.classList.add('loading');
 
 				const response = await fetch('/api/recalculate');
 				const result = await response.json();
 
-				that.removeAttribute('disabled');
-				that.classList.remove('loading');
+				this.removeAttribute('disabled');
+				this.classList.remove('loading');
 				UI.Notify(result.message);
 			}
 		);
@@ -256,15 +255,14 @@ export const Configuration = {
 			'click',
 			async function(event) {
 				event.stop();
-				const that = this;
 				this.setAttribute('disabled', 'disabled');
 				this.classList.add('loading');
 
 				const response = await fetch('/api/testmail', {method: 'POST'});
 				const result = await response.json();
 
-				that.removeAttribute('disabled');
-				that.classList.remove('loading');
+				this.removeAttribute('disabled');
+				this.classList.remove('loading');
 				UI.Notify(result.message);
 			}
 		);
