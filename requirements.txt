@@ -1,6 +1,6 @@
-gunicorn
-requests
-SQLAlchemy
-flask
-flask_restful
-PyMySQL
+gunicorn==20.0.4
+requests==2.25.1
+SQLAlchemy==1.4.1
+Flask==1.1.2
+Flask-RESTful==0.3.8
+PyMySQL==1.0.2
