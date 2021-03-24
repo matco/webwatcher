@@ -122,6 +122,9 @@ function draw_website(website) {
 	return website_ui;
 }
 
+const subscriber_comparator = (s1, s2) => s1.email.compareTo(s2.email);
+const website_comparator = (w1, w2) => w1.name.compareTo(w2.name);
+
 export const Configuration = {
 	ShowMain: async function() {
 		const response = await fetch('/api/configuration');
@@ -139,12 +142,12 @@ export const Configuration = {
 	ShowSubscribers: function() {
 		const subscribers_ui = document.getElementById('subscribers');
 		subscribers_ui.clear();
-		Subscribers.list().then(s => s.map(draw_subscriber).forEach(Node.prototype.appendChild, subscribers_ui));
+		Subscribers.list().then(s => s.sort(subscriber_comparator).map(draw_subscriber).forEach(Node.prototype.appendChild, subscribers_ui));
 	},
 	ShowWebsites: function() {
 		const websites_ui = document.getElementById('websites');
 		websites_ui.clear();
-		Websites.list().then(w => w.map(draw_website).forEach(Node.prototype.appendChild, websites_ui));
+		Websites.list().then(w => w.sort(website_comparator).map(draw_website).forEach(Node.prototype.appendChild, websites_ui));
 	},
 	Init: function() {
 		//basic configuration
@@ -217,8 +220,9 @@ export const Configuration = {
 				const websites_ui = document.getElementById('websites');
 				if(website.pk) {
 					Websites.save(website).then(() => {
-						websites_ui.removeChild(websites_ui.querySelector(`tr[data-pk="${website.pk}"]`));
-						websites_ui.appendChild(draw_website(website));
+						const website_ui = websites_ui.querySelector(`tr[data-pk="${website.pk}"]`);
+						websites_ui.insertBefore(draw_website(website), website_ui.nextSibling);
+						websites_ui.removeChild(website_ui);
 						form.reset();
 						form.style.display = 'none';
 						UI.Notify('Website saved successfully');
