@@ -69,7 +69,7 @@ export const Router = {
 					}
 					//display page
 					menu_config.classList.add('selected');
-					config.style.display = 'block';
+					config.style.display = 'flex';
 				}
 				else {
 					unselect_all();
@@ -85,9 +85,6 @@ export const Router = {
 						Status.Detail(data.details);
 					}
 				}
-
-				//show content
-				document.getElementById('content').style.display = 'block';
 			}
 		);
 

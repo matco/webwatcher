@@ -3,10 +3,10 @@
 	<head>
 		<meta charset="UTF-8" />
 		<title>Webwatcher</title>
-		<!--css inclusion-->
 		<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet" />
 	</head>
 	<body>
+		<!--modal windows-->
 		<div id="modal_overlay"></div>
 
 		<div id="notification">
@@ -56,190 +56,186 @@
 			</menu>
 		</form>
 
-		<div id="content">
-			<header>
-				<h1>Webwatcher</h1>
-				<ul>
-					<li><a id="menu_config" href="#page=config">Configuration</a></li>
-					<li><a id="menu_status" href="#page=status">Status</a></li>
-				</ul>
-				<button id="login">Login</button>
-				<button id="logout" style="display: none;">Logout</button>
-			</header>
+		<div id="website_details" class="modal">
+			<h2>Details for <a id="website_details_link" href="#"></a></h2>
+			<div class="content">
+				<p>
+					<span id="website_details_age"></span>.
+					<button id="website_details_check">Check now</button>
+				</p>
+				<div id="website_details_downtimes"></div>
+			</div>
+			<menu>
+				<a href="#page=status" class="button">Close</a>
+			</menu>
+		</div>
 
+		<!--content-->
+		<header>
+			<h1>Webwatcher</h1>
+			<nav>
+				<a id="menu_config" href="#page=config">Configuration</a>
+				<a id="menu_status" href="#page=status">Status</a>
+			</nav>
+			<button id="login">Login</button>
+			<button id="logout" style="display: none;">Logout</button>
+		</header>
+
+		<main>
 			<div id="config" style="display: none;">
 				<aside>
-					<ul>
-						<li><a href="#page=config&section=main">Main</a></li>
-						<li><a href="#page=config&section=subscribers">Subscribers</a></li>
-						<li><a href="#page=config&section=websites">Websites</a></li>
-						<li><a href="#page=config&section=other">Other</a></li>
-					</ul>
+					<nav>
+						<a href="#page=config&section=main">Main</a>
+						<a href="#page=config&section=subscribers">Subscribers</a>
+						<a href="#page=config&section=websites">Websites</a>
+						<a href="#page=config&section=other">Other</a>
+					</nav>
 				</aside>
-				<div>
-					<div id="section_main">
-						<h2>Main</h2>
-						<form id="configuration" method="post" action="#">
-							<p>
-								<label>
-									<span>Make website private</span>
-									<input name="protect_app" type="checkbox" />
-									your password is required to view websites status
-								</label>
-							</p>
-							<fieldset>
-								<legend>Email settings</legend>
-								<p>
-									<label>
-										<span>SMTP host</span>
-										<input name="smtp_host" required="required" style="width: 30rem" />
-									</label>
-								</p>
-								<p>
-									<label>
-										<span>SMTP port</span>
-										<input name="smtp_port" type="number" required="required" min="1" style="width: 5rem;" />
-									</label>
-								</p>
-								<p>
-									<label>
-										<span>SMTP username</span>
-										<input name="smtp_username" required="required" style="width: 30rem" />
-									</label>
-								</p>
-								<p>
-									<label>
-										<span>SMTP password</span>
-										<input name="smtp_password" required="required" style="width: 30rem" />
-									</label>
-								</p>
-								<p>
-									<label>
-										<span>Sender e-mail</span>
-										<input name="sender_email" type="email" required="required" />
-									</label>
-								</p>
-							</fieldset>
-							<fieldset>
-								<legend>Email settings</legend>
-								<p>
-									<label>
-										<span>Timeout</span>
-										<input name="website_timeout" type="number" min="1" required="required" />
-										in seconds
-									</label>
-								</p>
-								<p>
-									<label>
-										<span>Avoid cache</span>
-										<input name="avoid_cache" type="checkbox" />
-										add a timestamp to website URLs (warning, this could trigger false positive on some websites)
-									</label>
-								</p>
-							</fieldset>
-							<p>
-								<button>Save</button>
-							</p>
-						</form>
-					</div>
-					<div id="section_subscribers">
-						<h2>Subscribers</h2>
-						<table>
-							<thead>
-								<tr>
-									<th style="width: 300px;">E-mail</th>
-									<th style="width: 100px;">Actions</th>
-								</tr>
-							</thead>
-							<tbody id="subscribers"></tbody>
-						</table>
-						<h2>Add a subscriber</h2>
-						<form id="subscriber" method="post" action="#">
-							<p>
-								<label>
-									<span>E-mail</span>
-									<input name="email" type="email" required="required" />
-								</label>
-							</p>
-							<p>
-								<button>Add subscriber</button>
-							</p>
-						</form>
-					</div>
-					<div id="section_websites">
-						<h2>Websites</h2>
-						<table style="width: 100%;">
-							<thead>
-								<tr>
-									<th style="width: 120px;">Name</th>
-									<th style="width: 280px;">URL</th>
-									<th>Text</th>
-									<th style="width: 150px;">Actions</th>
-								</tr>
-							</thead>
-							<tbody id="websites"></tbody>
-						</table>
-						<button id="website_add">Add website</button>
-						<form id="website" method="post" action="#" style="display: none;">
-							<input name="pk" type="hidden"/>
-							<h2>Website</h2>
-							<p>
-								<label>
-									<span>Name</span>
-									<input name="name" required="required" placeholder="Example" pattern="[A-Za-z0-9]+" />
-								</label>
-							</p>
-							<p>
-								<label>
-									<span>URL</span>
-									<input name="url" type="url" required="required" placeholder="http://www.example.org" />
-								</label>
-							</p>
-							<p>
-								<label>
-									<span>Text</span>
-									<input name="text" placeholder="Example Domain" />
-								</label>
-							</p>
-							<p>
-								<button>Save</button>
-								<button id="website_cancel" type="reset">Cancel</button>
-							</p>
-						</form>
-					</div>
-					<div id="section_other">
-						<h2>Other</h2>
+				<section id="section_main">
+					<h2>Main</h2>
+					<form id="configuration" method="post" action="#">
 						<p>
-							<button id="recalculate">Recalculate websites downtime</button>
+							<label>
+								<span>Keep status private</span>
+								<input name="protect_app" type="checkbox" />
+								password is required to view websites status
+							</label>
+						</p>
+						<fieldset>
+							<legend>Email settings</legend>
+							<p>
+								<label>
+									<span>SMTP host</span>
+									<input name="smtp_host" required="required" style="width: 30rem" />
+								</label>
+							</p>
+							<p>
+								<label>
+									<span>SMTP port</span>
+									<input name="smtp_port" type="number" required="required" min="1" style="width: 5rem;" />
+								</label>
+							</p>
+							<p>
+								<label>
+									<span>SMTP username</span>
+									<input name="smtp_username" required="required" style="width: 30rem" />
+								</label>
+							</p>
+							<p>
+								<label>
+									<span>SMTP password</span>
+									<input name="smtp_password" required="required" style="width: 30rem" />
+								</label>
+							</p>
+							<p>
+								<label>
+									<span>Sender e-mail</span>
+									<input name="sender_email" type="email" required="required" />
+								</label>
+							</p>
+						</fieldset>
+						<fieldset>
+							<legend>Website check settings</legend>
+							<p>
+								<label>
+									<span>Timeout</span>
+									<input name="website_timeout" type="number" min="1" required="required" />
+									in seconds
+								</label>
+							</p>
+							<p>
+								<label>
+									<span>Avoid cache</span>
+									<input name="avoid_cache" type="checkbox" />
+									add a timestamp to website URLs (warning, this could trigger false positive on some websites)
+								</label>
+							</p>
+						</fieldset>
+						<p>
+							<button>Save</button>
+						</p>
+					</form>
+				</section>
+				<section id="section_subscribers">
+					<h2>Subscribers</h2>
+					<table>
+						<thead>
+							<tr>
+								<th style="width: 30rem;">E-mail</th>
+								<th style="width: 10rem;">Actions</th>
+							</tr>
+						</thead>
+						<tbody id="subscribers"></tbody>
+					</table>
+					<h2>Add a subscriber</h2>
+					<form id="subscriber" method="post" action="#">
+						<p>
+							<label>
+								<span>E-mail</span>
+								<input name="email" type="email" required="required" placeholder="john.doe@example.org"/>
+							</label>
 						</p>
 						<p>
-							<button id="test_mail">Send a test mail</button>
+							<button>Add subscriber</button>
 						</p>
-					</div>
-				</div>
+					</form>
+				</section>
+				<section id="section_websites">
+					<h2>Websites</h2>
+					<table style="width: 100%;">
+						<thead>
+							<tr>
+								<th style="width: 10rem;">Name</th>
+								<th style="width: 25rem;">URL</th>
+								<th style="max-width: 30rem;">Text</th>
+								<th style="width: 10rem;">Actions</th>
+							</tr>
+						</thead>
+						<tbody id="websites"></tbody>
+					</table>
+					<button id="website_add">Add website</button>
+					<form id="website" method="post" action="#" style="display: none;">
+						<input name="pk" type="hidden"/>
+						<h2>Website</h2>
+						<p>
+							<label>
+								<span>Name</span>
+								<input name="name" required="required" placeholder="Example" pattern="[A-Za-z0-9]+" />
+							</label>
+						</p>
+						<p>
+							<label>
+								<span>URL</span>
+								<input name="url" type="url" required="required" placeholder="http://www.example.org" />
+							</label>
+						</p>
+						<p>
+							<label>
+								<span>Text</span>
+								<input name="text" placeholder="Example Domain" />
+							</label>
+						</p>
+						<p>
+							<button>Save</button>
+							<button id="website_cancel" type="reset">Cancel</button>
+						</p>
+					</form>
+				</section>
+				<section id="section_other">
+					<h2>Other</h2>
+					<p>
+						<button id="recalculate">Recalculate websites downtime</button>
+					</p>
+					<p>
+						<button id="test_mail">Send a test mail</button>
+					</p>
+				</section>
 			</div>
 
 			<div id="status" style="display: none;">
-				<h2>Websites status<button id="status_check_now" style="margin-left: 10px;">Check now</button></h2>
-				<!--<p>
-					Last check <time id="status_last_check"></time>.
-				</p>-->
+				<h2>Websites status<button id="status_check_now" style="margin-left: 2rem;">Check now</button></h2>
 				<div id="states"></div>
-
-				<div id="website_details" class="modal">
-					<h2>Details for <a id="website_details_link" href="#"></a></h2>
-					<div class="content">
-						<p>
-							<span id="website_details_age"></span>.
-							<button id="website_details_check">Check now</button>
-						</p>
-						<div id="website_details_downtimes"></div>
-					</div>
-					<menu>
-						<a href="#page=status" class="button">Close</a>
-					</menu>
-				</div>
 			</div>
-		</div>
+		</main>
 	</body>
 </html>
