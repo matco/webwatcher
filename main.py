@@ -21,6 +21,9 @@ import requests
 from flask import Flask, session, request, jsonify, make_response
 from flask_restful import Resource, Api
 
+logging.basicConfig(level="INFO")
+logging.getLogger("sqlalchemy").setLevel(logging.ERROR)
+
 #number of tries before deciding to consider a website down
 CHECK_TRIES = 2
 #default timeout for checking website in seconds
@@ -46,7 +49,7 @@ engine = create_engine(
 		port=db_port,
 		database=db_name,
 	),
-	echo=True, future=True
+	future=True #,echo=True
 )
 Session = sessionmaker(engine)
 
@@ -99,6 +102,7 @@ class JSONCustomEncoder(json.JSONEncoder):
 
 #warn about the problem
 def warn(subject, content):
+	logging.info("Sending warning with subject [{0}]".format(subject))
 	with Session.begin() as db_session:
 		#send e-mails
 		smtp_host_setting = db_session.get(Setting, "smtp_host")
@@ -130,6 +134,7 @@ def get_exception_message(exception):
 
 #website checker
 def check(website, avoid_cache, timeout):
+	logging.info("Checking website {0}".format(website.name))
 	error = None
 	url = website.url
 	#add timestamp to url to avoid cache if asked
