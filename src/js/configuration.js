@@ -251,5 +251,22 @@ export const Configuration = {
 				UI.Notify(result.message);
 			}
 		);
+
+		document.getElementById('test_mail').addEventListener(
+			'click',
+			async function(event) {
+				event.stop();
+				const that = this;
+				this.setAttribute('disabled', 'disabled');
+				this.classList.add('loading');
+
+				const response = await fetch('/api/testmail', {method: 'POST'});
+				const result = await response.json();
+
+				that.removeAttribute('disabled');
+				that.classList.remove('loading');
+				UI.Notify(result.message);
+			}
+		);
 	}
 };

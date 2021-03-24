@@ -276,6 +276,15 @@ def authenticate():
 		session.pop("authenticated", None)
 		return {"message" : "Logout successful"}
 
+@app.route("/testmail", methods=["POST"])
+def test_mail():
+	#check rights
+	if not "authenticated" in session:
+		return {"message" : "You must be authenticated to perform this action"}, 401
+
+	warn("Test mail from the Webwatcher", "If you're reading this mail, your mail configuration is all good. Good job!")
+	return {"message" : "Test mail sent successfully"}
+
 class Configuration(Resource):
 	def get(self):
 		if not "authenticated" in session:
