@@ -1,8 +1,11 @@
-const path = require('path');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+import path from 'path';
+import {fileURLToPath} from 'url';
+import {CleanWebpackPlugin} from 'clean-webpack-plugin';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 
-module.exports = {
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+export default {
 	mode: 'development',
 	context: path.resolve(__dirname, 'src'),
 	entry: {
