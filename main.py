@@ -18,7 +18,7 @@ from email.message import EmailMessage
 #request
 import requests
 #flask
-from flask import Flask, session, request, jsonify, make_response
+from flask import Flask, Blueprint, session, request, jsonify, make_response
 from flask_restful import Resource, Api
 
 logging.basicConfig(level="INFO")
@@ -30,7 +30,6 @@ CHECK_TRIES = 2
 DEFAULT_TIMEOUT = 5
 
 #model
-
 db_user = os.getenv("DB_USER", "root")
 db_pass = os.getenv("DB_PASS", "root")
 db_name = os.getenv("DB_NAME", "webwatcher")
@@ -235,9 +234,13 @@ app = Flask(__name__)
 app.secret_key = "".join(random.choice(string.ascii_letters + string.ascii_lowercase + string.punctuation) for x in range(20))
 app.json_encoder = JSONCustomEncoder
 
-api = Api(app)
+#Google App Engine does not support URL rewriting
+#a blue print is required to mount the API on a specific path
+#see the end of this file to configure the URL prefix
+bp = Blueprint('api', __name__)
+api = Api(bp)
 
-@app.route("/status")
+@bp.route("/status")
 def status():
 	with Session.begin() as db_session:
 		if not check_database_initialized(db_session):
@@ -249,7 +252,7 @@ def status():
 			"authenticated": "authenticated" in session
 		}
 
-@app.route("/initialize", methods=["POST"])
+@bp.route("/initialize", methods=["POST"])
 def initialize():
 	#check if application has not already been initialized
 	with Session.begin() as db_session:
@@ -266,7 +269,7 @@ def initialize():
 	session["authenticated"] = True
 	return {"message" : "Application initialize successfully"}
 
-@app.route("/authenticate", methods=["POST", "DELETE"])
+@bp.route("/authenticate", methods=["POST", "DELETE"])
 def authenticate():
 	if request.method == "POST":
 		credentials = request.get_json()
@@ -281,7 +284,7 @@ def authenticate():
 		session.pop("authenticated", None)
 		return {"message" : "Logout successful"}
 
-@app.route("/testmail", methods=["POST"])
+@bp.route("/testmail", methods=["POST"])
 def test_mail():
 	#check rights
 	if not "authenticated" in session:
@@ -324,8 +327,8 @@ class Configuration(Resource):
 
 api.add_resource(Configuration, "/configuration")
 
-@app.route("/check", defaults={"pk": None})
-@app.route("/check/<int:pk>")
+@bp.route("/check", defaults={"pk": None})
+@bp.route("/check/<int:pk>")
 def website_check(pk):
 	#retrieve websites
 	with Session.begin() as db_session:
@@ -343,7 +346,7 @@ def website_check(pk):
 			monitor(db_session, website, avoid_cache, timeout)
 		return jsonify(websites)
 
-@app.route("/recalculate")
+@bp.route("/recalculate")
 def recalculate():
 	#check rights
 	if not "authenticated" in session:
@@ -461,7 +464,7 @@ class SubscribersResource(REST):
 
 api.add_resource(SubscribersResource, "/subscribers", "/subscribers/<int:pk>")
 
-@app.route("/websites/<int:pk>/action/<string:action>")
+@bp.route("/websites/<int:pk>/action/<string:action>")
 def website_action(pk, action):
 	#check rights
 	if not "authenticated" in session:
@@ -519,6 +522,10 @@ class WebsiteDowntimes(Resource):
 			return {"message" : "Downtime with pk {0} deleted successfully".format(pk)}
 
 api.add_resource(WebsiteDowntimes, "/websites/<int:website_pk>/downtimes", "/websites/<int:website_pk>/downtimes/<int:pk>")
+
+#mount the blueprint with a hard-coded URL prefix
+#this is because Google App Engine does not support URL rewriting
+app.register_blueprint(bp, url_prefix="/api")
 
 #local only for debug purpose
 if __name__ == "__main__":
