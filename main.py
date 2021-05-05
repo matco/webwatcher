@@ -279,7 +279,7 @@ def initialize():
 	with Session.begin() as db_session:
 		db_session.add(setting)
 	session["authenticated"] = True
-	return {"message" : "Application initialize successfully"}
+	return {"message" : "Application initialized successfully"}
 
 @bp.route("/authenticate", methods=["POST", "DELETE"])
 def authenticate():
