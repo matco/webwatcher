@@ -30,25 +30,37 @@ CHECK_TRIES = 2
 DEFAULT_TIMEOUT = 5
 
 #model
-db_user = os.getenv("DB_USER", "root")
-db_pass = os.getenv("DB_PASS", "root")
-db_name = os.getenv("DB_NAME", "webwatcher")
-db_host = os.getenv("DB_HOST", "localhost")
+db_socket = os.environ.get("DB_SOCKET")
+db_host = os.environ.get("DB_HOST", "localhost")
+db_port = os.environ.get("DB_PORT", 3306)
 
-# Extract host and port from db_host
-host_args = db_host.split(":")
-db_hostname, db_port = host_args[0], int(host_args[1]) if len(host_args) > 1 else 3306
+db_user = os.environ.get("DB_USER", "root")
+db_password = os.environ.get("DB_PASSWORD", "root")
+db_name = os.environ.get("DB_NAME", "webwatcher")
 
-engine = create_engine(
-	engine.url.URL.create(
+if db_socket is not None:
+	print("Connecting to database server using socket {db_socket}".format(db_socket = db_socket)),
+	url = engine.url.URL.create(
 		drivername="mysql+pymysql",
 		username=db_user,
-		password=db_pass,
-		host=db_hostname,
-		port=db_port,
+		password=db_password,
 		database=db_name,
-	),
-	future=True #,echo=True
+		query={"unix_socket": db_socket}
+	)
+else:
+	print("Connecting to database server on {db_host}:{db_port}".format(db_host = db_host, db_port = db_port))
+	url = engine.url.URL.create(
+		drivername="mysql+pymysql",
+		username=db_user,
+		password=db_password,
+		host=db_host,
+		port=db_port,
+		database=db_name
+	)
+print("Use database named {db_name} with user {db_user} and password {db_password[0]}*****".format(db_name = db_name, db_user = db_user, db_password = db_password))
+engine = create_engine(
+	url,
+	future=True#, echo=True
 )
 Session = sessionmaker(engine)
 
@@ -218,7 +230,7 @@ def monitor(db_session, website, avoid_cache, timeout):
 		website.online = False
 		db_session.add(website)
 		#return message to be displayed
-		return "Problem with website {0} : {1}".format(website.name, error)
+		return "Problem with website {0}: {1}".format(website.name, error)
 
 def hash_password(password):
 	return hashlib.sha256(password.encode("utf-8")).hexdigest()
