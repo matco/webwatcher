@@ -78,8 +78,8 @@ function render_duration(value) {
 
 function render_details_action(value, record) {
 	const element = document.createFullElement(
-		'a',
-		{href: '#', title: 'Delete downtime'},
+		'button',
+		{class: 'text', title: 'Delete downtime'},
 		'Delete',
 		{
 			click: async function(event) {

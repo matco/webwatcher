@@ -16,8 +16,8 @@ function draw_subscriber(subscriber) {
 	subscriber_ui.appendChild(document.createFullElement('td', {}, subscriber.email));
 	const subscribe_actions = document.createFullElement('td');
 	subscribe_actions.appendChild(document.createFullElement(
-		'a',
-		{href: '#', title: 'Delete this subscriber'},
+		'button',
+		{class: 'text', title: 'Delete this subscriber'},
 		'Delete',
 		{click: delete_subscriber_listener}
 	));
@@ -55,8 +55,8 @@ function disable_website_listener(event) {
 	website_action(container.parentNode.dataset.pk, 'disable').then(() => {
 		container.removeChild(link);
 		container.insertBefore(document.createFullElement(
-			'a',
-			{href: '#', title: 'Re-enable this website'},
+			'button',
+			{class: 'text', title: 'Re-enable this website'},
 			'Enable',
 			{click: enable_website_listener}
 		), container.lastChild);
@@ -70,8 +70,8 @@ function enable_website_listener(event) {
 	website_action(container.parentNode.dataset.pk, 'enable').then(() => {
 		container.removeChild(link);
 		container.insertBefore(document.createFullElement(
-			'a',
-			{href: '#', title: 'Disable this website temporarily'},
+			'button',
+			{class: 'text', title: 'Disable this website temporarily'},
 			'Disable',
 			{click: disable_website_listener}
 		), container.lastChild);
@@ -91,30 +91,30 @@ function draw_website(website) {
 	website_ui.appendChild(document.createFullElement('td', {}, website.text));
 	const website_actions = document.createFullElement('td');
 	website_actions.appendChild(document.createFullElement(
-		'a',
-		{href: '#', title: 'Edit this website', style: 'margin-right: 5px;'},
+		'button',
+		{class: 'text', title: 'Edit this website', style: 'margin-right: 0.5rem;'},
 		'Edit',
 		{click: edit_website_listener}
 	));
 	if(website.disabled) {
 		website_actions.appendChild(document.createFullElement(
-			'a',
-			{href: '#', title: 'Re-enable this website'},
+			'button',
+			{class: 'text', title: 'Re-enable this website'},
 			'Enable',
 			{click: enable_website_listener}
 		));
 	}
 	else {
 		website_actions.appendChild(document.createFullElement(
-			'a',
-			{href: '#', title: 'Disable this website temporarily'},
+			'button',
+			{class: 'text', title: 'Disable this website temporarily'},
 			'Disable',
 			{click: disable_website_listener}
 		));
 	}
 	website_actions.appendChild(document.createFullElement(
-		'a',
-		{href: '#', title: 'Unwatch this website and delete all logs', style: 'margin-left: 5px;'},
+		'button',
+		{class: 'text', title: 'Unwatch this website and delete all logs', style: 'margin-left: 0.5rem;'},
 		'Delete',
 		{click: delete_website_listener}
 	));
