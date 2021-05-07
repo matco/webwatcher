@@ -409,6 +409,8 @@ class REST(Resource):
 		with Session.begin() as db_session:
 			object = self.db_model(**dto)
 			db_session.add(object)
+			#flush session to update object with its generated pk
+			db_session.flush()
 			return jsonify(object)
 
 	def put(self, pk):
