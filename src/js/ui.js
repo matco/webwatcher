@@ -164,7 +164,7 @@ UI.Validate = function(message, yes_callback, no_callback, context, yes_text, no
 	document.getElementById('validate_message').textContent = message;
 	//manage buttons
 	const validate_buttons = document.getElementById('validate_buttons');
-	validate_buttons.clear();
+	validate_buttons.empty();
 	const no_button = document.createFullElement(
 		'button',
 		{type: 'button'},

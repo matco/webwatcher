@@ -141,12 +141,12 @@ export const Configuration = {
 	},
 	ShowSubscribers: function() {
 		const subscribers_ui = document.getElementById('subscribers');
-		subscribers_ui.clear();
+		subscribers_ui.empty();
 		Subscribers.list().then(s => s.sort(subscriber_comparator).map(draw_subscriber).forEach(Node.prototype.appendChild, subscribers_ui));
 	},
 	ShowWebsites: function() {
 		const websites_ui = document.getElementById('websites');
-		websites_ui.clear();
+		websites_ui.empty();
 		Websites.list().then(w => w.sort(website_comparator).map(draw_website).forEach(Node.prototype.appendChild, websites_ui));
 	},
 	Init: function() {
