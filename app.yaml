@@ -2,6 +2,9 @@ runtime: python38
 automatic_scaling:
   min_instances: 1
 
+includes:
+  - environment.yaml
+
 handlers:
 - url: /api/.*
   secure: always

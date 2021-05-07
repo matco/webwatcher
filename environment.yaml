@@ -1,0 +1,6 @@
+#place your environment variables here:
+#env_variables:
+#  DB_SOCKET: /cloudsql/project_name:region:instance_name
+#  DB_USER: custom_user
+#  DB_PASSWORD: custom_password
+#  DB_NAME: custom_database_name
