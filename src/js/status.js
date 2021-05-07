@@ -200,7 +200,7 @@ export const Status = {
 			async function() {
 				this.setAttribute('disabled', 'disabled');
 				this.classList.add('loading');
-				const response = await fetch(`/api/check/${this.dataset.websiteId}`)
+				const response = await fetch(`/api/check/${this.dataset.websiteId}`);
 				this.removeAttribute('disabled');
 				this.classList.remove('loading');
 				if(response.status === 200) {
