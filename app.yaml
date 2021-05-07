@@ -1,7 +1,6 @@
 runtime: python38
 automatic_scaling:
   min_instances: 1
-entrypoint: gunicorn -b :$PORT main:application
 
 handlers:
 - url: /api/.*
