@@ -3,7 +3,7 @@
 	"description": "Monitor your websites with Google App Engine",
 	"version": "1.0.0",
 	"scripts": {
-		"start": "webpack server",
+		"start": "webpack serve",
 		"build": "webpack",
 		"lint": "eslint ."
 	},

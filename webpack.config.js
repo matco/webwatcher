@@ -39,5 +39,12 @@ export default {
 				]
 			},
 		]
+	},
+	devServer: {
+		proxy: {
+			'/api': {
+				target: 'http://localhost:1338'
+			}
+		}
 	}
 };
