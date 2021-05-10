@@ -19,6 +19,7 @@ export default {
 			template: './index.html',
 			inject: 'head',
 			xhtml: true,
+			favicon: './favicon.svg'
 		})
 	],
 	module: {
