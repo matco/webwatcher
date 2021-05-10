@@ -1,6 +1,5 @@
 import path from 'path';
 import {fileURLToPath} from 'url';
-import {CleanWebpackPlugin} from 'clean-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -13,10 +12,9 @@ export default {
 	},
 	output: {
 		path: path.resolve(__dirname, 'static'),
-		filename: '[name]-bundle-[fullhash].js'
+		clean: true
 	},
 	plugins: [
-		new CleanWebpackPlugin(),
 		new HtmlWebpackPlugin({
 			template: './index.html',
 			inject: 'head',
@@ -35,9 +33,9 @@ export default {
 			{
 				test: /\.png$/,
 				use: [
-					'file-loader',
+					'file-loader'
 				]
-			},
+			}
 		]
 	},
 	devServer: {

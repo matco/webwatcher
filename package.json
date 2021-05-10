@@ -23,7 +23,6 @@
 		"js-tools": "git+ssh://git@github.com:matco/js-tools.git"
 	},
 	"devDependencies": {
-		"clean-webpack-plugin": "3.0.0",
 		"css-loader": "5.2.4",
 		"eslint": "7.25.0",
 		"file-loader": "6.2.0",
