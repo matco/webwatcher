@@ -4,3 +4,4 @@
 #  DB_USER: custom_user
 #  DB_PASSWORD: custom_password
 #  DB_NAME: custom_database_name
+#  COOKIE_SECRET: very_long_key

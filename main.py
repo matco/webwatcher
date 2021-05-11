@@ -243,7 +243,7 @@ def check_database_initialized(db_session):
 
 #api
 app = Flask(__name__)
-app.secret_key = "".join(random.choice(string.ascii_letters + string.ascii_lowercase + string.punctuation) for x in range(20))
+app.secret_key = os.environ.get("COOKIE_SECRET", "".join(random.choice(string.ascii_letters) for _ in range(32)))
 app.json_encoder = JSONCustomEncoder
 
 #Google App Engine does not support URL rewriting
