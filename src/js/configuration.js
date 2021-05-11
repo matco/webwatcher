@@ -85,7 +85,7 @@ function website_action(website, action) {
 }
 
 function draw_website(website) {
-	const website_ui = document.createFullElement('tr', {'data-pk': website.pk});
+	const website_ui = document.createFullElement('tr', {'data-pk': website.pk, style: `opacity: ${website.disabled ? '0.5' : '1'}`});
 	website_ui.appendChild(document.createFullElement('td', {}, website.name));
 	website_ui.appendChild(document.createFullElement('td', {}, website.url));
 	website_ui.appendChild(document.createFullElement('td', {}, website.text));
