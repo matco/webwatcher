@@ -5,14 +5,15 @@ const UI = {};
 	let notification_timeout;
 
 	window.addEventListener('load', function() {
-		function hide_after_animation() {
+		//manage non native notifications
+		function hide() {
 			this.style.display = 'none';
 		}
 		const notification = document.getElementById('notification');
-		//TODO clean this when all browsers support good event
-		notification.addEventListener('animationend', hide_after_animation);
-		notification.addEventListener('webkitAnimationEnd', hide_after_animation);
-		notification.addEventListener('oanimationend', hide_after_animation);
+		notification.addEventListener('click', hide);
+		//TODO clean this mess as soon as browsers support good event
+		notification.addEventListener('animationend', hide);
+		notification.addEventListener('webkitAnimationEnd', hide);
 	});
 
 	//remember if notification permission has been requested to avoid asking to the user more than once
@@ -29,9 +30,16 @@ const UI = {};
 		}
 		//use native notification
 		else if(Notification.permission === 'granted') {
-			const notification = new Notification(message, options);
+			const enhanced_options = Object.assign({
+				lang: 'EN',
+				silent: true
+			}, options);
+			const notification = new Notification(message, enhanced_options);
+			if(notification_timeout) {
+				clearTimeout(notification_timeout);
+			}
 			notification.addEventListener('show', function() {
-				setTimeout(function() {
+				notification_timeout = setTimeout(function() {
 					notification.close();
 				}, notification_close_time);
 			});
@@ -39,8 +47,8 @@ const UI = {};
 		//fallback on html notification
 		else {
 			//update icon
-			const notification_icon = document.getElementById('notification_icon');
-			if(options && options.hasOwnProperty('icon')) {
+			const notification_icon = /**@type HTMLImageElement */ (document.getElementById('notification_icon'));
+			if(options.hasOwnProperty('icon')) {
 				notification_icon.src = options.icon;
 				notification_icon.style.display = 'block';
 			}
@@ -52,7 +60,7 @@ const UI = {};
 			notification_title.textContent = message;
 			//update body
 			const notification_body = document.getElementById('notification_body');
-			if(options && options.hasOwnProperty('body')) {
+			if(options.hasOwnProperty('body')) {
 				notification_body.textContent = options.body;
 				notification_body.style.display = 'block';
 			}
@@ -66,10 +74,11 @@ const UI = {};
 				clearTimeout(notification_timeout);
 			}
 			//update notification
+			notification.classList.remove('fadeout');
 			notification.style.display = 'block';
 			//add class that will start animation
 			notification_timeout = setTimeout(function() {
-				notification.style.display = 'none';
+				notification.classList.add('fadeout');
 			}, notification_close_time);
 		}
 	};
