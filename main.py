@@ -121,7 +121,7 @@ def warn(subject, content):
 		if smtp_host_setting is None or not smtp_host_setting.value or smtp_port_setting is None or not smtp_port_setting.value:
 			return
 		#connect to SMTP
-		with smtplib.SMTP(smtp_host_setting.value, int(smtp_port_setting.value)) as smtp:
+		with smtplib.SMTP(smtp_host_setting.value, int(smtp_port_setting.value), timeout=5) as smtp:
 			#authenticate on SMTP
 			smtp_username_setting = db_session.get(Setting, "smtp_username")
 			smtp_password_setting = db_session.get(Setting, "smtp_password")
@@ -302,8 +302,12 @@ def test_mail():
 	if not "authenticated" in session:
 		return {"message" : "You must be authenticated to perform this action"}, 401
 
-	warn("Test mail from the Webwatcher", "If you're reading this mail, your mail configuration is all good. Good job!")
-	return {"message" : "Test mail sent successfully"}
+	try:
+		warn("Test mail from the Webwatcher", "If you're reading this mail, your mail configuration is all good. Good job!")
+		return {"message" : "Test email sent successfully"}
+	except Exception as e:
+		error = "Unable to send test email: {0}".format(get_exception_message(e))
+		return {"message" : error}, 503
 
 class Configuration(Resource):
 	def get(self):
