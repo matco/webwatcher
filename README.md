@@ -75,11 +75,6 @@ In your project, use the menu `Databases > SQL` to create a Google SQL instance.
 * Choose a strong password and note it
 * In `Customize your instance > Connections`, allow the access though a public IP (you can disable the access through a private IP)
 
-If you choose carefully the instance settings, you can benefit from [Google Cloud Free Program](https://cloud.google.com/free/docs/gcp-free-tier/#compute). If interested, do the following choices:
-* For the instance, use a "shared core 1vCPU, 0.6GB" located in us-west1, us-central1 or us-east1 and use "single zone" (free instance)
-* For the storage, use an HDD smaller than 30GB (free storage)
-* Disable backups (storage costs money)
-
 Wait for the instance to be created. Back to the main page of your instance, note the connection name of the instance (visible in the main page of the instance under `Connection name`).
 
 Then, you must create the database itself. From the main page of your instance, select `Databases` in the left menu and create a database named `webwatcher` (or any other name that please you). Keep default "Character set" and "Collation".
