@@ -1,11 +1,17 @@
 # Webwatcher
-Webwatcher is a web application that monitors your websites and e-mail you as if one of them becomes unavailable.
+Webwatcher is a web application that monitors your websites and e-mail you when one of them becomes unavailable.
 
 ## How it works?
-The web interface displays the status of the websites you are monitoring and allows you to do the following configuration:
-* Global settings (SMTP server, option to avoid cache)
+Webwatcher is a standard web application. It has two parts:
+* The backend, a REST API written in Python that relies on a MySQL database
+* The frontend is a website written using HTML, CSS and vanilla Javascript
+
+Webwatcher has been conceived to be easily deployed on Google App Engine (see "Deployment on Google App Engine" section below).
+
+The web interface displays the status of the websites you are monitoring and allows you to set the followings:
 * The websites you want to check
 * The people who will be e-mailed in case of a failure
+* The global settings (SMTP server, option to avoid cache)
 
 Webwatcher does not check the websites automatically. The websites are checked only when a request is made to the special URL `/api/check`. To automate this check, you need to set up a cron that will call this URL periodically. For example, you can use the following entry in the crontab of the server to check the websites every 5 minutes:
 ```
@@ -66,7 +72,7 @@ Don't forget to set up the cron that will check the websites on a regular basis.
 This application is ready to be deployed on Google App Engine. The best is to create a new Google Cloud Platform project dedicated to the application.
 
 You will need the following dependencies:
-* Google Cloud SDK (follow the instructions to login to your project)
+* Google Cloud SDK (follow the instructions to log in to your project)
 * Node.js with NPM
 
 ### Create the database instance
