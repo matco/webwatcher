@@ -1,5 +1,5 @@
-import 'js-tools/extension.js';
-import 'js-tools/dom_extension.js';
+import '@matco/basic-tools/extension.js';
+import '@matco/basic-tools/dom_extension.js';
 
 import {Configuration} from './configuration.js';
 import {Status} from './status.js';

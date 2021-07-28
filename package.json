@@ -19,17 +19,17 @@
 		"url": "https://github.com/matco/webwatcher.git"
 	},
 	"dependencies": {
-		"@matco/basic-table": "2.0.0",
-		"js-tools": "git+ssh://git@github.com:matco/js-tools.git"
+		"@matco/basic-table": "2.1.0",
+		"@matco/basic-tools": "2.0.0"
 	},
 	"devDependencies": {
-		"css-loader": "5.2.4",
-		"eslint": "7.25.0",
+		"css-loader": "6.2.0",
+		"eslint": "7.31.0",
 		"file-loader": "6.2.0",
-		"html-webpack-plugin": "5.3.1",
-		"style-loader": "2.0.0",
-		"webpack": "5.36.2",
-		"webpack-cli": "4.7.0",
+		"html-webpack-plugin": "5.3.2",
+		"style-loader": "3.2.1",
+		"webpack": "5.47.0",
+		"webpack-cli": "4.7.2",
 		"webpack-dev-server": "3.11.2"
 	}
 }
