@@ -33,16 +33,14 @@ export default {
 			},
 			{
 				test: /\.png$/,
-				use: [
-					'file-loader'
-				]
+				type: 'asset/resource'
 			}
 		]
 	},
 	devServer: {
 		proxy: {
 			'/api': {
-				target: 'http://localhost:1338'
+				target: 'http://127.0.0.1:1338'
 			}
 		}
 	}

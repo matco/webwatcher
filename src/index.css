@@ -1,5 +1,3 @@
-@import url(~@matco/basic-table/src/table.css);
-
 html {
 	font-family: 'Open Sans';
 	font-size: 80%; /*let users choose their own font size, but decrease this size a little bit as most browsers have default font size set to 16px*/
