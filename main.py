@@ -361,7 +361,7 @@ def website_check(pk):
 		avoid_cache_setting = db_session.get(Setting, "avoid_cache")
 		avoid_cache = avoid_cache_setting is not None and avoid_cache_setting.value
 		timeout_setting = db_session.get(Setting, "website_timeout")
-		timeout = int(timeout_setting.value) if timeout_setting is not None else DEFAULT_TIMEOUT
+		timeout = int(timeout_setting.value) if not timeout_setting else DEFAULT_TIMEOUT
 		#check retrieved websites
 		for website in websites:
 			monitor(db_session, website, avoid_cache, timeout)

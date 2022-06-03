@@ -139,8 +139,8 @@
 							<p>
 								<label>
 									<span>Timeout</span>
-									<input name="website_timeout" type="number" min="1" required="required" />
-									in seconds
+									<input name="website_timeout" type="number" min="1" />
+									in seconds (default to 5)
 								</label>
 							</p>
 							<p>
@@ -233,7 +233,7 @@
 			</div>
 
 			<div id="status" style="display: none;">
-				<h2>Status<button id="status_check_now" style="margin-left: 2rem;">Check now</button></h2>
+				<h2>Websites status<button id="status_check_now" style="margin-left: 2rem;">Check now</button></h2>
 				<div id="states"></div>
 			</div>
 		</main>
