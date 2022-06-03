@@ -37,14 +37,16 @@ The website uses client side "sessions" (using cookies). The cookies are encrypt
 
 ### Requirements
 You will need the following dependencies:
-* Python 3 with PIP
+* Python 3 with PIP and venv
 * Node.js with NPM
 * An SQL database
 
 ### The back-end
 First, install the dependencies:
 ```
-pip install -r requirements.txt
+python3 -m venv .venv
+source .venv/bin/activate
+pip3 install -r requirements.txt
 ```
 
 Then, launch the back-end:
