@@ -89,8 +89,7 @@ export const Router = {
 		);
 
 		//trigger manually hash change event
-		const event = document.createEvent('UIEvent');
-		event.initUIEvent('hashchange', true, true, window, 1);
+		const event = new UIEvent('hashchange', {bubbles: true, cancelable: true});
 		window.dispatchEvent(event);
 	}
 };
