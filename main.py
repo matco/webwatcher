@@ -9,7 +9,7 @@ import string
 import random
 import io
 #database
-from sqlalchemy import create_engine, engine, select, delete, func, Column, Integer, String, DateTime, Boolean, ForeignKey
+from sqlalchemy import create_engine, engine, select, delete, func, text, Column, Integer, String, DateTime, Boolean, ForeignKey
 from sqlalchemy.orm import sessionmaker, declarative_base
 #email
 import smtplib
@@ -62,6 +62,11 @@ engine = create_engine(
 	url,
 	future=True#, echo=True
 )
+
+#test connection
+with engine.connect() as connection:
+	connection.execute(text("SELECT 1"))
+
 Session = sessionmaker(engine)
 
 Base = declarative_base()
