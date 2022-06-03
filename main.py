@@ -140,7 +140,7 @@ def warn(subject, content):
 #get error message
 def get_exception_message(exception):
 	if hasattr(exception, 'message'):
-		return e.message
+		return exception.message
 	return str(exception)
 
 #website checker
