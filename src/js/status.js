@@ -4,18 +4,8 @@ import {Table, Datasource} from '@matco/basic-table';
 import {Websites} from './services.js';
 
 let selected_website_pk;
-
-//status
 let states_grid;
-
-const states_columns = [
-	{label: 'Name', data: 'name', type: Table.DataType.STRING, width: 120, render: render_name},
-	{label: 'Last check', data: 'update', type: Table.DataType.DATE, width: 150, render: render_date},
-	{label: 'Downtime', data: 'downtime', type: Table.DataType.NUMBER, width: 250, render: render_time},
-	{label: 'Uptime', data: 'uptime', type: Table.DataType.NUMBER, width: 250, render: render_time},
-	{label: 'Availability', data: 'availability', type: Table.DataType.NUMBER, width: 80, render: render_online},
-	{label: 'Actions', width: 100, unsortable: true, render: render_actions}
-];
+let details_grid;
 
 function render_date(value) {
 	return value ? value.toFullDisplay() : 'NA';
@@ -60,17 +50,6 @@ function draw_websites(websites) {
 	//update states grid
 	states_grid.render(new Datasource({data: websites}));
 }
-
-//details
-let details_grid;
-
-const details_columns = [
-	{label: 'Start', data: 'start', type: Table.DataType.DATE, width: 150, render: render_date},
-	{label: 'Stop', data: 'stop', type: Table.DataType.DATE, width: 150, render: render_date},
-	{label: 'Duration', data: 'duration', type: Table.DataType.NUMBER, width: 200, render: render_duration},
-	{label: 'Rationale', data: 'rationale', type: Table.DataType.STRING},
-	{label: 'Action', width: 100, unsortable: true, render: render_details_action}
-];
 
 function render_duration(value) {
 	return value ? Date.getDurationLiteral(value) : 'NA';
@@ -133,15 +112,8 @@ export const Status = {
 		document.getElementById('website_details_check').dataset.websiteId = website_pk;
 
 		//prepare grid with custom export link
-		details_grid = new Table({
-			container: document.getElementById('website_details_downtimes'),
-			columns: details_columns,
-			path: '/js/grid/',
-			rowPerPage: 10,
-			actions: [
-				{label: 'Export', url: `/api/websites/${website_pk}/downtimes`}
-			]
-		});
+		const action = {label: 'Export', url: `/api/websites/${website_pk}/downtimes`};
+		details_grid.setActions([action]);
 
 		const downtimes_response = await fetch(`/api/websites/${website_pk}/downtimes`, {headers: {'Accept': 'application/json'}});
 		const downtimes = await downtimes_response.json();
@@ -159,11 +131,16 @@ export const Status = {
 		UI.OpenModal(document.getElementById('website_details'), true);
 	},
 	Init: function() {
-		//status
 		states_grid = new Table({
 			container: document.getElementById('states'),
-			columns: states_columns,
-			path: '/js/grid/',
+			columns: [
+				{label: 'Name', data: 'name', type: Table.DataType.STRING, width: 120, render: render_name},
+				{label: 'Last check', data: 'update', type: Table.DataType.DATE, width: 150, render: render_date},
+				{label: 'Downtime', data: 'downtime', type: Table.DataType.NUMBER, width: 250, render: render_time},
+				{label: 'Uptime', data: 'uptime', type: Table.DataType.NUMBER, width: 250, render: render_time},
+				{label: 'Availability', data: 'availability', type: Table.DataType.NUMBER, width: 80, render: render_online},
+				{label: 'Actions', width: 100, unsortable: true, render: render_actions}
+			],
 			rowPerPage: undefined,
 			rowClass: function(record) {
 				if(record.disabled) {
@@ -171,6 +148,18 @@ export const Status = {
 				}
 				return !record.update ? 'unchecked' : record.online ? 'online' : 'offline';
 			}
+		});
+
+		details_grid = new Table({
+			container: document.getElementById('website_details_downtimes'),
+			columns: [
+				{label: 'Start', data: 'start', type: Table.DataType.DATE, width: 150, render: render_date},
+				{label: 'Stop', data: 'stop', type: Table.DataType.DATE, width: 150, render: render_date},
+				{label: 'Duration', data: 'duration', type: Table.DataType.NUMBER, width: 200, render: render_duration},
+				{label: 'Rationale', data: 'rationale', type: Table.DataType.STRING},
+				{label: 'Action', width: 100, unsortable: true, render: render_details_action}
+			],
+			rowPerPage: 10
 		});
 
 		document.getElementById('status_check_now').addEventListener(
