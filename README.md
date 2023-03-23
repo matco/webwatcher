@@ -88,7 +88,7 @@ Wait for the instance to be created. Back to the main page of your instance, not
 Then, you must create the database itself. From the main page of your instance, select `Databases` in the left menu and create a database named `webwatcher` (or any other name that please you). Keep default "Character set" and "Collation".
 
 ### Allow the Google App Engine service account to use the Cloud SQL API
-A Google App Engine application relies on a Google Cloud Platform service account. You must ensure this account has the appropriate Cloud SQL role and permissions as described (https://cloud.google.com/sql/docs/mysql/connect-app-engine-standard#public-ip-default)[here].
+A Google App Engine application relies on a Google Cloud Platform service account. You must ensure this account has the appropriate Cloud SQL role and permissions as described [here](https://cloud.google.com/sql/docs/mysql/connect-app-engine-standard#public-ip-default).
 
 Here is the simplified process:
 * Use the menu `IAM & Admin > IAM`
