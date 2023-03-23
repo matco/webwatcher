@@ -83,7 +83,7 @@ In your project, use the menu `Databases > SQL` to create a Google SQL instance.
 * Choose a strong password and note it
 * In `Customize your instance > Connections`, allow the access though a public IP (you can disable the access through a private IP)
 
-Wait for the instance to be created. Back to the main page of your instance, note the connection name of the instance (visible in the main page of the instance under `Connection name`).
+Wait for the instance to be created. Back to the main page of your instance, get the connection name of the instance (visible in the block `Connect to this instance` under `Connection name`). It should be something like `project-id:us-west1:webwatcher`. The name of the connection must then be prefixed with `/cloudsql/` to get the final name of the connection (`/cloudsql/project-id:us-west1:webwatcher` with the previous example).
 
 Then, you must create the database itself. From the main page of your instance, select `Databases` in the left menu and create a database named `webwatcher` (or any other name that please you). Keep default "Character set" and "Collation".
 
