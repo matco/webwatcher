@@ -4,7 +4,7 @@ Webwatcher is a web application that monitors your websites and e-mail you when 
 ## How it works?
 Webwatcher is a standard web application. It has two parts:
 * The backend, a REST API written in Python that relies on a MySQL database
-* The frontend is a website written using HTML, CSS and vanilla Javascript
+* The frontend is a website written using HTML, CSS and vanilla JavaScript
 
 Webwatcher has been conceived to be easily deployed on Google App Engine (see "Deployment on Google App Engine" section below).
 
@@ -31,7 +31,7 @@ Set these variables only if you would like to customize their values.
 The database will be automatically initialized by the application itself.
 
 ### Sessions
-The website uses client side "sessions" (using cookies). The cookies are encrypted using a key. By default, a random key is generated each time the application starts. This does not work for the Google App Engine environment where multiple instances or the application can run at the same time. The environment variable `COOKIE_SECRET` allows choosing once for all the key that will be used to encrypt the cookie.
+The website uses client side "sessions" (using cookies). The cookies are encrypted using a key. By default, a random key is generated each time the application starts. This does not work for the Google App Engine environment, where multiple instances of the application can run at the same time. The environment variable `COOKIE_SECRET` allows choosing the key that will be used to encrypt the cookie.
 
 ## Local usage
 
@@ -68,7 +68,7 @@ npm start
 Finally, open your browser on `http://localhost:8080`.
 
 ### Check websites automatically
-Don't forget to set up the cron that will check the websites on a regular basis.
+Do not forget to set up the cron that will check the websites regularly.
 
 ## Deployment on Google App Engine
 This application is ready to be deployed on Google App Engine. The best is to create a new Google Cloud Platform project dedicated to the application.
@@ -85,7 +85,7 @@ In your project, use the menu `Databases > SQL` to create a Google SQL instance.
 
 Wait for the instance to be created. Back to the main page of your instance, get the connection name of the instance (visible in the block `Connect to this instance` under `Connection name`). It should be something like `project-id:us-west1:webwatcher`. The name of the connection must then be prefixed with `/cloudsql/` to get the final name of the connection (`/cloudsql/project-id:us-west1:webwatcher` with the previous example).
 
-Then, you must create the database itself. From the main page of your instance, select `Databases` in the left menu and create a database named `webwatcher` (or any other name that please you). Keep default "Character set" and "Collation".
+Then, you must create the database itself. From the main page of your instance, select `Databases` in the left menu and create a database named `webwatcher` (or any other name that pleases you). Keep default "Character set" and "Collation".
 
 ### Allow the Google App Engine service account to use the Cloud SQL API
 A Google App Engine application relies on a Google Cloud Platform service account. You must ensure this account has the appropriate Cloud SQL role and permissions as described [here](https://cloud.google.com/sql/docs/mysql/connect-app-engine-standard#public-ip-default).
