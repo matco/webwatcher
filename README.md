@@ -18,6 +18,12 @@ Webwatcher does not check the websites automatically. The websites are checked o
 */5 * * * * curl http://localhost:8080/api/check
 ```
 
+### Requirements
+You will need the following dependencies:
+* Python 3 with PIP and venv
+* Node.js with NPM
+* An SQL database
+
 ### Database
 The application relies on the following environment variables to connect to the database:
 * `DB_HOST`: the host (default `localhost`)
@@ -35,11 +41,7 @@ The website uses client side "sessions" (using cookies). The cookies are encrypt
 
 ## Local usage
 
-### Requirements
-You will need the following dependencies:
-* Python 3 with PIP and venv
-* Node.js with NPM
-* An SQL database
+The first step is to install the requirements described in the [Requirements](#requirements) section.
 
 ### The back-end
 First, install the dependencies:
@@ -67,8 +69,48 @@ npm start
 
 Finally, open your browser on `http://localhost:8080`.
 
+## Server usage
+
+The first step is to install the requirements described in the [Requirements](#requirements) section.
+
+You will also need a production-ready WSGI server such as `Gunicorn` and a front server such as `Nginx` (acting as reverse proxy for the back-end and a classic HTTP server for the front-end). Install them with the following command:
+```
+sudo apt install nginx python3-gunicorn
+```
+
+### Set up the project
+On the server, checkout the code of the project in a folder, for example in `/opt/webwatcher`. Then, in this folder, execute the following commands to install the project dependencies and generate the front-end bundle:
+```
+python3 -m venv .venv
+source .venv/bin/activate
+pip3 install -r requirements.txt
+npm install
+npm run build
+```
+
+### Set up a systemd service
+Copy the file `resources/webwatcher.service` to the remote path `~/.config/systemd/user/webwatcher.service`. Then, run the following commands to reload systemd and start the service:
+```
+systemctl --user daemon-reload
+systemctl --user start webwatcher
+```
+
+### Set up Nginx
+Copy the Nginx configuration file `resources/webwatcher` in `/etc/nginx/sites-available/webwatcher` and enable this configuration with a symbolic link:
+```
+sudo ln -s /etc/nginx/sites-available/webwatcher /etc/nginx/sites-enabled/webwatcher
+```
+
+Then, reload Nginx:
+```
+sudo nginx -s reload
+```
+
 ### Check websites automatically
-Do not forget to set up the cron that will check the websites regularly.
+Do not forget to set up the cron that will check the websites regularly. You can add the following entry in your `crontab` to check the websites status every 5 minutes:
+```
+*/5 * * * * /usr/bin/curl http://localhost:8000/api/check
+```
 
 ## Deployment on Google App Engine
 This application is ready to be deployed on Google App Engine. The best is to create a new Google Cloud Platform project dedicated to the application.

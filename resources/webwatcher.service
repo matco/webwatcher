@@ -1,0 +1,11 @@
+[Unit]
+Description=webwatcher
+
+[Service]
+WorkingDirectory=/opt/webwatcher/
+ExecStart=/usr/local/bin/gunicorn 'main:app'
+SyslogIdentifier=webwatcher
+
+[Install]
+#instance will be run if the system reboot (default.target starts when systemd starts)
+WantedBy=default.target
