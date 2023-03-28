@@ -553,4 +553,4 @@ app.register_blueprint(bp, url_prefix="/api")
 #local only for debug purpose
 if __name__ == "__main__":
 	print("Launching application locally")
-	app.run(host="0.0.0.0", port=1338, debug=True)
+	app.run(host="0.0.0.0", port=8000, debug=True)
