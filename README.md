@@ -89,10 +89,9 @@ npm run build
 ```
 
 ### Set up a systemd service
-Copy the file `resources/webwatcher.service` to the remote path `~/.config/systemd/user/webwatcher.service`. Then, run the following commands to reload systemd and start the service:
+Copy the file `resources/webwatcher.service` to the remote path `/etc/systemd/system/webwatcher.service`. Then, run the following command to enable and start the service:
 ```
-systemctl --user daemon-reload
-systemctl --user start webwatcher
+sudo systemctl enable --now webwatcher.service
 ```
 
 ### Set up Nginx

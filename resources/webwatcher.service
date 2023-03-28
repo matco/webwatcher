@@ -1,11 +1,20 @@
 [Unit]
 Description=webwatcher
+After=network.target
 
 [Service]
+Type=notify
+#the user that the service will run as
+User=www-data
+Group=www-data
 WorkingDirectory=/opt/webwatcher/
 ExecStart=/usr/local/bin/gunicorn 'main:app'
 SyslogIdentifier=webwatcher
+TimeoutStopSec=5
+PrivateTmp=true
+#restart service if the app crashes
+Restart=always
+RestartSec=10
 
 [Install]
-#instance will be run if the system reboot (default.target starts when systemd starts)
-WantedBy=default.target
+WantedBy=multi-user.target
