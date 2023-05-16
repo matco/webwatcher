@@ -134,7 +134,9 @@ def warn(subject, content):
 		if smtp_host_setting is None or not smtp_host_setting.value or smtp_port_setting is None or not smtp_port_setting.value:
 			return
 		#connect to SMTP
-		with smtplib.SMTP_SSL(smtp_host_setting.value, int(smtp_port_setting.value), timeout=5) as smtp:
+		context = ssl.create_default_context()
+		with smtplib.SMTP(smtp_host_setting.value, int(smtp_port_setting.value), timeout=5) as smtp:
+			smtp.starttls(context=context)
 			#authenticate on SMTP
 			smtp_username_setting = db_session.get(Setting, "smtp_username")
 			smtp_password_setting = db_session.get(Setting, "smtp_password")
