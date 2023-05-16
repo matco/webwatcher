@@ -19,6 +19,7 @@ from email.message import EmailMessage
 import requests
 #flask
 from flask import Flask, Blueprint, session, request, jsonify, make_response
+from flask.json.provider import JSONProvider
 from flask_restful import Resource, Api
 
 logging.basicConfig(level="INFO")
@@ -102,7 +103,7 @@ class Downtime(Base):
 	start = Column(DateTime, nullable=False, default=datetime.datetime.now)
 	stop = Column(DateTime)
 
-class JSONCustomEncoder(json.JSONEncoder):
+class CustomJSONEncoder(json.JSONEncoder):
 	def default(self, object):
 		if object.__class__.__name__ == "Setting":
 			return {"id" : object.id, "value" : object.value}
@@ -115,6 +116,13 @@ class JSONCustomEncoder(json.JSONEncoder):
 		if object.__class__.__name__ == "datetime":
 			return object.isoformat() + "Z"
 		return json.JSONEncoder.default(self, object)
+
+class CustomJSONProvider(JSONProvider):
+	def dumps(self, object, **kwargs):
+		return json.dumps(object, **kwargs, cls=CustomJSONEncoder)
+
+	def loads(self, string, **kwargs):
+		return json.loads(string, **kwargs)
 
 #warn about the problem
 def warn(subject, content):
@@ -249,7 +257,7 @@ def check_database_initialized(db_session):
 #api
 app = Flask(__name__)
 app.secret_key = os.environ.get("COOKIE_SECRET", "".join(random.choice(string.ascii_letters) for _ in range(32)))
-app.json_encoder = JSONCustomEncoder
+app.json = CustomJSONProvider(app)
 
 #Google App Engine does not support URL rewriting
 #a blue print is required to mount the API on a specific path
