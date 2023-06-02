@@ -170,7 +170,10 @@ def check(website, avoid_cache, timeout):
 	#do check
 	try:
 		response = requests.get(url,
-			headers={"Cache-Control" : "max-age=60"},
+			headers={
+				"User-Agent": "Webwatcher",
+				"Cache-Control" : "max-age=60"
+			},
 			timeout=timeout
 		)
 		try:
