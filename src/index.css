@@ -271,18 +271,6 @@ input[type="checkbox"] {
 #status {
 	padding: 1rem;
 }
-#status .disabled {
-	background-color: #d9edf7;
-}
-#status .unchecked {
-	background-color: #ffd8ba;
-}
-#status .online {
-	background-color: #dff0d8;
-}
-#status .offline {
-	background-color: #f2dede;
-}
 
 #website_details {
 	width: 80%;

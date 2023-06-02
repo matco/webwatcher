@@ -93,6 +93,16 @@ function update_website_details_age(date) {
 	document.getElementById('website_details_age').textContent = age;
 }
 
+function get_row_color(record) {
+	if(record.disabled) {
+		return '#d9edf7';
+	}
+	if(!record.update) {
+		return '#ffd8ba';
+	}
+	return record.online ? '#dff0d8' : '#f2dede';
+}
+
 export const Status = {
 	Show: function update_states() {
 		Websites.list().then(draw_websites);
@@ -142,12 +152,7 @@ export const Status = {
 				{label: 'Actions', width: 100, unsortable: true, render: render_actions}
 			],
 			rowPerPage: undefined,
-			rowClass: function(record) {
-				if(record.disabled) {
-					return 'disabled';
-				}
-				return !record.update ? 'unchecked' : record.online ? 'online' : 'offline';
-			}
+			rowCSS: r => ({backgroundColor: get_row_color(r)})
 		});
 
 		details_grid = new Table({
