@@ -29,10 +29,6 @@ let authentication_promise = undefined;
 let authentication_resolve = undefined;
 let authentication_reject = undefined;
 
-let initialization_promise = undefined;
-let initialization_resolve = undefined;
-let initialization_reject = undefined;
-
 export const Authentication = {
 	GetStatus: function() {
 		//return a copy of the status object
@@ -55,19 +51,9 @@ export const Authentication = {
 		return authentication_promise;
 	},
 	OpenInitialization: function() {
-		//initialization window may have already been open
-		if(initialization_promise) {
-			return initialization_promise;
-		}
-		initialization_promise = new Promise((resolve, reject) => {
-			initialization_resolve = resolve;
-			initialization_reject = reject;
-
-			const initialization_form = document.getElementById('initialization');
-			initialization_form.show();
-			initialization_form.querySelector('form')['password_1'].focus();
-		});
-		return initialization_promise;
+		const initialization_form = document.getElementById('initialization');
+		initialization_form.show();
+		initialization_form.querySelector('form')['password_1'].focus();
 	},
 	Init: async function() {
 		document.getElementById('initialization').querySelector('form').addEventListener(
@@ -92,9 +78,6 @@ export const Authentication = {
 				if(response.status === 401) {
 					const result = await response.json();
 					document.getElementById('initialization_error').textContent = result.message;
-
-					initialization_promise = undefined;
-					initialization_reject();
 				}
 				else {
 					//after initialization, consider that user is logged in
@@ -106,9 +89,6 @@ export const Authentication = {
 					document.getElementById('login').style.display = 'none';
 					document.getElementById('logout').style.display = 'block';
 					location.hash = '#page=config';
-
-					initialization_promise = undefined;
-					initialization_resolve();
 				}
 			}
 		);
