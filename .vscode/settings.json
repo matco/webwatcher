@@ -1,5 +1,6 @@
 {
 	"files.exclude": {
+		".venv": true,
 		"__pycache__": true,
 		"node_modules": true,
 		"package-lock.json": true,
