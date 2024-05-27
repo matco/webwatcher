@@ -22,29 +22,32 @@ header {
 	color: white;
 	display: flex;
 	align-items: flex-end;
-}
-header > h1 {
-	padding: 0.5rem;
-}
-header > nav {
-	flex-grow: 1;
-	margin: 0 5rem;
-}
-header > nav > a {
-	display: inline-block;
-	padding: 0.5rem 2rem;
-	border-radius: 5px 5px 0 0;
-	color: white;
-}
-header > nav > a:hover:not(.selected) {
-	background-color: #333;
-}
-header > nav > a.selected {
-	background-color: white;
-	color: black;
-}
-header > button {
-	margin-bottom: 1rem;
+
+	& > h1 {
+		padding: 0.5rem;
+	}
+	& > nav {
+		flex-grow: 1;
+		margin: 0 5rem;
+
+		& > a {
+			display: inline-block;
+			padding: 0.5rem 2rem;
+			border-radius: 5px 5px 0 0;
+			color: white;
+
+			&:hover:not(.selected) {
+				background-color: #333;
+			}
+			&.selected {
+				background-color: white;
+				color: black;
+			}
+		}
+	}
+	& > button {
+		margin-bottom: 1rem;
+	}
 }
 main {
 	flex-grow: 1;
@@ -52,58 +55,57 @@ main {
 a {
 	text-decoration: none;
 }
-button, a.button {
+button {
 	font-family: 'Open Sans';
 	cursor: pointer;
 	padding: 0.2rem 1rem;
 	border: 1px solid #888;
 	border-radius: 5px;
 	background-color: #eee;
-}
-a.button {
-	text-decoration: none;
-	vertical-align: bottom;
-}
-button[disabled], a.button[disabled] {
-	cursor: auto;
-	opacity: 0.7;
-}
-button:not([disabled]):hover, a.button:not([disabled]):hover {
-	border-color: #111;
-	background-color: #444;
-	color: #ddd;
-}
-button.loading, a.button.loading {
-	background-image: url(images/loading.png);
-	background-repeat: no-repeat;
-	background-position: right 0.5rem center;
-	background-size: 1.2rem;
-	padding-right: 2rem;
-}
-button.text {
-	background: none;
-	border: none;
-	padding: 0;
-}
-button.text:hover {
-	color: #111;
-	background: none;
-	text-decoration: underline;
+
+	&[disabled] {
+		cursor: auto;
+		opacity: 0.7;
+	}
+	&:not([disabled]):hover {
+		border-color: #111;
+		background-color: #444;
+		color: #ddd;
+	}
+	&.loading {
+		background-image: url(images/loading.png);
+		background-repeat: no-repeat;
+		background-position: right 0.5rem center;
+		background-size: 1.2rem;
+		padding-right: 2rem;
+	}
+	&.text {
+		background: none;
+		border: none;
+		padding: 0;
+
+		&:hover {
+			color: #111;
+			background: none;
+			text-decoration: underline;
+		}
+	}
 }
 table {
 	table-layout: fixed;
 	background-color: #fff;
 	border-collapse: collapse;
-}
-table tr:nth-child(even) {
-	background-color: #efefef;
-}
-table td, table th {
-	border: 1px solid #ccc;
-	overflow: hidden;
-	white-space: nowrap;
-	text-overflow: ellipsis;
-	padding: 0.2rem;
+
+	& tr:nth-child(even) {
+		background-color: #efefef;
+	}
+	& td, & th {
+		border: 1px solid #ccc;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		padding: 0.2rem;
+	}
 }
 form {
 	margin: 0;
@@ -121,28 +123,23 @@ input {
 	border: 1px solid #ccc;
 	border-radius: 5px;
 	padding: 0.2rem;
-}
-input:focus {
-	border: 1px solid #aaa;
-}
-input::placeholder {
-	color: #aaa;
-}
-input::-webkit-input-placeholder {
-	color: #aaa;
-}
-input::-moz-placeholder {
-	color: #aaa;
-}
-input[type="email"] {
-	width: 20rem;
-}
-input[type="number"] {
-	width: 3rem;
-	text-align: right;
-}
-input[type="checkbox"] {
-	vertical-align: middle;
+
+	&:focus {
+		border: 1px solid #aaa;
+	}
+	&::placeholder {
+		color: #aaa;
+	}
+	&[type="email"] {
+		width: 20rem;
+	}
+	&[type="number"] {
+		width: 3rem;
+		text-align: right;
+	}
+	&[type="checkbox"] {
+		vertical-align: middle;
+	}
 }
 
 /* dialog */
@@ -162,30 +159,32 @@ dialog {
 	background-color: white;
 	border: 1px solid #aaa;
 	border-radius: 5px;
-}
-dialog > :is(form, div) {
-	display: flex; /*dialog cannot be displayed flex directly because the display property is managed by the Javascript dialog API*/
-	flex-direction: column;
-	flex-wrap: nowrap;
-	height: 100%;
-	width: 100%;
-}
-dialog > :is(form, div) > h2 {
-	margin: 0;
-	padding: 0.5rem;
-	border-bottom: 1px solid #aaa;
-	text-align: center;
-}
-dialog > :is(form, div) > div.content {
-	flex-grow: 1;
-	padding: 1rem;
-}
-dialog > :is(form, div) > menu {
-	width: 100%;
-	margin: 0;
-	padding: 1rem;
-	text-align: right;
-	box-sizing: border-box;
+
+	& > :is(form, div) {
+		display: flex; /*dialog cannot be displayed flex directly because the display property is managed by the Javascript dialog API*/
+		flex-direction: column;
+		flex-wrap: nowrap;
+		height: 100%;
+		width: 100%;
+
+		& > h2 {
+			margin: 0;
+			padding: 0.5rem;
+			border-bottom: 1px solid #aaa;
+			text-align: center;
+		}
+		& > div.content {
+			flex-grow: 1;
+			padding: 1rem;
+		}
+		& > menu {
+			width: 100%;
+			margin: 0;
+			padding: 1rem;
+			text-align: right;
+			box-sizing: border-box;
+		}
+	}
 }
 
 .error {
@@ -194,43 +193,48 @@ dialog > :is(form, div) > menu {
 	background-color: #f2dede;
 	border: 1px solid #eed3d7;
 	color: #b94a48;
-}
-.error:empty {
-	display: none;
+
+	&:empty {
+		display: none;
+	}
 }
 
 #config {
 	display: flex;
 	height: 100%;
-}
-#config > aside {
-	width: 12rem;
-	background-color: #ddd;
-	padding-top: 3rem;
-	box-sizing: border-box;
-}
-#config > aside > nav {
-	width: 100%;
-	padding: 0 0 0 1rem;
-	box-sizing: border-box;
-}
-#config > aside > nav > a {
-	text-decoration: none;
-	color: black;
-	display: block;
-	box-sizing: border-box;
-	padding: 0.5rem 2rem 0.5rem 0.5rem;
-}
-#config > aside > nav > a.selected {
-	background-color: white;
-	border-radius: 5px 0 0 5px;
-}
-#config > section {
-	width: 100%;
-	padding: 1rem;
-}
-#config table {
-	margin-bottom: 1.5rem;
+
+	& > aside {
+		width: 12rem;
+		background-color: #ddd;
+		padding-top: 3rem;
+		box-sizing: border-box;
+
+		& > nav {
+			width: 100%;
+			padding: 0 0 0 1rem;
+			box-sizing: border-box;
+
+			& > a {
+				text-decoration: none;
+				color: black;
+				display: block;
+				box-sizing: border-box;
+				padding: 0.5rem 2rem 0.5rem 0.5rem;
+
+				&.selected {
+					background-color: white;
+					border-radius: 5px 0 0 5px;
+				}
+			}
+		}
+	}
+	& > section {
+		width: 100%;
+		padding: 1rem;
+	}
+	& table {
+		margin-bottom: 1.5rem;
+	}
 }
 
 #website input[name="name"] {
