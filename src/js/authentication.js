@@ -49,8 +49,8 @@ export const Authentication = {
 
 			document.getElementById('authentication_cancel').style.display = cancellable ? 'inline' : 'none';
 			const authentication_form = document.getElementById('authentication');
-			UI.OpenModal(authentication_form, true);
-			authentication_form['password'].focus();
+			authentication_form.showModal();
+			authentication_form.querySelector('form')['password'].focus();
 		});
 		return authentication_promise;
 	},
@@ -64,13 +64,13 @@ export const Authentication = {
 			initialization_reject = reject;
 
 			const initialization_form = document.getElementById('initialization');
-			UI.OpenModal(initialization_form, true);
-			initialization_form['password_1'].focus();
+			initialization_form.show();
+			initialization_form.querySelector('form')['password_1'].focus();
 		});
 		return initialization_promise;
 	},
 	Init: async function() {
-		document.getElementById('initialization').addEventListener(
+		document.getElementById('initialization').querySelector('form').addEventListener(
 			'submit',
 			async function(event) {
 				event.stop();
@@ -100,7 +100,9 @@ export const Authentication = {
 					//after initialization, consider that user is logged in
 					status.protected = true;
 					status.authenticated = true;
-					UI.CloseModal(document.getElementById('initialization'));
+					document.querySelector('header').style.visibility = 'visible';
+					document.querySelector('main').style.visibility = 'visible';
+					document.getElementById('initialization').close();
 					document.getElementById('login').style.display = 'none';
 					document.getElementById('logout').style.display = 'block';
 					location.hash = '#page=config';
@@ -111,7 +113,7 @@ export const Authentication = {
 			}
 		);
 
-		document.getElementById('authentication').addEventListener(
+		document.getElementById('authentication').querySelector('form').addEventListener(
 			'submit',
 			async function(event) {
 				event.stop();
@@ -135,7 +137,7 @@ export const Authentication = {
 				}
 				else {
 					status.authenticated = true;
-					UI.CloseModal(document.getElementById('authentication'));
+					document.getElementById('authentication').close();
 					document.getElementById('login').style.display = 'none';
 					document.getElementById('logout').style.display = 'block';
 
@@ -148,7 +150,7 @@ export const Authentication = {
 		document.getElementById('authentication_cancel').addEventListener(
 			'click',
 			function() {
-				UI.CloseModal(document.getElementById('authentication'));
+				document.getElementById('authentication').close();
 				location.hash = '#page=status';
 
 				authentication_promise = undefined;
@@ -189,6 +191,8 @@ export const Authentication = {
 		const response = await fetch('/api/status');
 		//application must be initialized
 		if(response.status === 403) {
+			document.querySelector('header').style.visibility = 'hidden';
+			document.querySelector('main').style.visibility = 'hidden';
 			await Authentication.OpenInitialization();
 		}
 		else {

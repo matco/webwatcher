@@ -6,9 +6,6 @@
 		<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet" />
 	</head>
 	<body>
-		<!--modal windows-->
-		<div id="modal_overlay"></div>
-
 		<div id="notification">
 			<p>
 				<img id="notification_icon" />
@@ -17,58 +14,64 @@
 			<p id="notification_body"></p>
 		</div>
 
-		<form id="initialization" method="post" action="#" class="modal">
-			<h2>Initialization</h2>
-			<div class="content">
-				<p id="initialization_error" class="error"></p>
-				<p>
-					<label>
-						<span>Password</span>
-						<input name="password_1" type="password" required="required" />
-					</label>
-				</p>
-				<p>
-					<label>
-						<span>Retype password</span>
-						<input name="password_2" type="password" required="required" />
-					</label>
-				</p>
-			</div>
-			<menu>
-				<button>Validate</button>
-			</menu>
-		</form>
+		<dialog id="initialization">
+			<form method="dialog">
+				<h2>Initialization</h2>
+				<div class="content">
+					<p id="initialization_error" class="error"></p>
+					<p>
+						<label>
+							<span>Password</span>
+							<input name="password_1" type="password" required="required" />
+						</label>
+					</p>
+					<p>
+						<label>
+							<span>Retype password</span>
+							<input name="password_2" type="password" required="required" />
+						</label>
+					</p>
+				</div>
+				<menu>
+					<button>Validate</button>
+				</menu>
+			</form>
+		</dialog>
 
-		<form id="authentication" method="post" action="#" class="modal">
-			<h2>Authentication</h2>
-			<div class="content">
-				<p id="authentication_error" class="error"></p>
-				<p>
-					<label>
-						<span>Password</span>
-						<input name="password" type="password" required="required" />
-					</label>
-				</p>
-			</div>
-			<menu>
-				<button id="authentication_cancel" type="button">Cancel</button>
-				<button>Login</button>
-			</menu>
-		</form>
+		<dialog id="authentication">
+			<form method="dialog">
+				<h2>Authentication</h2>
+				<div class="content">
+					<p id="authentication_error" class="error"></p>
+					<p>
+						<label>
+							<span>Password</span>
+							<input name="password" type="password" required="required" />
+						</label>
+					</p>
+				</div>
+				<menu>
+					<button id="authentication_cancel" type="button">Cancel</button>
+					<button>Login</button>
+				</menu>
+			</form>
+		</dialog>
 
-		<div id="website_details" class="modal">
-			<h2>Details for <a id="website_details_link" href="#"></a></h2>
-			<div class="content">
-				<p>
-					<span id="website_details_age"></span>.
-					<button id="website_details_check">Check now</button>
-				</p>
-				<div id="website_details_downtimes"></div>
+		<dialog id="website_details">
+			<div>
+				<h2>Details for <a id="website_details_link" href="#"></a></h2>
+				<div class="content">
+					<p>
+						<span id="website_details_age"></span>.
+						<button id="website_details_check">Check now</button>
+					</p>
+					<div id="website_details_downtimes"></div>
+				</div>
+				<menu>
+					<button id="website_details_close">Close</button>
+				</menu>
 			</div>
-			<menu>
-				<a href="#page=status" class="button">Close</a>
-			</menu>
-		</div>
+		</dialog>
 
 		<!--content-->
 		<header>

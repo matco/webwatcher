@@ -32,7 +32,12 @@ function render_online(value) {
 
 function render_actions(_, record) {
 	if(Authentication.GetStatus().authenticated) {
-		return document.createFullElement('a', {href: `#page=status&details=${record.pk}`, title: 'View website details'}, 'Details');
+		const details = document.createFullElement('button', {title: 'View website details'}, 'Details');
+		details.addEventListener('click', event => {
+			event.stop();
+			Status.Detail(record.pk);
+		});
+		return details;
 	}
 	return document.createElement('span');
 }
@@ -138,7 +143,7 @@ export const Status = {
 		});
 		//update downtimes grid
 		details_grid.render(new Datasource({data: downtimes}));
-		UI.OpenModal(document.getElementById('website_details'), true);
+		document.getElementById('website_details').showModal();
 	},
 	Init: function() {
 		states_grid = new Table({
@@ -204,6 +209,13 @@ export const Status = {
 				else {
 					UI.Notify('Unable to check website');
 				}
+			}
+		);
+
+		document.getElementById('website_details_close').addEventListener(
+			'click',
+			function() {
+				document.getElementById('website_details').close();
 			}
 		);
 	}

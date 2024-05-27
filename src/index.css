@@ -171,41 +171,42 @@ input[type="checkbox"] {
 	vertical-align: middle;
 }
 
-#modal_overlay {
-	position: fixed;
-	display: none;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	z-index: 10;
+/* dialog */
+dialog::backdrop {
 	background-color: #eee;
 	opacity: 0.9;
 }
-.modal {
-	display: none;
-	flex-direction: column;
+dialog {
 	position: fixed;
+	z-index: 100;
 	height: 20rem;
 	width: 50rem;
 	top: 20%;
 	left: calc(50% - 25rem);
-	z-index: 11;
+	padding: 0;
+	margin: 0;
 	background-color: white;
 	border: 1px solid #aaa;
 	border-radius: 5px;
 }
-.modal > h2 {
+dialog > :is(form, div) {
+	display: flex; /*dialog cannot be displayed flex directly because the display property is managed by the Javascript dialog API*/
+	flex-direction: column;
+	flex-wrap: nowrap;
+	height: 100%;
+	width: 100%;
+}
+dialog > :is(form, div) > h2 {
 	margin: 0;
 	padding: 0.5rem;
 	border-bottom: 1px solid #aaa;
 	text-align: center;
 }
-.modal > div.content {
+dialog > :is(form, div) > div.content {
 	flex-grow: 1;
 	padding: 1rem;
 }
-.modal > menu {
+dialog > :is(form, div) > menu {
 	width: 100%;
 	margin: 0;
 	padding: 1rem;

@@ -38,9 +38,6 @@ export const Router = {
 					document.getElementById('section_other').style.display = 'none';
 				}
 
-				//close all modals
-				UI.CloseModals();
-
 				//retrieve data encoded in hash
 				const data = Hash.Decode(location.hash);
 
@@ -80,10 +77,6 @@ export const Router = {
 					//display page
 					menu_status.classList.add('selected');
 					status.style.display = 'block';
-					//details
-					if(data.hasOwnProperty('details')) {
-						Status.Detail(data.details);
-					}
 				}
 			}
 		);
