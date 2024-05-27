@@ -1,5 +1,3 @@
-import {UI} from './ui.js';
-
 //override fetch function to intercept errors
 const original_fetch = window.fetch;
 window.fetch = function() {

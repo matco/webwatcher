@@ -1,6 +1,5 @@
 import {Configuration} from './configuration.js';
 import {Status} from './status.js';
-import {UI} from './ui.js';
 import {Hash} from './hash.js';
 
 let refresh_status_page_interval;
