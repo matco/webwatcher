@@ -5,10 +5,8 @@ After=network.target
 [Service]
 Type=notify
 #the user that the service will run as
-User=www-data
-Group=www-data
-WorkingDirectory=/opt/webwatcher/
-ExecStart=/usr/local/bin/gunicorn 'main:app'
+WorkingDirectory={{ app_path }}
+ExecStart={{ app_path }}/.venv/bin/gunicorn 'main:app'
 SyslogIdentifier=webwatcher
 TimeoutStopSec=5
 PrivateTmp=true

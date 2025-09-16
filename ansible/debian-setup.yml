@@ -1,0 +1,178 @@
+---
+- name: Set up a Debian server
+  hosts: webwatchers
+  vars:
+    mariadb_unix_socket: /run/mysqld/mysqld.sock
+    database_user: root
+    database_password: root
+  tasks:
+    - name: Print debug message
+      ansible.builtin.debug:
+        msg: "Run by {{ lookup('env', 'USER') }} on {{ inventory_hostname }} at {{ ansible_date_time.date }}."
+
+    - name: Install dependencies
+      ansible.builtin.apt:
+        pkg: "{{ packages }}"
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+      vars:
+        packages:
+          - git
+          # Ansible dependencies
+          - python3-pymysql
+          # Let's encrypt certbot dependencies
+          - certbot
+          - python3-certbot-nginx
+          # project dependencies
+          - nodejs
+          - npm
+          - python3-venv
+          - mariadb-server
+          - nginx
+      become: true
+
+    # Retrieve project
+    - name: Prepare project folder
+      ansible.builtin.file:
+        state: directory
+        dest: "{{ app_path }}"
+        mode: "0755"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+      become: true
+
+    - name: Clone project Git repository
+      ansible.builtin.git:
+        accept_hostkey: true
+        repo: "{{ app_git_url }}"
+        dest: "{{ app_path }}"
+        version: "{{ app_git_reference }}"
+        force: true
+
+    - name: Create database
+      community.mysql.mysql_db:
+        login_unix_socket: "{{ mariadb_unix_socket }}"
+        name: webwatcher
+        encoding: utf8
+        state: present
+      become: true
+
+    - name: Create database user
+      community.mysql.mysql_user:
+        login_unix_socket: "{{ mariadb_unix_socket }}"
+        name: "{{ database_user }}"
+        password: "{{ database_password }}"
+        priv: "*.*:ALL"
+        state: present
+      become: true
+
+    - name: Store MariaDB credentials
+      template:
+        src: templates/my.cnf
+        dest: /root/.my.cnf
+        owner: root
+        mode: 0600
+      become: true
+
+    - name: Install backend dependencies
+      pip:
+        requirements: "{{ app_path }}/requirements.txt"
+        virtualenv: "{{ app_path }}/.venv"
+        virtualenv_command: python3 -m venv
+
+    - name: Install frontend dependencies
+      community.general.npm:
+        path: "{{ app_path }}"
+      changed_when: true
+
+    - name: Build frontend
+      ansible.builtin.command: npm run build
+      args:
+        chdir: "{{ app_path }}"
+      changed_when: true
+
+    # Set up Nginx
+    - name: Setup Let's Encrypt certificate
+      ansible.builtin.command:
+        cmd: certbot certonly --nginx -d {{ server_name }} --email {{ server_email }} --agree-tos --keep --non-interactive
+        creates: /etc/letsencrypt/live/{{ server_name }}
+      become: true
+
+    - name: Add Nginx configuration
+      ansible.builtin.template:
+        src: "templates/nginx.conf"
+        dest: "/etc/nginx/sites-available/webwatcher"
+        mode: "0644"
+      become: true
+
+    - name: Enable Nginx configuration
+      ansible.builtin.file:
+        src: "/etc/nginx/sites-available/webwatcher"
+        dest: "/etc/nginx/sites-enabled/webwatcher"
+        state: link
+      become: true
+
+    - name: Reload Nginx
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded
+      become: true
+
+    # Set up systemd service
+    - name: Prepare systemd folder
+      ansible.builtin.file:
+        state: directory
+        dest: "{{ ansible_env.HOME }}/.config/systemd/user"
+        mode: "0700"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+      become: true
+
+    - name: Allow user to run systemd services even without session
+      ansible.builtin.command:
+        cmd: "loginctl enable-linger {{ ansible_user }}"
+        creates: /var/lib/systemd/linger/{{ ansible_user }}
+      become: true
+
+    - name: Create systemd service
+      ansible.builtin.template:
+        src: "templates/webwatcher.service"
+        dest: "{{ ansible_env.HOME }}/.config/systemd/user/webwatcher.service"
+        mode: "0600"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+      become: true
+
+    - name: Retrieve user UID
+      ansible.builtin.command: "id -u {{ ansible_user }}"
+      register: uid
+      changed_when: false
+
+    # Do not start the service here, it will be started in the next step
+    # This step will setup the service during the first deployment and will stop the service for subsequent deployments
+    - name: Reload systemd configuration and enable (so it is started automatically on boot) the webwatcher service
+      ansible.builtin.systemd:
+        name: webwatcher
+        state: stopped
+        daemon_reload: true
+        enabled: true
+        scope: user
+      environment:
+        XDG_RUNTIME_DIR: "/run/user/{{ uid.stdout }}"
+        DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ uid.stdout }}/bus"
+
+    - name: Start the webwatcher service
+      ansible.builtin.systemd:
+        name: webwatcher
+        state: started
+        scope: user
+      environment:
+        XDG_RUNTIME_DIR: "/run/user/{{ uid.stdout }}"
+        DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ uid.stdout }}/bus"
+
+    - name: Check the websites every 5 minutes
+      ansible.builtin.cron:
+        name: "Check websites"
+        minute: "*/5"
+        job: "/usr/bin/curl http://localhost:8000/api/check"

@@ -69,17 +69,31 @@ npm start
 
 Finally, open your browser on `http://localhost:8080`.
 
-## Server usage
+## Server setup
 
+### Automated setup with Ansible
+An Ansible script is provided to help set up the application on a Debian server. It requires additional Ansible community collections to work. They can be installed with the following command:
+```
+ansible-galaxy install -r ansible/requirements.yml
+```
+
+Then, update the file `ansible/hosts.yml` with the information about your host.
+
+Finally, execute the Ansible playbook:
+```
+ansible-playbook ansible/debian-setup.yml -i ansible/hosts.yml
+```
+
+### Manual setup
 The first step is to install the requirements described in the [Requirements](#requirements) section.
 
-You will also need a production-ready WSGI server such as `Gunicorn` and a front server such as `Nginx` (acting as reverse proxy for the back-end and a classic HTTP server for the front-end). Install them with the following command:
+You will also need a front server such as `Nginx` (acting as reverse proxy for the back-end and a classic HTTP server for the front-end). Install it with the following command:
 ```
-sudo apt install nginx python3-gunicorn
+sudo apt install nginx
 ```
 
-### Set up the project
-On the server, checkout the code of the project in a folder, for example in `/opt/webwatcher`. Then, in this folder, execute the following commands to install the project dependencies and generate the front-end bundle:
+#### Download dependencies
+On the server, checkout the code of the application in a folder, for example in `/opt/webwatcher`. Then, in this folder, execute the following commands to install the project dependencies and generate the front-end bundle:
 ```
 python3 -m venv .venv
 source .venv/bin/activate
@@ -88,14 +102,14 @@ npm install
 npm run build
 ```
 
-### Set up a systemd service
-Copy the file `resources/webwatcher.service` to the remote path `/etc/systemd/system/webwatcher.service`. Then, run the following command to enable and start the service:
+#### Set up a systemd service
+Copy the template file `ansible/templates/webwatcher.service` to the remote path `/etc/systemd/system/webwatcher.service` and replace the variable `{{ app_path }}` by the path to the folder containing the app. Then, run the following command to enable and start the service:
 ```
 sudo systemctl enable --now webwatcher.service
 ```
 
-### Set up Nginx
-Copy the Nginx configuration file `resources/webwatcher` in `/etc/nginx/sites-available/webwatcher` and enable this configuration with a symbolic link:
+#### Set up Nginx
+Create an Nginx configuration file based on the template provided in `ansible/templates/nginx.conf`. Copy it to the remote path `/etc/nginx/sites-available/webwatcher` and enable the configuration with a symbolic link:
 ```
 sudo ln -s /etc/nginx/sites-available/webwatcher /etc/nginx/sites-enabled/webwatcher
 ```
@@ -105,7 +119,7 @@ Then, reload Nginx:
 sudo nginx -s reload
 ```
 
-### Check websites automatically
+#### Check websites automatically
 Do not forget to set up the cron that will check the websites regularly. You can add the following entry in your `crontab` to check the websites status every 5 minutes:
 ```
 */5 * * * * /usr/bin/curl http://localhost:8000/api/check
